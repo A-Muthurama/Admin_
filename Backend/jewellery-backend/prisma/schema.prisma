@@ -7,6 +7,44 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum OfferStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model Offer {
+  id          String @id @default(uuid())
+  title       String
+  description String
+  price       Float
+
+  storeLat Float
+  storeLng Float
+
+  status   OfferStatus @default(PENDING)
+  isActive Boolean     @default(false)
+
+  createdAt DateTime @default(now())
+
+  vendorId String
+  vendor   VendorProfile @relation("VendorProfileToOffer", fields: [vendorId], references: [id])
+  images OfferImage[]
+}
+
+model OfferImage {
+  id        String      @id @default(uuid())
+  url       String
+  publicId  String
+  status    MediaStatus @default(PENDING)
+  createdAt DateTime    @default(now())
+
+  offerId String
+  offer   Offer @relation(fields: [offerId], references: [id])
+}
+
+
+
 model User {
   id            String         @id @default(uuid())
   email         String         @unique
@@ -25,6 +63,7 @@ model VendorProfile {
   status    String
   createdAt DateTime @default(now())
   user      User     @relation(fields: [userId], references: [id])
+  offers    Offer[]  @relation("VendorProfileToOffer")
 }
 
 enum Role {
@@ -32,3 +71,10 @@ enum Role {
   VENDOR_PENDING
   VENDOR_APPROVED
 }
+
+enum MediaStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
