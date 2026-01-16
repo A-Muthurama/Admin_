@@ -6,12 +6,13 @@ import "../styles/variables.css";
 // Define the props for the AdminLogin component
 interface AdminLoginProps {
   onLogin: () => void;
+  onForgotPassword: () => void;
 }
 
 // Define the possible login steps
 type LoginStep = "credentials" | "otp";
 
-export function AdminLogin({ onLogin }: AdminLoginProps) {
+export function AdminLogin({ onLogin, onForgotPassword }: AdminLoginProps) {
   // State variables for managing login steps, credentials, OTP, and errors
   const [step, setStep] = useState<LoginStep>("credentials");
   const [username, setUsername] = useState("");
@@ -188,6 +189,24 @@ export function AdminLogin({ onLogin }: AdminLoginProps) {
                 }}
               />
             </div>
+            <div className="text-right">
+            <button
+              type="button"
+              onClick={onForgotPassword}
+              style={{
+                color: "var(--color-plum)",
+                fontSize: "0.875rem",
+                textDecoration: "underline",
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                padding: 0,
+                      }}
+                          >
+                Forgot password?
+              </button>
+            </div>
+
 
             <button
               type="submit"

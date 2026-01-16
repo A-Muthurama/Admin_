@@ -2,19 +2,24 @@ import { useState } from "react";
 import { AdminLogin } from "./components/AdminLogin";
 import { AdminDashboard } from "./components/AdminDashboard";
 import { Gem, ShieldCheck } from "lucide-react";
+import { ForgotPassword } from "./components/ForgotPassword";
+
 import "./styles/variables.css";
 import "./styles/typography.css";
 
 export default function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  type View = "login" | "forgot" | "dashboard";
+  const [view, setView] = useState<View>("login");
+
 
   const handleLogin = () => {
-    setIsLoggedIn(true);
-  };
+  setView("dashboard");
+};
 
-  const handleLogout = () => {
-    setIsLoggedIn(false);
-  };
+const handleLogout = () => {
+  setView("login");
+};
+
 
   return (
     <div
@@ -71,13 +76,23 @@ export default function App() {
 
       {/* Main Content */}
       <main style={{ backgroundColor: "var(--bg-secondary)" }}>
-        {isLoggedIn ? (
-          <AdminDashboard onLogout={handleLogout} />
-        ) : (
-          <div className="container mx-auto px-4 py-8">
-            <AdminLogin onLogin={handleLogin} />
-          </div>
-        )}
+        {view === "dashboard" && <AdminDashboard onLogout={handleLogout} />}
+
+          {view === "login" && (
+            <div className="container mx-auto px-4 py-8">
+              <AdminLogin
+                onLogin={handleLogin}
+                onForgotPassword={() => setView("forgot")}
+              />
+            </div>
+          )}
+
+          {view === "forgot" && (
+            <div className="container mx-auto px-4 py-8">
+              <ForgotPassword onBack={() => setView("login")} />
+            </div>
+          )}
+
       </main>
 
       {/* Footer */}
