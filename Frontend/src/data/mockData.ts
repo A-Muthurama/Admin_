@@ -223,3 +223,9 @@ export const pincodesByCity: Record<string, string[]> = {
   Ahmedabad: ['380001', '380002', '380003'],
   Surat: ['395001', '395002', '395003'],
 };
+// ---- ADMIN MOCK (ADD THIS AT BOTTOM) ----
+export const mockAdmin = {
+  email: "admin@projectj.com",
+  password: "admin123",
+  otp: "123456", // mock OTP for both login & forgot password
+};
