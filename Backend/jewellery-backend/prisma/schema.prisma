@@ -15,6 +15,7 @@ enum OfferStatus {
 
 model Offer {
   id          String @id @default(uuid())
+  externalOfferId Int?    @unique
   title       String
   description String
   price       Float
@@ -56,6 +57,7 @@ model User {
 
 model VendorProfile {
   id        String   @id @default(uuid())
+  externalVendorId Int?    @unique
   userId    String   @unique
   shopName  String
   ownerName String

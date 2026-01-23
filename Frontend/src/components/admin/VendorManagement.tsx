@@ -1,89 +1,157 @@
-import { useState } from "react";
-import { mockVendors } from "../../data/mockData";
-import { Vendor, VendorStatus } from "../../types";
-import { CheckCircle, XCircle, Ban, Search, Eye } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import {
+  AdminVendorProfile,
+  BackendVendorStatus,
+  VendorKycResponse,
+  approveVendor,
+  getAllVendors,
+  getVendorKyc,
+  rejectVendor,
+} from "../../api/api";
+import { CheckCircle, XCircle, Search, Eye } from "lucide-react";
 
 export function VendorManagement() {
-  const [vendors, setVendors] = useState(mockVendors);
-  const [filterStatus, setFilterStatus] = useState<VendorStatus | "all">("all");
+  const [vendors, setVendors] = useState<AdminVendorProfile[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [actionMessage, setActionMessage] = useState<string | null>(null);
+
+  const [filterStatus, setFilterStatus] = useState<BackendVendorStatus | "all">(
+    "all",
+  );
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedVendor, setSelectedVendor] = useState<Vendor | null>(null);
+  const [selectedVendor, setSelectedVendor] =
+    useState<AdminVendorProfile | null>(null);
 
-  const filteredVendors = vendors.filter((vendor) => {
-    const matchesStatus =
-      filterStatus === "all" || vendor.status === filterStatus;
-    const matchesSearch =
-      vendor.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      vendor.businessName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      vendor.email.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesStatus && matchesSearch;
-  });
+  const [kycDetails, setKycDetails] = useState<VendorKycResponse | null>(null);
+  const [isKycLoading, setIsKycLoading] = useState(false);
+  const [kycError, setKycError] = useState<string | null>(null);
 
-  const handleApprove = (vendorId: string) => {
-    setVendors(
-      vendors.map((v) => (v.id === vendorId ? { ...v, status: "approved" } : v))
-    );
-    setSelectedVendor(null);
+  const refresh = async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const res = await getAllVendors();
+      setVendors(res.data);
+    } catch (err) {
+      setError("Failed to load vendors");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleReject = (vendorId: string) => {
-    setVendors(
-      vendors.map((v) => (v.id === vendorId ? { ...v, status: "rejected" } : v))
-    );
-    setSelectedVendor(null);
+  useEffect(() => {
+    refresh();
+  }, []);
+
+  useEffect(() => {
+    if (!selectedVendor) {
+      setKycDetails(null);
+      setKycError(null);
+      setIsKycLoading(false);
+      return;
+    }
+
+    const run = async () => {
+      setIsKycLoading(true);
+      setKycError(null);
+      try {
+        const res = await getVendorKyc(selectedVendor.id);
+        setKycDetails(res.data);
+      } catch (err) {
+        setKycError("Failed to load KYC details");
+      } finally {
+        setIsKycLoading(false);
+      }
+    };
+
+    run();
+  }, [selectedVendor]);
+
+  useEffect(() => {
+    const onFocus = () => refresh();
+    window.addEventListener("focus", onFocus);
+    return () => window.removeEventListener("focus", onFocus);
+  }, []);
+
+  const filteredVendors = useMemo(() => {
+    return vendors.filter((vendor) => {
+      const matchesStatus =
+        filterStatus === "all" || vendor.status === filterStatus;
+      const q = searchQuery.trim().toLowerCase();
+      const matchesSearch =
+        q.length === 0 ||
+        vendor.ownerName.toLowerCase().includes(q) ||
+        vendor.shopName.toLowerCase().includes(q) ||
+        vendor.user.email.toLowerCase().includes(q);
+      return matchesStatus && matchesSearch;
+    });
+  }, [vendors, filterStatus, searchQuery]);
+
+  const handleApprove = async (userId: string) => {
+    setActionMessage(null);
+    try {
+      const res = await approveVendor(userId);
+      setActionMessage(res.data.message);
+      setSelectedVendor(null);
+      await refresh();
+    } catch (err) {
+      setActionMessage("Failed to approve vendor");
+    }
   };
 
-  const handleSuspend = (vendorId: string) => {
-    setVendors(
-      vendors.map((v) =>
-        v.id === vendorId ? { ...v, status: "suspended" } : v
-      )
-    );
-    setSelectedVendor(null);
+  const handleReject = async (userId: string) => {
+    setActionMessage(null);
+    try {
+      const res = await rejectVendor(userId);
+      setActionMessage(res.data.message);
+      setSelectedVendor(null);
+      await refresh();
+    } catch (err) {
+      setActionMessage("Failed to reject vendor");
+    }
   };
 
-  const getStatusBadge = (status: VendorStatus) => {
+  const getStatusBadge = (status: BackendVendorStatus) => {
     switch (status) {
-      case "approved":
+      case "APPROVED":
         return (
           <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm">
             Approved
           </span>
         );
-      case "pending":
+      case "PENDING":
         return (
           <span className="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-sm">
             Pending
           </span>
         );
-      case "rejected":
+      case "REJECTED":
         return (
           <span className="px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm">
             Rejected
           </span>
         );
-      case "suspended":
-        return (
-          <span className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm">
-            Suspended
-          </span>
-        );
     }
   };
 
-  const statusOptions: (VendorStatus | "all")[] = [
+  const statusOptions: (BackendVendorStatus | "all")[] = [
     "all",
-    "pending",
-    "approved",
-    "rejected",
-    "suspended",
+    "PENDING",
+    "APPROVED",
+    "REJECTED",
   ];
 
   return (
     <div className="bg-white rounded-xl shadow-md p-6">
       <h3 className="text-gray-900">Vendor Management</h3>
       <p className="text-gray-600 mb-6">Manage vendor details and statuses</p>
+
+      {error && <div className="mb-4 text-sm text-red-600">{error}</div>}
+      {actionMessage && (
+        <div className="mb-4 text-sm text-gray-700">{actionMessage}</div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Search Vendors */}
@@ -113,9 +181,7 @@ export function VendorManagement() {
               onClick={() => setIsFilterOpen((prev) => !prev)}
               className="w-full px-4 py-2 rounded-lg border border-gray-300 flex items-center justify-between"
             >
-              {filterStatus === "all"
-                ? "All Statuses"
-                : filterStatus.charAt(0).toUpperCase() + filterStatus.slice(1)}
+              {filterStatus === "all" ? "All Statuses" : filterStatus}
               <span>▾</span>
             </button>
 
@@ -130,9 +196,7 @@ export function VendorManagement() {
                     }}
                     className="w-full text-left px-4 py-2 hover:bg-gray-100"
                   >
-                    {status === "all"
-                      ? "All Statuses"
-                      : status.charAt(0).toUpperCase() + status.slice(1)}
+                    {status === "all" ? "All Statuses" : status}
                   </button>
                 ))}
               </div>
@@ -147,46 +211,54 @@ export function VendorManagement() {
           <thead>
             <tr className="border-b border-gray-300">
               <th className="text-left py-3 px-4 text-gray-600">Vendor</th>
-              <th className="text-left py-3 px-4 text-gray-600">
-                Business Name
-              </th>
+              <th className="text-left py-3 px-4 text-gray-600">Shop</th>
               <th className="text-left py-3 px-4 text-gray-600">Email</th>
+              <th className="text-left py-3 px-4 text-gray-600">Role</th>
               <th className="text-left py-3 px-4 text-gray-600">Status</th>
-              <th className="text-left py-3 px-4 text-gray-600">
-                Remaining Posts
-              </th>
               <th className="text-left py-3 px-4 text-gray-600">Actions</th>
             </tr>
           </thead>
           <tbody>
-            {filteredVendors.map((vendor) => (
-              <tr key={vendor.id} className="border-b border-gray-300">
-                <td className="py-3 px-4">
-                  <p className="text-gray-900 font-medium">{vendor.name}</p>
-                  <p className="text-sm text-gray-600">{vendor.phone}</p>
-                </td>
-                <td className="py-3 px-4 text-gray-900">
-                  {vendor.businessName}
-                </td>
-                <td className="py-3 px-4 text-gray-900">{vendor.email}</td>
-                <td className="py-3 px-4">{getStatusBadge(vendor.status)}</td>
-                <td className="py-3 px-4 text-gray-900">
-                  {vendor.remainingPosts}
-                </td>
-                <td className="py-3 px-4">
-                  <button
-                    onClick={() => setSelectedVendor(vendor)}
-                    className="text-blue-600 hover:text-blue-700 text-sm"
-                  >
-                    <Eye className="w-4 h-4" /> View
-                  </button>
+            {isLoading ? (
+              <tr>
+                <td colSpan={6} className="py-6 px-4 text-gray-500">
+                  Loading vendors...
                 </td>
               </tr>
-            ))}
+            ) : (
+              filteredVendors.map((vendor) => (
+                <tr key={vendor.id} className="border-b border-gray-300">
+                  <td className="py-3 px-4">
+                    <p className="text-gray-900 font-medium">
+                      {vendor.ownerName}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      Vendor ID: {vendor.id}
+                    </p>
+                  </td>
+                  <td className="py-3 px-4 text-gray-900">{vendor.shopName}</td>
+                  <td className="py-3 px-4 text-gray-900">
+                    {vendor.user.email}
+                  </td>
+                  <td className="py-3 px-4 text-gray-900">
+                    {vendor.user.role}
+                  </td>
+                  <td className="py-3 px-4">{getStatusBadge(vendor.status)}</td>
+                  <td className="py-3 px-4">
+                    <button
+                      onClick={() => setSelectedVendor(vendor)}
+                      className="text-blue-600 hover:text-blue-700 text-sm flex items-center gap-2"
+                    >
+                      <Eye className="w-4 h-4" /> View
+                    </button>
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
 
-        {filteredVendors.length === 0 && (
+        {!isLoading && filteredVendors.length === 0 && (
           <div className="text-center py-8 text-gray-500">No vendors found</div>
         )}
       </div>
@@ -214,21 +286,27 @@ export function VendorManagement() {
                 {getStatusBadge(selectedVendor.status)}
               </div>
 
-              {/* Personal Information */}
+              {/* Vendor Information */}
               <div>
-                <h3 className="text-amber-400 mb-3">Personal Information</h3>
+                <h3 className="text-amber-400 mb-3">Vendor Information</h3>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <p className="text-sm text-muted-foreground">Full Name</p>
-                    <p className="text-foreground">{selectedVendor.name}</p>
+                    <p className="text-sm text-muted-foreground">Owner Name</p>
+                    <p className="text-foreground">
+                      {selectedVendor.ownerName}
+                    </p>
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Email</p>
-                    <p className="text-foreground">{selectedVendor.email}</p>
+                    <p className="text-foreground">
+                      {selectedVendor.user.email}
+                    </p>
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Phone</p>
-                    <p className="text-foreground">{selectedVendor.phone}</p>
+                    <p className="text-sm text-muted-foreground">User Role</p>
+                    <p className="text-foreground">
+                      {selectedVendor.user.role}
+                    </p>
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">
@@ -238,95 +316,107 @@ export function VendorManagement() {
                       {new Date(selectedVendor.createdAt).toLocaleDateString()}
                     </p>
                   </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">User ID</p>
+                    <p className="text-foreground">{selectedVendor.userId}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">
+                      External Vendor ID
+                    </p>
+                    <p className="text-foreground">
+                      {selectedVendor.externalVendorId ?? "—"}
+                    </p>
+                  </div>
                 </div>
               </div>
 
-              {/* Business Information */}
+              {/* Shop Information */}
               <div>
-                <h3 className="text-amber-400 mb-3">Business Information</h3>
+                <h3 className="text-amber-400 mb-3">Shop Information</h3>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <p className="text-sm text-muted-foreground">
-                      Business Name
-                    </p>
-                    <p className="text-foreground">
-                      {selectedVendor.businessName}
-                    </p>
+                    <p className="text-sm text-muted-foreground">Shop Name</p>
+                    <p className="text-foreground">{selectedVendor.shopName}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">GST Number</p>
-                    <p className="text-foreground">
-                      {selectedVendor.gstNumber}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">
-                      Remaining Posts
-                    </p>
-                    <p className="text-foreground">
-                      {selectedVendor.remainingPosts}
-                    </p>
+                    <p className="text-sm text-muted-foreground">KYC Status</p>
+                    <p className="text-foreground">{selectedVendor.status}</p>
                   </div>
                 </div>
               </div>
 
               {/* KYC Documents */}
               <div>
-                <h3 className="text-amber-400 mb-3">KYC Documents</h3>
-                <div className="space-y-2">
-                  {selectedVendor.kycDocuments.map((doc, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center justify-between p-3 rounded-lg border bg-gray-100 border-gray-200"
-                    >
-                      <span className="text-foreground">{doc}</span>
-                      <button className="text-blue-600 hover:text-blue-700 text-sm">
-                        View
-                      </button>
+                <h3 className="text-amber-400 mb-3">KYC</h3>
+                <div className="space-y-3">
+                  {isKycLoading && (
+                    <div className="text-sm text-gray-500">Loading KYC...</div>
+                  )}
+                  {kycError && (
+                    <div className="text-sm text-red-600">{kycError}</div>
+                  )}
+
+                  {!isKycLoading && !kycError && kycDetails && (
+                    <div className="rounded-lg border bg-gray-50 border-gray-200 p-4 space-y-2">
+                      <div>
+                        <p className="text-sm text-muted-foreground">
+                          Vendor Email
+                        </p>
+                        <p className="text-foreground">
+                          {kycDetails.user.email}
+                        </p>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <p className="text-sm text-muted-foreground">
+                            Shop Name
+                          </p>
+                          <p className="text-foreground">
+                            {kycDetails.shopName}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-muted-foreground">
+                            Owner Name
+                          </p>
+                          <p className="text-foreground">
+                            {kycDetails.ownerName}
+                          </p>
+                        </div>
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground">
+                          KYC Docs
+                        </p>
+                        <p className="text-foreground break-words">
+                          {kycDetails.kycDocs}
+                        </p>
+                      </div>
                     </div>
-                  ))}
+                  )}
                 </div>
               </div>
 
               {/* Actions */}
               <div className="flex gap-3">
-                {selectedVendor.status === "pending" && (
+                {selectedVendor.status === "PENDING" && (
                   <>
                     <button
-                      onClick={() => handleApprove(selectedVendor.id)}
+                      onClick={() => handleApprove(selectedVendor.user.id)}
                       className="flex-1 flex items-center justify-center gap-2 bg-green-500 text-white py-3 rounded-lg hover:bg-green-600"
                     >
                       <CheckCircle className="w-5 h-5" />
                       Approve Vendor
                     </button>
                     <button
-                      onClick={() => handleReject(selectedVendor.id)}
+                      onClick={() => handleReject(selectedVendor.user.id)}
                       className="flex-1 flex items-center justify-center gap-2 bg-red-500 text-white py-3 rounded-lg hover:bg-red-600"
                     >
                       <XCircle className="w-5 h-5" />
                       Reject Vendor
                     </button>
                   </>
-                )}
-
-                {selectedVendor.status === "approved" && (
-                  <button
-                    onClick={() => handleSuspend(selectedVendor.id)}
-                    className="flex-1 flex items-center justify-center gap-2 bg-gray-500 text-white py-3 rounded-lg hover:bg-gray-600"
-                  >
-                    <Ban className="w-5 h-5" />
-                    Suspend Vendor
-                  </button>
-                )}
-
-                {selectedVendor.status === "suspended" && (
-                  <button
-                    onClick={() => handleApprove(selectedVendor.id)}
-                    className="flex-1 flex items-center justify-center gap-2 bg-green-500 text-white py-3 rounded-lg hover:bg-green-600"
-                  >
-                    <CheckCircle className="w-5 h-5" />
-                    Reactivate Vendor
-                  </button>
                 )}
               </div>
             </div>

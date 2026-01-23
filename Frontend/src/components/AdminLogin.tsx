@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { ShieldCheck, AlertCircle, Mail } from "lucide-react";
 import "../styles/variables.css";
-
+import { adminLogin } from "../api/api";
 // Define the props for the AdminLogin component
 interface AdminLoginProps {
   onLogin: () => void;
@@ -21,18 +21,23 @@ export function AdminLogin({ onLogin }: AdminLoginProps) {
   const [generatedOtp, setGeneratedOtp] = useState("");
 
   // Handle submission of credentials
-  const handleCredentialsSubmit = (e: React.FormEvent) => {
+
+  const handleCredentialsSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
-    // Demo admin credentials
-    if (username === "admin" && password === "admin123") {
-      // Generate OTP
-      const newOtp = Math.floor(100000 + Math.random() * 900000).toString();
-      setGeneratedOtp(newOtp);
-      console.log("Generated OTP:", newOtp); // For demo purposes
-      setStep("otp");
-    } else {
+    try {
+      const res = await adminLogin({
+        email: username,
+        password,
+      });
+
+      // ✅ Store token
+      localStorage.setItem("adminToken", res.data.access_token);
+
+      // ✅ Complete login (bypass OTP)
+      onLogin();
+    } catch (err) {
       setError("Invalid username or password");
     }
   };

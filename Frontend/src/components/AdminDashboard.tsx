@@ -1,11 +1,11 @@
 // Import necessary libraries and components
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { LogOut, Users, FileText, MapPin, Tag } from "lucide-react";
 import { VendorManagement } from "./admin/VendorManagement";
 import { OfferManagement } from "./admin/OfferManagement";
 import { LocationManagement } from "./admin/LocationManagement";
 import { PlanManagement } from "./admin/PlanManagement";
-import { mockVendors, mockOffers } from "../data/mockData";
+import { getAllVendors, getPendingOffers, getPendingVendors } from "../api/api";
 
 interface AdminDashboardProps {
   onLogout: () => void;
@@ -17,15 +17,43 @@ export function AdminDashboard({ onLogout }: AdminDashboardProps) {
   // State for managing active tab
   const [activeTab, setActiveTab] = useState<AdminTab>("vendors");
 
-  // Calculate stats for dashboard
-  const pendingVendors = mockVendors.filter(
-    (v) => v.status === "pending"
-  ).length;
-  const pendingOffers = mockOffers.filter((o) => o.status === "pending").length;
-  const activeOffers = mockOffers.filter((o) => {
-    const validUntil = new Date(o.validUntil);
-    return o.status === "approved" && validUntil >= new Date();
-  }).length;
+  const [vendorCount, setVendorCount] = useState<number | null>(null);
+  const [pendingVendorCount, setPendingVendorCount] = useState<number | null>(
+    null,
+  );
+  const [pendingOfferCount, setPendingOfferCount] = useState<number | null>(
+    null,
+  );
+  const [isStatsLoading, setIsStatsLoading] = useState(true);
+
+  const [showToken, setShowToken] = useState(false);
+  const token = useMemo(() => localStorage.getItem("adminToken"), []);
+
+  useEffect(() => {
+    const run = async () => {
+      setIsStatsLoading(true);
+      try {
+        const [allVendorsRes, pendingVendorsRes, pendingOffersRes] =
+          await Promise.all([
+            getAllVendors(),
+            getPendingVendors(),
+            getPendingOffers(),
+          ]);
+
+        setVendorCount(allVendorsRes.data.length);
+        setPendingVendorCount(pendingVendorsRes.data.length);
+        setPendingOfferCount(pendingOffersRes.data.length);
+      } catch (err) {
+        setVendorCount(null);
+        setPendingVendorCount(null);
+        setPendingOfferCount(null);
+      } finally {
+        setIsStatsLoading(false);
+      }
+    };
+
+    run();
+  }, []);
 
   // Define tabs for navigation
   const tabs = [
@@ -33,13 +61,13 @@ export function AdminDashboard({ onLogout }: AdminDashboardProps) {
       id: "vendors" as AdminTab,
       label: "Vendor Management",
       icon: Users,
-      badge: pendingVendors,
+      badge: pendingVendorCount ?? 0,
     },
     {
       id: "offers" as AdminTab,
       label: "Offer Management",
       icon: FileText,
-      badge: pendingOffers,
+      badge: pendingOfferCount ?? 0,
     },
     { id: "locations" as AdminTab, label: "Locations", icon: MapPin, badge: 0 },
     {
@@ -92,6 +120,21 @@ export function AdminDashboard({ onLogout }: AdminDashboardProps) {
               Logout
             </button>
           </div>
+
+          {token && (
+            <div className="mt-3 text-xs text-gray-700 flex items-center gap-3">
+              <span className="text-gray-600">Session token:</span>
+              <span className="font-mono break-all">
+                {showToken ? token : "•".repeat(Math.min(token.length, 24))}
+              </span>
+              <button
+                onClick={() => setShowToken((v) => !v)}
+                className="px-2 py-1 rounded border border-gray-300 hover:bg-gray-50"
+              >
+                {showToken ? "Hide" : "Show"}
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
@@ -122,7 +165,7 @@ export function AdminDashboard({ onLogout }: AdminDashboardProps) {
                 className="text-gray-900"
                 style={{ fontFamily: "var(--font-heading)" }}
               >
-                {mockVendors.length}
+                {isStatsLoading ? "…" : (vendorCount ?? "—")}
               </p>
             </div>
             <div
@@ -142,7 +185,7 @@ export function AdminDashboard({ onLogout }: AdminDashboardProps) {
                 className="text-gray-900"
                 style={{ fontFamily: "var(--font-heading)" }}
               >
-                {pendingVendors}
+                {isStatsLoading ? "…" : (pendingVendorCount ?? "—")}
               </p>
             </div>
             <div
@@ -162,7 +205,7 @@ export function AdminDashboard({ onLogout }: AdminDashboardProps) {
                 className="text-gray-900"
                 style={{ fontFamily: "var(--font-heading)" }}
               >
-                {activeOffers}
+                —
               </p>
             </div>
             <div
@@ -182,7 +225,7 @@ export function AdminDashboard({ onLogout }: AdminDashboardProps) {
                 className="text-gray-900"
                 style={{ fontFamily: "var(--font-heading)" }}
               >
-                {pendingOffers}
+                {isStatsLoading ? "…" : (pendingOfferCount ?? "—")}
               </p>
             </div>
           </div>

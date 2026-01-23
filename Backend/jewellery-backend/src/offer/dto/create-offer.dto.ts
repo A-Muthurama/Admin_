@@ -21,4 +21,8 @@ export class CreateOfferDto {
   @Type(() => Number)
   @IsNumber()
   storeLng: number;
+
+  @Type(() => Number)
+  @IsNumber()
+  externalOfferId: number;
 }

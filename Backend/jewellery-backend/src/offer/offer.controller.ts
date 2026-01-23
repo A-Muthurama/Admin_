@@ -29,10 +29,13 @@ export class OfferController {
       throw new Error('Image is required');
     }
 
+    const externalOfferId = dto.externalOfferId;
+
     return this.offerService.createOfferWithImage(
       dto,
       image,
       req.user.vendorId,
+      externalOfferId,
     );
   }
 }

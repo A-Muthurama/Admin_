@@ -8,6 +8,11 @@ import { RolesGuard } from '../auth/roles.guard';
 export class AdminController {
   constructor(private readonly adminService: AdminService) {}
 
+  @Get('vendors')
+  getAllVendors() {
+    return this.adminService.getAllVendors();
+  }
+
   @Get('vendors/pending')
   getPendingVendors() {
     return this.adminService.getPendingVendors();
@@ -36,5 +41,15 @@ export class AdminController {
   @Patch('offers/:offerId/reject')
   rejectOffer(@Param('offerId') offerId: string) {
     return this.adminService.rejectOfferWithMedia(offerId);
+  }
+
+  @Get('offers/:offerId')
+  getOfferDetails(@Param('offerId') offerId: string) {
+    return this.adminService.getOfferDetails(offerId);
+  }
+
+  @Get('vendors/:vendorId/kyc')
+  getVendorKyc(@Param('vendorId') vendorId: string) {
+    return this.adminService.getVendorKyc(vendorId);
   }
 }

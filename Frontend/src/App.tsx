@@ -6,13 +6,17 @@ import "./styles/variables.css";
 import "./styles/typography.css";
 
 export default function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(() => {
+    const token = localStorage.getItem("adminToken");
+    return Boolean(token);
+  });
 
   const handleLogin = () => {
     setIsLoggedIn(true);
   };
 
   const handleLogout = () => {
+    localStorage.removeItem("adminToken");
     setIsLoggedIn(false);
   };
 
@@ -29,10 +33,7 @@ export default function App() {
         <div className="container mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div
-                
-                className="p-3"
-              >
+              <div className="p-3">
                 <Gem
                   style={{
                     color: "var(--color-gold-primary)",
