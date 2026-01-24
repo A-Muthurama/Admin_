@@ -61,3 +61,5 @@ node_modules
 dist/
 
 /generated/prisma
+
+backup_utf8.sql
