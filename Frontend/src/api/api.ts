@@ -95,7 +95,7 @@ export interface MessageResponse {
  * All admin API calls go through this instance
  */
 const API = axios.create({
-  baseURL: "http://localhost:4000", // change to prod URL later
+  baseURL: "https://project-j-64ia.onrender.com",
 });
 
 /**
