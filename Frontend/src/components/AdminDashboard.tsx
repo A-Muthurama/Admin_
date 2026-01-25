@@ -121,20 +121,6 @@ export function AdminDashboard({ onLogout }: AdminDashboardProps) {
             </button>
           </div>
 
-          {token && (
-            <div className="mt-3 text-xs text-gray-700 flex items-center gap-3">
-              <span className="text-gray-600">Session token:</span>
-              <span className="font-mono break-all">
-                {showToken ? token : "•".repeat(Math.min(token.length, 24))}
-              </span>
-              <button
-                onClick={() => setShowToken((v) => !v)}
-                className="px-2 py-1 rounded border border-gray-300 hover:bg-gray-50"
-              >
-                {showToken ? "Hide" : "Show"}
-              </button>
-            </div>
-          )}
         </div>
       </div>
 

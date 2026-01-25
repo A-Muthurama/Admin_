@@ -3,6 +3,16 @@
 
 import axios from "axios";
 
+declare global {
+  interface ImportMetaEnv {
+    readonly VITE_ADMIN_API_BASE_URL?: string;
+  }
+
+  interface ImportMeta {
+    readonly env: ImportMetaEnv;
+  }
+}
+
 /* ======================================================
    Shared Types (backend response shapes)
    ====================================================== */
@@ -90,12 +100,23 @@ export interface MessageResponse {
   message: string;
 }
 
+export interface ForgotPasswordRequestResponse {
+  message: string;
+  cooldownSeconds?: number;
+}
+
+export interface ForgotPasswordVerifyResponse {
+  reset_token: string;
+}
+
 /**
  * AXIOS INSTANCE
  * All admin API calls go through this instance
  */
 const API = axios.create({
-  baseURL: "https://project-j-64ia.onrender.com",
+  baseURL:
+    import.meta.env.VITE_ADMIN_API_BASE_URL ??
+    "https://admin-api.jewellersparadise.com",
 });
 
 /**
@@ -121,6 +142,36 @@ API.interceptors.request.use((config) => {
  */
 export const adminLogin = (data: { email: string; password: string }) =>
   API.post<AdminLoginResponse>("/auth/admin/login", data);
+
+/**
+ * Admin Forgot Password - Request OTP
+ */
+export const adminForgotPasswordRequest = (data: { email: string }) =>
+  API.post<ForgotPasswordRequestResponse>(
+    "/auth/admin/forgot-password/request",
+    data,
+  );
+
+/**
+ * Admin Forgot Password - Verify OTP
+ * Returns a short-lived reset token
+ */
+export const adminForgotPasswordVerify = (data: {
+  email: string;
+  otp: string;
+}) =>
+  API.post<ForgotPasswordVerifyResponse>(
+    "/auth/admin/forgot-password/verify",
+    data,
+  );
+
+/**
+ * Admin Forgot Password - Reset Password
+ */
+export const adminForgotPasswordReset = (data: {
+  reset_token: string;
+  password: string;
+}) => API.post<MessageResponse>("/auth/admin/forgot-password/reset", data);
 
 /* ======================================================
    VENDOR MANAGEMENT APIs

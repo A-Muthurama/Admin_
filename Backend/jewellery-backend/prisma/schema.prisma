@@ -53,6 +53,20 @@ model User {
   role          Role
   createdAt     DateTime       @default(now())
   vendorProfile VendorProfile?
+  adminPasswordResetOtps AdminPasswordResetOtp[]
+}
+
+model AdminPasswordResetOtp {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  otpHash   String
+  expiresAt DateTime
+  usedAt    DateTime?
+  attempts  Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
 }
 
 model VendorProfile {
