@@ -4,22 +4,25 @@ import * as bcrypt from 'bcrypt';
 const prisma = new PrismaClient();
 
 async function main() {
+  const adminEmails = ['admin@jewellery.com', 'vinodkarthik2005@gmail.com'];
   const hashedPassword = await bcrypt.hash('admin123', 10);
 
-  await prisma.user.upsert({
-    where: { email: 'admin@jewellery.com' },
-    update: {
-      password: hashedPassword,
-      role: Role.ADMIN,
-    },
-    create: {
-      email: 'admin@jewellery.com',
-      password: hashedPassword,
-      role: Role.ADMIN,
-    },
-  });
+  for (const email of adminEmails) {
+    await prisma.user.upsert({
+      where: { email },
+      update: {
+        password: hashedPassword,
+        role: Role.ADMIN,
+      },
+      create: {
+        email,
+        password: hashedPassword,
+        role: Role.ADMIN,
+      },
+    });
+  }
 
-  console.log('Admin user created / updated');
+  console.log(`Seeded ${adminEmails.length} admin account(s)`);
 }
 
 main()
