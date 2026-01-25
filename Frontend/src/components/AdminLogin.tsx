@@ -224,7 +224,7 @@ export function AdminLogin({ onLogin, onForgotPassword }: AdminLoginProps) {
               }}
             >
               <ShieldCheck className="w-5 h-5" />
-              Continue to OTP
+              Login
             </button>
           </form>
         ) : (
