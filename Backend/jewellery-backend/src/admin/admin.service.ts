@@ -1,13 +1,17 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'prisma/prisma.service';
 import { Role } from '@prisma/client';
 import { VendorSyncService } from 'src/sync/vendor-sync.service';
+import { BrevoService } from '../mail/brevo.service';
 
 @Injectable()
 export class AdminService {
+  private readonly logger = new Logger(AdminService.name);
+
   constructor(
     private prisma: PrismaService,
     private vendorSyncService: VendorSyncService,
+    private brevo: BrevoService,
   ) {}
 
   /* ===================== VENDORS ===================== */
@@ -51,6 +55,8 @@ export class AdminService {
           select: {
             id: true,
             externalVendorId: true,
+            shopName: true,
+            ownerName: true,
           },
         },
       },
@@ -76,6 +82,18 @@ export class AdminService {
     await this.vendorSyncService.approveVendor(
       user.vendorProfile.externalVendorId,
     );
+
+    // 3️⃣ Notify vendor (best-effort)
+    try {
+      await this.brevo.sendVendorApprovedEmail({
+        toEmail: user.email,
+        shopName: user.vendorProfile.shopName,
+        ownerName: user.vendorProfile.ownerName,
+      });
+    } catch (err: any) {
+      this.logger.error(`Failed to send vendor approval email to ${user.email}`);
+      this.logger.error(err?.message ?? String(err));
+    }
 
     return { message: 'Vendor approved successfully' };
   }
@@ -134,7 +152,18 @@ export class AdminService {
       where: { id: offerId },
       select: {
         id: true,
+        title: true,
         externalOfferId: true,
+        vendor: {
+          select: {
+            shopName: true,
+            user: {
+              select: {
+                email: true,
+              },
+            },
+          },
+        },
       },
     });
 
@@ -160,6 +189,21 @@ export class AdminService {
         offer.externalOfferId,
         err.message,
       );
+    }
+
+    // 3️⃣ Notify vendor (best-effort)
+    try {
+      const toEmail = offer.vendor?.user?.email;
+      if (toEmail) {
+        await this.brevo.sendOfferApprovedEmail({
+          toEmail,
+          offerTitle: offer.title,
+          shopName: offer.vendor?.shopName,
+        });
+      }
+    } catch (err: any) {
+      this.logger.error(`Failed to send offer approval email for offer ${offerId}`);
+      this.logger.error(err?.message ?? String(err));
     }
 
     return { message: 'Offer approved successfully' };
