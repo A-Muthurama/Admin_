@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { PrismaService } from 'prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
@@ -6,6 +6,8 @@ import { BrevoService } from '../mail/brevo.service';
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
+
   constructor(
     private prisma: PrismaService,
     private jwt: JwtService,
@@ -49,37 +51,43 @@ export class AuthService {
       cooldownSeconds: 30,
     };
 
-    const user = await this.prisma.user.findUnique({ where: { email } });
-    if (!user || user.role !== 'ADMIN') {
-      return generic;
-    }
-
-    const last = await this.prisma.adminPasswordResetOtp.findFirst({
-      where: { userId: user.id, usedAt: null },
-      orderBy: { createdAt: 'desc' },
-    });
-
-    if (last) {
-      const ageMs = Date.now() - last.createdAt.getTime();
-      if (ageMs < 30_000) {
+    try {
+      const user = await this.prisma.user.findUnique({ where: { email } });
+      if (!user || user.role !== 'ADMIN') {
         return generic;
       }
+
+      const last = await this.prisma.adminPasswordResetOtp.findFirst({
+        where: { userId: user.id, usedAt: null },
+        orderBy: { createdAt: 'desc' },
+      });
+
+      if (last) {
+        const ageMs = Date.now() - last.createdAt.getTime();
+        if (ageMs < 30_000) {
+          return generic;
+        }
+      }
+
+      const otp = this.generateSixDigitOtp();
+      const otpHash = await bcrypt.hash(otp, 10);
+      const expiresAt = new Date(Date.now() + 10 * 60_000);
+
+      await this.prisma.adminPasswordResetOtp.create({
+        data: {
+          userId: user.id,
+          otpHash,
+          expiresAt,
+        },
+      });
+
+      await this.brevo.sendAdminPasswordResetOtp(email, otp);
+      return generic;
+    } catch (err: any) {
+      this.logger.error(`adminForgotPasswordRequest failed for ${email}`);
+      this.logger.error(err?.message ?? String(err));
+      return generic;
     }
-
-    const otp = this.generateSixDigitOtp();
-    const otpHash = await bcrypt.hash(otp, 10);
-    const expiresAt = new Date(Date.now() + 10 * 60_000);
-
-    await this.prisma.adminPasswordResetOtp.create({
-      data: {
-        userId: user.id,
-        otpHash,
-        expiresAt,
-      },
-    });
-
-    await this.brevo.sendAdminPasswordResetOtp(email, otp);
-    return generic;
   }
 
   /**

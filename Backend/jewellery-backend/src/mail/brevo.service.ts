@@ -19,28 +19,42 @@ export class BrevoService {
       return;
     }
 
-    await axios.post(
-      'https://api.brevo.com/v3/smtp/email',
-      {
-        sender: { name: senderName, email: senderEmail },
-        to: [{ email: toEmail }],
-        subject: 'Password reset code',
-        htmlContent: `
-          <div>
-            <p>Your password reset code is:</p>
-            <p style="font-size: 20px; font-weight: 700; letter-spacing: 2px;">${otp}</p>
-            <p>This code expires in 10 minutes.</p>
-          </div>
-        `,
-      },
-      {
-        headers: {
-          accept: 'application/json',
-          'content-type': 'application/json',
-          'api-key': apiKey,
+    try {
+      await axios.post(
+        'https://api.brevo.com/v3/smtp/email',
+        {
+          sender: { name: senderName, email: senderEmail },
+          to: [{ email: toEmail }],
+          subject: 'Password reset code',
+          htmlContent: `
+            <div>
+              <p>Your password reset code is:</p>
+              <p style="font-size: 20px; font-weight: 700; letter-spacing: 2px;">${otp}</p>
+              <p>This code expires in 10 minutes.</p>
+            </div>
+          `,
         },
-        timeout: 10_000,
-      },
-    );
+        {
+          headers: {
+            accept: 'application/json',
+            'content-type': 'application/json',
+            'api-key': apiKey,
+          },
+          timeout: 10_000,
+        },
+      );
+    } catch (err: any) {
+      const status = err?.response?.status;
+      const data = err?.response?.data;
+      this.logger.error(
+        `Brevo send failed${status ? ` (HTTP ${status})` : ''} for ${toEmail}`,
+      );
+      if (data) {
+        this.logger.error(`Brevo response: ${JSON.stringify(data)}`);
+      } else {
+        this.logger.error(err?.message ?? String(err));
+      }
+      // Do not throw: forgot-password should not leak email delivery details.
+    }
   }
 }
