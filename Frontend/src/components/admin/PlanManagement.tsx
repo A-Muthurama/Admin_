@@ -3,27 +3,53 @@ import { subscriptionPlans } from '../../data/mockData';
 import { SubscriptionPlan } from '../../types';
 import { Edit2, Save, X } from 'lucide-react';
 
-
 export function PlanManagement() {
-  const [plans, setPlans] = useState(subscriptionPlans);
+  const [plans, setPlans] = useState<SubscriptionPlan[]>(subscriptionPlans);
   const [editingPlan, setEditingPlan] = useState<string | null>(null);
-  const [editValues, setEditValues] = useState<{ price: number; posts: number; months: number }>({ 
-    price: 0, 
-    posts: 0,
-    months: 1
-  });
+
+
+    const [editValues, setEditValues] = useState<{
+    price: number;
+    posts: number;
+    months: number;
+    feature1: string;
+    feature2: string;
+    feature3: string;
+    }>({
+      price: 0,
+      posts: 0,
+      months: 1,
+      feature1: '',
+      feature2: '',
+      feature3: '',
+    });
+
 
   const handleEdit = (plan: SubscriptionPlan) => {
     setEditingPlan(plan.id);
-    setEditValues({ price: plan.price, posts: plan.posts, months: plan.months });
+    setEditValues({
+      price: plan.price,
+      posts: plan.posts,
+      months: plan.months,
+      feature1: `${plan.posts} Product Posts`,
+      feature2: 'Admin Approval',
+      feature3: 'Visible to Customers',
+    });
   };
 
   const handleSave = (planId: string) => {
-    setPlans(plans.map(p => 
-      p.id === planId 
-        ? { ...p, price: editValues.price, posts: editValues.posts, months: editValues.months }
-        : p
-    ));
+    setPlans((prev) =>
+      prev.map((p) =>
+        p.id === planId
+          ? {
+              ...p,
+              price: editValues.price,
+              posts: editValues.posts,
+              months: editValues.months,
+            }
+          : p
+      )
+    );
     setEditingPlan(null);
   };
 
@@ -33,122 +59,162 @@ export function PlanManagement() {
 
   return (
     <div className="bg-white rounded-xl shadow-md p-6">
-      <h3 className="text-gray-900">Subscription Plans Management</h3>
-      <p className="text-gray-600 mb-6">Modify pricing and post limits for subscription plans</p>
+      <h3 className="text-gray-900 text-lg font-semibold">
+        Subscription Plans Management
+      </h3>
+      <p className="text-gray-600 mb-6">
+        Modify pricing and plan content
+      </p>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {plans.map((plan) => (
-          <div 
-            key={plan.id} 
-            className="border-2 border-gray-200 rounded-xl p-6"
+          <div
+            key={plan.id}
+            className="rounded-2xl p-6 pb-10 bg-white shadow-lg border border-gray-200 text-center overflow-visible"
           >
-            <div className="text-center mb-4">
-              <h4 className="mb-2 text-gray-900">{plan.name}</h4>
-              
-              {editingPlan === plan.id ? (
-                <div className="space-y-3">
-                  <div>
-                    <label className="block text-xs mb-1 text-gray-600">Price (₹)</label>
+            {/* PRICE */}
+                  {editingPlan === plan.id ? (
                     <input
                       type="number"
                       value={editValues.price}
-                      onChange={(e) => setEditValues({ ...editValues, price: parseInt(e.target.value) || 0 })}
-                      className="w-full px-3 py-2 rounded-lg border text-center bg-white border-gray-300"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs mb-1 text-gray-600">Posts</label>
-                    <input
-                      type="number"
-                      value={editValues.posts}
-                      onChange={(e) => setEditValues({ ...editValues, posts: parseInt(e.target.value) || 0 })}
-                      className="w-full px-3 py-2 rounded-lg border text-center bg-white border-gray-300"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs mb-1 text-gray-600">Months</label>
-                    <input
-                      type="number"
-                      value={editValues.months}
-                      onChange={(e) => setEditValues({ ...editValues, months: parseInt(e.target.value) || 1 })}
-                      className="bg-white border-gray-300"
-                    />
-                  </div>
-                </div>
+                      onChange={(e) =>
+                        setEditValues({
+                          ...editValues,
+                          price: Number(e.target.value) || 0,
+                        })
+                      }
+                       className="w-full text-4xl font-extrabold text-center border rounded-xl py-3"
+                        />
+                    ) : (
+                        <>
+                          {/* PRICE HEADER — FIXED */}
+                          <div className="text-center">
+                            <div className="block text-[52px] font-extrabold leading-[1.1] text-gray-900">
+                              ₹{plan.price}
+                            </div>
+
+                            <div className="block mt-2 mb-6 text-[14px] text-gray-500">
+                              {plan.posts} Product Posts
+                            </div>
+                          </div>
+
+                          {/* SPACING BETWEEN PRICE & FEATURES */}
+                          <div className="mt-10" />
+                        </>
+                      )}
+
+            
+            {/* FEATURES */}
+            <div
+              className={`space-y-3 text-[14px] text-gray-700 ${
+                editingPlan === plan.id ? 'mt-8' : ''
+              }`}
+            >
+
+              {editingPlan === plan.id ? (
+                <>
+                  <input
+                    value={editValues.feature1}
+                    onChange={(e) =>
+                      setEditValues({
+                        ...editValues,
+                        feature1: e.target.value,
+                      })
+                    }
+                    className="w-full text-center border rounded-lg py-2"
+                  />
+                  <input
+                    value={editValues.feature2}
+                    onChange={(e) =>
+                      setEditValues({
+                        ...editValues,
+                        feature2: e.target.value,
+                      })
+                    }
+                    className="w-full text-center border rounded-lg py-2"
+                  />
+                  <input
+                    value={editValues.feature3}
+                    onChange={(e) =>
+                      setEditValues({
+                        ...editValues,
+                        feature3: e.target.value,
+                      })
+                    }
+                    className="w-full text-center border rounded-lg py-2"
+                  />
+                  <input
+                    type="number"
+                    value={editValues.months}
+                    onChange={(e) =>
+                      setEditValues({
+                        ...editValues,
+                        months: Number(e.target.value) || 1,
+                      })
+                    }
+                    className="w-full text-center border rounded-lg py-2"
+                  />
+                </>
               ) : (
                 <>
-                  <div className="mb-3">
-                    <span className="text-amber-500">₹{plan.price}</span>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="bg-gray-50 rounded-lg p-3">
-                      <p className="text-gray-900">{plan.posts}</p>
-                      <p className="text-gray-600">Posts</p>
-                    </div>
-                    <div className="bg-gray-50 rounded-lg p-3">
-                      <p className="text-gray-900">{plan.months}</p>
-                      <p className="text-gray-600">Month{plan.months > 1 ? 's' : ''}</p>
-                    </div>
-                  </div>
+                  <p>✔ Admin Approval</p>
+                  <p>✔ Visible to Customers</p>
+                  <p>✔ {plan.months} Month Access</p>
                 </>
               )}
             </div>
 
-            <div className="space-y-2">
-              {editingPlan === plan.id ? (
-                <div className="flex gap-2">
+            {/* ACTION BUTTONS */}
+            {editingPlan === plan.id ? (
+              <div className="mt-8 flex gap-3">
                   <button
-                    onClick={() => handleSave(plan.id)}
-                    className="flex-1 flex items-center justify-center gap-2 bg-green-500 text-white py-2 rounded-lg hover:bg-green-600 transition-colors"
-                  >
-                    <Save className="w-4 h-4" />
-                    Save
-                  </button>
+                      onClick={() => handleSave(plan.id)}
+                      style={{
+                        backgroundColor: '#6B0F3A',
+                        color: '#ffffff',
+                      }}
+                      className="flex-1 py-3 rounded-xl font-semibold shadow-md flex items-center justify-center gap-2 hover:opacity-90"
+                    >
+                      <Save size={16} color="white" />
+                      Save
+                    </button>
                   <button
                     onClick={handleCancel}
-                    className="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg transition-colors bg-gray-500 text-white hover:bg-gray-600"
+                    style={{
+                      backgroundColor: '#6c6666',
+                      color: '#fbf1f1',
+                    }}
+                    className="flex-1 py-3 rounded-xl font-semibold border border-gray-300 flex items-center justify-center gap-2 hover:bg-gray-100"
                   >
-                    <X className="w-4 h-4" />
+                    <X size={16} />
                     Cancel
                   </button>
-                </div>
-              ) : (
-                <button
-                  onClick={() => handleEdit(plan)}
-                  className="w-full flex items-center justify-center gap-2 bg-amber-500 text-black py-2 rounded-lg hover:bg-amber-600 transition-colors"
-                >
-                  <Edit2 className="w-4 h-4" />
-                  Edit Plan
-                </button>
-              )}
-            </div>
+              </div>
+            ) : (
+             <button
+                onClick={() => handleEdit(plan)}
+                style={{
+                  backgroundColor: '#6B0F3A',
+                  color: '#ffffff',
+                }}
+                className="w-full mt-8 py-3 rounded-xl font-semibold flex items-center justify-center gap-2 shadow-md hover:opacity-90 transition"
+              >
+                <Edit2 size={16} color="white" />
+                Edit Plan
+              </button>
+            )}
           </div>
         ))}
       </div>
 
-      {/* Plan Features */}
+      {/* INFO SECTION */}
       <div className="mt-8 p-6 rounded-xl bg-blue-50">
-        <h4 className="text-gray-900">Plan Features</h4>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
-          <div>
-            <p className="text-sm mb-2 text-gray-700">All plans include:</p>
-            <ul className="space-y-1 text-sm text-gray-600">
-              <li>• Admin approval for all offers</li>
-              <li>• Analytics dashboard access</li>
-              <li>• Edit and delete offer capabilities</li>
-              <li>• Google Maps integration</li>
-            </ul>
-          </div>
-          <div>
-            <p className="text-sm mb-2 text-gray-700">Post count management:</p>
-            <ul className="space-y-1 text-sm text-gray-600">
-              <li>• Posts reduce when offers are published</li>
-              <li>• Expired offers don't refund posts</li>
-              <li>• Vendors can purchase new plans anytime</li>
-              <li>• Posts from multiple plans accumulate</li>
-            </ul>
-          </div>
-        </div>
+        <h4 className="text-gray-900 font-medium">Plan Notes</h4>
+        <ul className="mt-3 space-y-1 text-sm text-gray-600">
+          <li>• Admin controls pricing and content</li>
+          <li>• Vendors see updated plans instantly</li>
+          <li>• Posts are deducted when offers go live</li>
+        </ul>
       </div>
     </div>
   );

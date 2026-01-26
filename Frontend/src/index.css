@@ -17,6 +17,7 @@ body {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
 }
 
+
 @layer properties {
   @supports (((-webkit-hyphens: none)) and (not (margin-trim: inline))) or ((-moz-orient: inline) and (not (color: rgb(from red r g b)))) {
     *, :before, :after, ::backdrop {
@@ -136,6 +137,11 @@ body {
     --default-mono-font-family: var(--font-mono);
     --default-mono-font-feature-settings: var(--font-mono--font-feature-settings);
     --default-mono-font-variation-settings: var(--font-mono--font-variation-settings);
+  }
+}
+@layer base {
+  button {
+    background-color: unset;
   }
 }
 
@@ -258,9 +264,7 @@ body {
     font-feature-settings: inherit;
     font-variation-settings: inherit;
     letter-spacing: inherit;
-    color: inherit;
     opacity: 1;
-    background-color: #0000;
     border-radius: 0;
   }
 
@@ -454,6 +458,10 @@ body {
     font-weight: var(--font-weight-normal);
     line-height: 1.5;
   }
+}
+@theme {
+  --color-brand: #6B0F3A;
+  --color-brand-hover: #8A1450;
 }
 
 @layer utilities {
