@@ -1,11 +1,13 @@
 import { useState, useEffect } from "react";
-import { Eye, EyeOff, ArrowLeft } from "lucide-react";
+import { Eye, EyeOff, ArrowLeft, Mail, Lock, ShieldAlert } from "lucide-react";
 import {
   adminForgotPasswordRequest,
   adminForgotPasswordVerify,
   adminForgotPasswordReset,
 } from "../api/api";
-import "../styles/variables.css";
+import { Footer } from "./Footer";
+import icon from "../assets/icon.png";
+import "../styles/auth.css";
 
 interface ForgotPasswordProps {
   onBack: () => void;
@@ -120,152 +122,172 @@ export function ForgotPassword({ onBack }: ForgotPasswordProps) {
   };
 
   return (
-    <div className="max-w-md mx-auto">
-      <div
-        className="rounded-2xl shadow-xl p-8"
-        style={{ backgroundColor: "var(--bg-tertiary)" }}
-      >
-        <h2 className="text-center mb-6">Forgot Password</h2>
+    <div className="auth-page-wrapper">
+      {/* Top Header for Forgot Password Page */}
+      <header className="pj-header-container">
+        <div className="pj-brand">
+          <div className="pj-logo-wrapper">
+            <img src={icon} alt="Jewellers Paradise" className="pj-logo-icon" />
+          </div>
+          <span className="pj-brand-name">JEWELLERS PARADISE</span>
+        </div>
 
-        {error && (
-          <p
-            className="text-sm text-center mb-4"
-            style={{ color: "var(--color-error)" }}
-          >
-            {error}
-          </p>
-        )}
+        <nav className="pj-nav-menu">
+          <button className="pj-nav-link active">HOME</button>
+          <button className="pj-nav-link">OFFERS</button>
+        </nav>
 
-        {info && (
-          <p
-            className="text-sm text-center mb-4"
-            style={{ color: "var(--text-muted)" }}
-          >
-            {info}
-          </p>
-        )}
+        <div style={{ width: '120px' }}></div>
+      </header>
 
-        {/* STEP 1: EMAIL */}
-        {step === "email" && (
-          <>
-            <input
-              type="email"
-              placeholder="Admin Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-3 mb-4 rounded-lg border bg-white"
-              disabled={requesting}
-            />
+      <div className="auth-container">
+        <div className="auth-card">
+          {/* Internal Header Small */}
+          <div className="auth-header" style={{ marginBottom: '32px' }}>
+            <h2 className="auth-title" style={{ fontSize: '30px' }}>Security Recovery</h2>
+            <p className="auth-subtitle">
+              {step === 'email' && "Identify your portal access email"}
+              {step === 'otp' && "Verification code sent to email"}
+              {step === 'reset' && "Create a new secure secret"}
+            </p>
+          </div>
 
-            <button
-              onClick={requestOtp}
-              className="w-full py-3 rounded-lg"
-              style={{ background: "var(--color-plum)", color: "#fff" }}
-              disabled={requesting}
-            >
-              {requesting ? "Sending..." : "Send OTP"}
-            </button>
-          </>
-        )}
+          {error && (
+            <div className="auth-alert" style={{ color: 'var(--color-error)', background: '#fffafa', padding: '15px', borderRadius: '12px', marginBottom: '20px', fontSize: '14px', border: '1px solid #fee2e2', display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <ShieldAlert size={18} />
+              <span>{error}</span>
+            </div>
+          )}
 
-        {/* STEP 2: OTP */}
-        {step === "otp" && (
-          <>
-            <input
-              type="text"
-              placeholder="Enter OTP"
-              value={otp}
-              onChange={(e) => setOtp(e.target.value)}
-              className="w-full px-4 py-3 mb-4 rounded-lg border bg-white"
-              disabled={verifying}
-            />
+          {info && (
+            <div className="auth-alert" style={{ color: 'var(--color-plum)', background: '#f8f8ff', padding: '15px', borderRadius: '12px', marginBottom: '20px', fontSize: '14px', border: '1px solid #e2e2ff', display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <Mail size={18} />
+              <span>{info}</span>
+            </div>
+          )}
 
-            <div
-              className="flex justify-between items-center mb-4 text-sm"
-              style={{ color: "var(--text-muted)" }}
-            >
-              <span>
-                {timer > 0
-                  ? `Resend available in ${formatTimer(timer)}`
-                  : "You can resend the OTP"}
-              </span>
+          {/* STEP 1: EMAIL */}
+          {step === "email" && (
+            <div className="auth-form">
+              <div className="form-group">
+                <label className="form-label">Administrator Email</label>
+                <div className="input-wrapper">
+                  <Mail className="input-icon" size={18} />
+                  <input
+                    type="email"
+                    placeholder="admin@example.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="form-input"
+                    disabled={requesting}
+                    required
+                  />
+                </div>
+              </div>
+
               <button
-                type="button"
                 onClick={requestOtp}
-                disabled={timer > 0 || requesting}
-                className="underline"
+                className="auth-button"
+                disabled={requesting}
               >
-                {requesting ? "Resending..." : "Resend"}
+                {requesting ? "Sending..." : "Request OTP"}
               </button>
             </div>
+          )}
 
-            <button
-              onClick={verifyOtp}
-              className="w-full py-3 rounded-lg"
-              style={{
-                background:
-                  "linear-gradient(to right, var(--color-plum), var(--color-plum-light))",
-                color: "#fff",
-              }}
-              disabled={verifying}
-            >
-              {verifying ? "Verifying..." : "Verify OTP"}
-            </button>
-          </>
-        )}
+          {/* STEP 2: OTP */}
+          {step === "otp" && (
+            <div className="auth-form">
+              <div className="form-group">
+                <label className="form-label">Verification Code</label>
+                <div className="input-wrapper">
+                  <Lock className="input-icon" size={18} />
+                  <input
+                    type="text"
+                    placeholder="6-digit code"
+                    value={otp}
+                    onChange={(e) => setOtp(e.target.value)}
+                    className="form-input"
+                    disabled={verifying}
+                    required
+                    style={{ textAlign: 'center', letterSpacing: '0.4em', fontWeight: 'bold' }}
+                  />
+                </div>
+              </div>
 
-        {/* STEP 3: RESET */}
-        {step === "reset" && (
-          <>
-            <div className="mb-4">
-              <div className="flex items-center w-full h-12 rounded-lg border bg-white overflow-hidden">
-                <input
-                  type={show ? "text" : "password"}
-                  placeholder="New Password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="flex-1 h-full px-4 outline-none border-none bg-transparent"
-                  disabled={resetting}
-                />
-
+              <div className="flex justify-between items-center text-xs">
+                <span className="text-gray-400">
+                  {timer > 0 ? `Resend in ${formatTimer(timer)}` : "Didn't receive code?"}
+                </span>
                 <button
                   type="button"
-                  onClick={() => setShow(!show)}
-                  className="h-full px-4 flex items-center justify-center"
-                  style={{ color: "var(--text-muted)" }}
-                  disabled={resetting}
+                  onClick={requestOtp}
+                  disabled={timer > 0 || requesting}
+                  className="text-[var(--color-plum)] font-bold hover:underline disabled:opacity-30"
                 >
-                  {show ? <EyeOff size={18} /> : <Eye size={18} />}
+                  {requesting ? "Sending..." : "Resend"}
                 </button>
               </div>
+
+              <button
+                onClick={verifyOtp}
+                className="auth-button"
+                disabled={verifying}
+              >
+                {verifying ? "Verifying..." : "Verify OTP"}
+              </button>
             </div>
+          )}
 
-            <p className="text-xs mb-4" style={{ color: "var(--text-muted)" }}>
-              Use at least 8 characters.
-            </p>
+          {/* STEP 3: RESET */}
+          {step === "reset" && (
+            <div className="auth-form">
+              <div className="form-group">
+                <label className="form-label">New Password</label>
+                <div className="input-wrapper">
+                  <Lock className="input-icon" size={18} />
+                  <input
+                    type={show ? "text" : "password"}
+                    placeholder="Min. 8 characters"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="form-input"
+                    disabled={resetting}
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShow(!show)}
+                    className="password-toggle"
+                    disabled={resetting}
+                  >
+                    {show ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+              </div>
 
-            <button
-              onClick={resetPassword}
-              className="w-full py-3 rounded-lg"
-              style={{
-                background:
-                  "linear-gradient(to right, var(--color-plum), var(--color-plum-light))",
-                color: "#fff",
-              }}
-              disabled={resetting}
-            >
-              {resetting ? "Resetting..." : "Reset Password"}
+              <button
+                onClick={resetPassword}
+                className="auth-button"
+                disabled={resetting}
+              >
+                {resetting ? "Resetting..." : "Update Password"}
+              </button>
+            </div>
+          )}
+
+          {/* Back */}
+          <div className="auth-footer-help">
+            <button onClick={onBack}>
+              <ArrowLeft size={14} /> Back to Login
             </button>
-          </>
-        )}
+          </div>
+        </div>
 
-        {/* Back */}
-        <button
-          onClick={onBack}
-          className="mt-6 w-full flex justify-center items-center gap-2 text-sm"
-        >
-          <ArrowLeft size={14} /> Back to Login
-        </button>
+        {/* Footer */}
+        <div className="auth-footer">
+          <p className="footer-text">© 2026 JEWELLERS PARADISE. ALL RIGHTS RESERVED.</p>
+        </div>
       </div>
     </div>
   );

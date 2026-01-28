@@ -1,0 +1,125 @@
+/* Premium Horizontal Top Navbar Style */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+:root {
+    --navbar-height: 88px;
+    --nav-text-color: var(--color-plum);
+    --nav-active-color: var(--color-plum);
+    --border-color: #f1f5f9;
+    --bg-body: #ffffff;
+}
+
+body {
+    background-color: var(--bg-body);
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    margin: 0;
+}
+
+/* Navbar Container */
+.top-navbar {
+    height: var(--navbar-height);
+    background-color: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 4%;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+/* Brand Section */
+.nav-brand {
+    display: flex;
+    align-items: center;
+}
+
+.brand-text {
+    font-weight: 800;
+    font-size: 20px;
+    letter-spacing: -0.02em;
+    color: var(--color-plum);
+}
+
+/* Navigation Menu */
+.nav-menu {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    justify-content: center;
+    flex: 1;
+}
+
+.nav-link-simple {
+    text-decoration: none;
+    color: var(--text-muted);
+    font-weight: 700;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 12px 16px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+    border-radius: 12px;
+}
+
+.nav-link-simple:hover {
+    color: var(--color-plum);
+    background-color: var(--color-plum-soft);
+}
+
+.nav-link-simple.active {
+    color: var(--color-plum);
+    background-color: var(--color-plum-soft);
+}
+
+/* Right Section Actions */
+.nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.btn-admin-action {
+    background: var(--bg-plum-gradient);
+    color: #ffffff;
+    font-weight: 800;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 12px 28px;
+    border-radius: 14px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 4px 12px rgba(107, 33, 168, 0.2);
+}
+
+.btn-admin-action:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(107, 33, 168, 0.3);
+    filter: brightness(1.1);
+}
+
+/* Main Layout Fix */
+.main-wrapper {
+    max-width: 1440px;
+    margin: 48px auto;
+    padding: 0 48px;
+}
+
+@media (max-width: 1024px) {
+    .nav-menu {
+        gap: 12px;
+    }
+
+    .nav-link-simple {
+        padding: 8px 12px;
+        font-size: 11px;
+    }
+}

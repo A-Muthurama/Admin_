@@ -1,11 +1,15 @@
-// Import necessary libraries and components
-import { useEffect, useMemo, useState } from "react";
-import { LogOut, Users, FileText, MapPin, Tag } from "lucide-react";
+
+import { useState, useEffect } from "react";
+import { LogOut, Diamond } from "lucide-react";
 import { VendorManagement } from "./admin/VendorManagement";
 import { OfferManagement } from "./admin/OfferManagement";
 import { LocationManagement } from "./admin/LocationManagement";
 import { PlanManagement } from "./admin/PlanManagement";
-import { getAllVendors, getPendingOffers, getPendingVendors } from "../api/api";
+import { VendorDetailsPage } from "./admin/VendorDetailsPage";
+import { OfferDetailsPage } from "./admin/OfferDetailsPage";
+import { Footer } from "./Footer";
+import icon from "../assets/icon.png";
+import "../styles/top-nav-premium.css"; // The new premium styles
 
 interface AdminDashboardProps {
   onLogout: () => void;
@@ -14,257 +18,155 @@ interface AdminDashboardProps {
 type AdminTab = "vendors" | "offers" | "locations" | "plans";
 
 export function AdminDashboard({ onLogout }: AdminDashboardProps) {
-  // State for managing active tab
   const [activeTab, setActiveTab] = useState<AdminTab>("vendors");
+  const [viewingVendorId, setViewingVendorId] = useState<string | null>(null);
+  const [viewingOfferId, setViewingOfferId] = useState<string | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
 
-  const [vendorCount, setVendorCount] = useState<number | null>(null);
-  const [pendingVendorCount, setPendingVendorCount] = useState<number | null>(
-    null,
-  );
-  const [pendingOfferCount, setPendingOfferCount] = useState<number | null>(
-    null,
-  );
-  const [isStatsLoading, setIsStatsLoading] = useState(true);
-
-  const [showToken, setShowToken] = useState(false);
-  const token = useMemo(() => localStorage.getItem("adminToken"), []);
-
+  // Sync state with URL on Load and on Browser Back/Forward
   useEffect(() => {
-    const run = async () => {
-      setIsStatsLoading(true);
-      try {
-        const [allVendorsRes, pendingVendorsRes, pendingOffersRes] =
-          await Promise.all([
-            getAllVendors(),
-            getPendingVendors(),
-            getPendingOffers(),
-          ]);
+    const handleLocationChange = () => {
+      const fullPath = window.location.pathname.toLowerCase().replace(/\/$/, ""); // Normalize path
 
-        setVendorCount(allVendorsRes.data.length);
-        setPendingVendorCount(pendingVendorsRes.data.length);
-        setPendingOfferCount(pendingOffersRes.data.length);
-      } catch (err) {
-        setVendorCount(null);
-        setPendingVendorCount(null);
-        setPendingOfferCount(null);
-      } finally {
-        setIsStatsLoading(false);
+      if (fullPath.startsWith('/vendor/')) {
+        const id = fullPath.replace('/vendor/', '');
+        setViewingVendorId(id);
+        setViewingOfferId(null);
+        setActiveTab('vendors');
+      } else if (fullPath.startsWith('/offer/')) {
+        const id = fullPath.replace('/offer/', '');
+        setViewingOfferId(id);
+        setViewingVendorId(null);
+        setActiveTab('offers');
+      } else if (fullPath === '/offers' || fullPath === '/offer') {
+        setActiveTab('offers');
+        setViewingVendorId(null);
+        setViewingOfferId(null);
+      } else if (fullPath === '/locations' || fullPath === '/location') {
+        setActiveTab('locations');
+        setViewingVendorId(null);
+        setViewingOfferId(null);
+      } else if (fullPath === '/plans' || fullPath === '/plan') {
+        setActiveTab('plans');
+        setViewingVendorId(null);
+        setViewingOfferId(null);
+      } else {
+        setActiveTab('vendors');
+        setViewingVendorId(null);
+        setViewingOfferId(null);
       }
     };
 
-    run();
+    // Initialize on mount
+    handleLocationChange();
+
+    // Listen for back/forward buttons
+    window.addEventListener('popstate', handleLocationChange);
+    return () => window.removeEventListener('popstate', handleLocationChange);
   }, []);
 
-  // Define tabs for navigation
-  const tabs = [
-    {
-      id: "vendors" as AdminTab,
-      label: "Vendor Management",
-      icon: Users,
-      badge: pendingVendorCount ?? 0,
-    },
-    {
-      id: "offers" as AdminTab,
-      label: "Offer Management",
-      icon: FileText,
-      badge: pendingOfferCount ?? 0,
-    },
-    { id: "locations" as AdminTab, label: "Locations", icon: MapPin, badge: 0 },
-    {
-      id: "plans" as AdminTab,
-      label: "Subscription Plans",
-      icon: Tag,
-      badge: 0,
-    },
+  const menuItems = [
+    { id: "vendors" as AdminTab, label: "Vendors", path: '/vendors' },
+    { id: "offers" as AdminTab, label: "Offers", path: '/offers' },
+    { id: "plans" as AdminTab, label: "Plan", path: '/plans' },
+    { id: "locations" as AdminTab, label: "Location", path: '/locations' },
   ];
 
+  const handleTabChange = (item: { id: AdminTab, path: string }) => {
+    setActiveTab(item.id);
+    setViewingVendorId(null);
+    setViewingOfferId(null);
+    window.history.pushState({ tab: item.id }, '', item.path);
+  };
+
+  const handleViewVendor = (id: string) => {
+    setViewingVendorId(id);
+    window.history.pushState({ vendorId: id }, '', `/vendor/${id}`);
+  };
+
+  const handleViewOffer = (id: string) => {
+    setViewingOfferId(id);
+    window.history.pushState({ offerId: id }, '', `/offer/${id}`);
+  };
+
+  const handleStatusChange = () => {
+    setRefreshKey(prev => prev + 1);
+  };
+
+  const isDetailView = !!viewingVendorId || !!viewingOfferId;
+
   return (
-    <div
-      className="min-h-screen"
-      style={{ backgroundColor: "var(--bg-primary)" }} // Apply primary background color
-    >
-      {/* Header Section */}
-      <div
-        className=""
-        style={{ backgroundColor: "var(--bg-medium)" }} // Removed border-b class
-      >
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2
-                className="text-gray-900"
-                style={{ fontFamily: "var(--font-heading)" }}
-              >
-                Admin Dashboard
-              </h2>
-              <p
-                className="text-sm"
-                style={{
-                  color: "var(--text-muted)",
-                  fontFamily: "var(--font-body)",
-                }}
-              >
-                Manage your jewellery marketplace
-              </p>
-            </div>
+    <div className="w-full">
+      {/* Dashboard Header - Always Visible */}
+      <header className="pj-header-container">
+        <div
+          className="pj-brand"
+          onClick={() => {
+            setActiveTab('vendors');
+            setViewingVendorId(null);
+            setViewingOfferId(null);
+            window.history.pushState({ tab: 'vendors' }, '', '/vendors');
+          }}
+          style={{ cursor: 'pointer' }}
+        >
+          <div className="pj-logo-wrapper">
+            <img src={icon} alt="Jewellers Paradise" className="pj-logo-icon" />
+          </div>
+          <span className="pj-brand-name">JEWELLERS PARADISE</span>
+        </div>
+
+        <nav className="pj-nav-menu">
+          {menuItems.map((item) => (
             <button
-              onClick={onLogout}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg transition-colors"
-              style={{
-                color: "var(--color-error)",
-                backgroundColor: "var(--bg-tertiary)",
-                transition: "var(--transition-smooth)",
-              }}
+              key={item.id}
+              onClick={() => handleTabChange(item)}
+              className={`pj-nav-link ${activeTab === item.id ? 'active' : ''}`}
             >
-              <LogOut className="w-5 h-5" />
-              Logout
+              {item.label}
             </button>
-          </div>
+          ))}
+        </nav>
 
+        <div>
+          <button onClick={onLogout} className="pj-btn-action flex items-center gap-2">
+            <LogOut size={16} color="white" />
+            <span style={{ color: 'white' }}>Logout</span>
+          </button>
         </div>
-      </div>
+      </header>
 
-      {/* Stats Section */}
-      <div
-        className="border-b"
-        style={{
-          backgroundColor: "var(--bg-medium)",
-          borderColor: "var(--border-color)",
-        }}
-      >
-        <div className="container mx-auto px-4 py-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div
-              className="rounded-xl p-4"
-              style={{
-                backgroundColor: "var(--color-white)",
-                boxShadow: "var(--card-shadow)",
+      {/* Main Content Area */}
+      <main className={isDetailView ? "p-10 pt-20 pb-32 animate-fade-in" : "pj-main-layout"}>
+        <div className="fadeInPage">
+          {viewingVendorId ? (
+            <VendorDetailsPage
+              vendorId={viewingVendorId}
+              onBack={() => {
+                setViewingVendorId(null);
+                window.history.pushState({ tab: 'vendors' }, '', '/vendors');
               }}
-            >
-              <p
-                className="text-sm mb-1"
-                style={{ color: "var(--text-muted)" }}
-              >
-                Total Vendors
-              </p>
-              <p
-                className="text-gray-900"
-                style={{ fontFamily: "var(--font-heading)" }}
-              >
-                {isStatsLoading ? "…" : (vendorCount ?? "—")}
-              </p>
-            </div>
-            <div
-              className="rounded-xl p-4"
-              style={{
-                backgroundColor: "var(--color-white)",
-                boxShadow: "var(--card-shadow)",
+              onStatusChange={handleStatusChange}
+            />
+          ) : viewingOfferId ? (
+            <OfferDetailsPage
+              offerId={viewingOfferId}
+              onBack={() => {
+                setViewingOfferId(null);
+                window.history.pushState({ tab: 'offers' }, '', '/offers');
               }}
-            >
-              <p
-                className="text-sm mb-1"
-                style={{ color: "var(--text-muted)" }}
-              >
-                Pending Approvals
-              </p>
-              <p
-                className="text-gray-900"
-                style={{ fontFamily: "var(--font-heading)" }}
-              >
-                {isStatsLoading ? "…" : (pendingVendorCount ?? "—")}
-              </p>
+              onStatusChange={handleStatusChange}
+            />
+          ) : (
+            <div key={refreshKey}>
+              {activeTab === "vendors" && <VendorManagement onViewVendor={handleViewVendor} />}
+              {activeTab === "offers" && <OfferManagement onViewOffer={handleViewOffer} />}
+              {activeTab === "locations" && <LocationManagement />}
+              {activeTab === "plans" && <PlanManagement />}
             </div>
-            <div
-              className="rounded-xl p-4"
-              style={{
-                backgroundColor: "var(--color-white)",
-                boxShadow: "var(--card-shadow)",
-              }}
-            >
-              <p
-                className="text-sm mb-1"
-                style={{ color: "var(--text-muted)" }}
-              >
-                Active Offers
-              </p>
-              <p
-                className="text-gray-900"
-                style={{ fontFamily: "var(--font-heading)" }}
-              >
-                —
-              </p>
-            </div>
-            <div
-              className="rounded-xl p-4"
-              style={{
-                backgroundColor: "var(--color-white)",
-                boxShadow: "var(--card-shadow)",
-              }}
-            >
-              <p
-                className="text-sm mb-1"
-                style={{ color: "var(--text-muted)" }}
-              >
-                Pending Offers
-              </p>
-              <p
-                className="text-gray-900"
-                style={{ fontFamily: "var(--font-heading)" }}
-              >
-                {isStatsLoading ? "…" : (pendingOfferCount ?? "—")}
-              </p>
-            </div>
-          </div>
+          )}
         </div>
-      </div>
-
-      {/* Tabs Section */}
-      <div
-        className="border-b"
-        style={{
-          backgroundColor: "var(--bg-medium)",
-          borderColor: "var(--border-color)",
-        }}
-      >
-        <div className="container mx-auto px-4">
-          <div className="flex gap-1 overflow-x-auto">
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-2 px-6 py-4 border-b-2 transition-colors whitespace-nowrap ${
-                  activeTab === tab.id
-                    ? "border-amber-500 text-amber-600"
-                    : "border-transparent text-gray-600 hover:text-gray-900"
-                }`}
-                style={{ fontFamily: "var(--font-body)" }}
-              >
-                <tab.icon className="w-5 h-5" />
-                {tab.label}
-                {tab.badge > 0 && (
-                  <span
-                    className="text-xs px-2 py-1 rounded-full"
-                    style={{
-                      backgroundColor: "var(--color-plum-light)",
-                      color: "var(--color-white)",
-                    }}
-                  >
-                    {tab.badge}
-                  </span>
-                )}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Content Section */}
-      <div className="container mx-auto px-4 py-8">
-        {activeTab === "vendors" && <VendorManagement />}
-        {activeTab === "offers" && <OfferManagement />}
-        {activeTab === "locations" && <LocationManagement />}
-        {activeTab === "plans" && <PlanManagement />}
-      </div>
+      </main>
+      <Footer />
     </div>
   );
 }

@@ -12,18 +12,18 @@ export class AuthService {
     private prisma: PrismaService,
     private jwt: JwtService,
     private brevo: BrevoService,
-  ) {}
+  ) { }
 
   private generateSixDigitOtp(): string {
     return String(Math.floor(100000 + Math.random() * 900000));
   }
 
   async adminLogin(email: string, password: string) {
-    const admin = await this.prisma.user.findUnique({
+    const admin = await this.prisma.admins.findUnique({
       where: { email },
     });
 
-    if (!admin || admin.role !== 'ADMIN') {
+    if (!admin) {
       throw new UnauthorizedException('Invalid credentials');
     }
 
@@ -35,7 +35,7 @@ export class AuthService {
     return {
       access_token: this.jwt.sign({
         sub: admin.id,
-        role: admin.role,
+        role: 'ADMIN',
       }),
     };
   }
@@ -52,13 +52,13 @@ export class AuthService {
     };
 
     try {
-      const user = await this.prisma.user.findUnique({ where: { email } });
-      if (!user || user.role !== 'ADMIN') {
+      const admin = await this.prisma.admins.findUnique({ where: { email } });
+      if (!admin) {
         return generic;
       }
 
-      const last = await this.prisma.adminPasswordResetOtp.findFirst({
-        where: { userId: user.id, usedAt: null },
+      const last = await this.prisma.adminPasswordReset.findFirst({
+        where: { adminId: admin.id, usedAt: null },
         orderBy: { createdAt: 'desc' },
       });
 
@@ -73,9 +73,9 @@ export class AuthService {
       const otpHash = await bcrypt.hash(otp, 10);
       const expiresAt = new Date(Date.now() + 10 * 60_000);
 
-      await this.prisma.adminPasswordResetOtp.create({
+      await this.prisma.adminPasswordReset.create({
         data: {
-          userId: user.id,
+          adminId: admin.id,
           otpHash,
           expiresAt,
         },
@@ -94,14 +94,14 @@ export class AuthService {
    * Verifies OTP and returns a short-lived reset token.
    */
   async adminForgotPasswordVerify(email: string, otp: string) {
-    const user = await this.prisma.user.findUnique({ where: { email } });
-    if (!user || user.role !== 'ADMIN') {
+    const admin = await this.prisma.admins.findUnique({ where: { email } });
+    if (!admin) {
       throw new UnauthorizedException('Invalid OTP');
     }
 
-    const record = await this.prisma.adminPasswordResetOtp.findFirst({
+    const record = await this.prisma.adminPasswordReset.findFirst({
       where: {
-        userId: user.id,
+        adminId: admin.id,
         usedAt: null,
         expiresAt: { gt: new Date() },
       },
@@ -118,21 +118,21 @@ export class AuthService {
 
     const ok = await bcrypt.compare(otp, record.otpHash);
     if (!ok) {
-      await this.prisma.adminPasswordResetOtp.update({
+      await this.prisma.adminPasswordReset.update({
         where: { id: record.id },
         data: { attempts: { increment: 1 } },
       });
       throw new UnauthorizedException('Invalid OTP');
     }
 
-    await this.prisma.adminPasswordResetOtp.update({
+    await this.prisma.adminPasswordReset.update({
       where: { id: record.id },
       data: { usedAt: new Date() },
     });
 
     const reset_token = this.jwt.sign(
       {
-        sub: user.id,
+        sub: admin.id,
         purpose: 'admin_password_reset',
       },
       { expiresIn: '15m' },
@@ -156,16 +156,16 @@ export class AuthService {
       throw new UnauthorizedException('Invalid reset token');
     }
 
-    const user = await this.prisma.user.findUnique({
+    const admin = await this.prisma.admins.findUnique({
       where: { id: payload.sub },
     });
-    if (!user || user.role !== 'ADMIN') {
+    if (!admin) {
       throw new UnauthorizedException('Invalid reset token');
     }
 
     const password = await bcrypt.hash(newPassword, 10);
-    await this.prisma.user.update({
-      where: { id: user.id },
+    await this.prisma.admins.update({
+      where: { id: admin.id },
       data: { password },
     });
 
@@ -173,29 +173,28 @@ export class AuthService {
   }
 
   async vendorLogin(email: string, password: string) {
-    const user = await this.prisma.user.findUnique({
+    const vendor = await this.prisma.vendors.findUnique({
       where: { email },
-      include: { vendorProfile: true },
     });
 
-    if (
-      !user ||
-      user.role !== 'VENDOR_APPROVED' ||
-      user.vendorProfile?.status !== 'APPROVED'
-    ) {
-      throw new UnauthorizedException('Vendor not approved');
+    if (!vendor || vendor.status !== 'APPROVED') {
+      throw new UnauthorizedException('Vendor not approved or not found');
     }
 
-    const valid = await bcrypt.compare(password, user.password);
+    if (!vendor.password_hash) {
+      throw new UnauthorizedException('Password not set for this vendor');
+    }
+
+    const valid = await bcrypt.compare(password, vendor.password_hash);
     if (!valid) {
       throw new UnauthorizedException('Invalid credentials');
     }
 
     return {
       access_token: this.jwt.sign({
-        sub: user.id,
-        role: user.role,
-        vendorId: user.vendorProfile.id,
+        sub: vendor.id.toString(),
+        role: 'VENDOR_APPROVED',
+        vendorId: vendor.id.toString(),
       }),
     };
   }

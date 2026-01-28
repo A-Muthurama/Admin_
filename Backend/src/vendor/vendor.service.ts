@@ -6,10 +6,10 @@ import { ApplyVendorDto } from './dto/apply-vendor.dto';
 
 @Injectable()
 export class VendorService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async apply(dto: ApplyVendorDto) {
-    const existing = await this.prisma.user.findUnique({
+    const existing = await this.prisma.vendors.findUnique({
       where: { email: dto.email },
     });
 
@@ -19,19 +19,13 @@ export class VendorService {
 
     const hashedPassword = await bcrypt.hash(dto.password, 10);
 
-    return this.prisma.user.create({
+    return this.prisma.vendors.create({
       data: {
         email: dto.email,
-        password: hashedPassword,
-        role: Role.VENDOR_PENDING,
-        vendorProfile: {
-          create: {
-            shopName: dto.shopName,
-            ownerName: dto.ownerName,
-            kycDocs: dto.kycDocs,
-            status: 'PENDING',
-          },
-        },
+        password_hash: hashedPassword,
+        shop_name: dto.shopName,
+        owner_name: dto.ownerName,
+        status: 'pending',
       },
     });
   }

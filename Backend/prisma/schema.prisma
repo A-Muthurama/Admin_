@@ -1,0 +1,124 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model kyc_documents {
+  id         Int       @id @default(autoincrement())
+  vendor_id  Int?
+  doc_type   String    @db.VarChar(50)
+  file_url   String
+  created_at DateTime? @default(now()) @db.Timestamp(6)
+  vendors    vendors?  @relation(fields: [vendor_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model offers {
+  id                     Int       @id @default(autoincrement())
+  vendor_id              Int?
+  title                  String    @db.VarChar(255)
+  description            String?
+  poster_url             String?
+  video_url              String?
+  category               String?   @db.VarChar(100)
+  start_date             DateTime? @db.Date
+  end_date               DateTime? @db.Date
+  discount_type          String?   @db.VarChar(50)
+  discount_label         String?   @db.VarChar(100)
+  discount_value_numeric Decimal?  @db.Decimal
+  buy_link               String?
+  status                 String?   @default("pending") @db.VarChar(20)
+  like_count             Int?      @default(0)
+  created_at             DateTime? @default(now()) @db.Timestamp(6)
+  shop_address           String?   @default("")
+  map_link               String?
+  is_featured            Boolean?  @default(false)
+  rejection_reason       String?
+  vendors                vendors?  @relation(fields: [vendor_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model otp_verifications {
+  id         Int       @id @default(autoincrement())
+  email      String    @db.VarChar(255)
+  otp        String    @db.VarChar(6)
+  expires_at DateTime  @db.Timestamp(6)
+  created_at DateTime? @default(now()) @db.Timestamp(6)
+}
+
+model subscriptions {
+  id              Int       @id @default(autoincrement())
+  vendor_id       Int?
+  plan_name       String    @db.VarChar(50)
+  price           Decimal   @db.Decimal(10, 2)
+  total_posts     Int
+  remaining_posts Int
+  start_date      DateTime? @default(now()) @db.Timestamp(6)
+  expiry_date     DateTime  @db.Timestamp(6)
+  status          String?   @default("ACTIVE") @db.VarChar(20)
+  vendors         vendors?  @relation(fields: [vendor_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model vendors {
+  id                     Int             @id @default(autoincrement())
+  shop_name              String          @db.VarChar(255)
+  owner_name             String?         @db.VarChar(255)
+  email                  String?         @unique @db.VarChar(255)
+  phone                  String?         @db.VarChar(20)
+  state                  String?         @db.VarChar(100)
+  city                   String?         @db.VarChar(100)
+  pincode                String?         @db.VarChar(10)
+  address                String?
+  status                 String?         @default("pending") @db.VarChar(20)
+  created_at             DateTime?       @default(now()) @db.Timestamp(6)
+  password_hash          String?         @default("")
+  rejection_reason       String?
+  reset_password_token   String?
+  reset_password_expires DateTime?       @db.Timestamp(6)
+  profile_picture_url    String?
+  reasons                String?
+  kyc_documents          kyc_documents[]
+  offers                 offers[]
+  subscriptions          subscriptions[]
+}
+
+model Admins {
+  id             String               @id @default(uuid())
+  email          String               @unique
+  password       String
+  createdAt      DateTime             @default(now())
+  passwordResets AdminPasswordReset[]
+}
+
+model AdminPasswordReset {
+  id        String    @id @default(uuid())
+  adminId   String
+  otpHash   String
+  expiresAt DateTime
+  usedAt    DateTime?
+  attempts  Int       @default(0)
+  createdAt DateTime  @default(now())
+  admin     Admins    @relation(fields: [adminId], references: [id], onDelete: Cascade)
+
+  @@index([adminId, createdAt])
+}
+
+enum OfferStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum Role {
+  ADMIN
+  VENDOR_PENDING
+  VENDOR_APPROVED
+}
+
+enum MediaStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}

@@ -1,4 +1,4 @@
-import { Controller, Get, Patch, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Patch, Param, UseGuards, Body } from '@nestjs/common';
 import { AdminService } from './admin.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
@@ -6,7 +6,7 @@ import { RolesGuard } from '../auth/roles.guard';
 @Controller('admin')
 @UseGuards(JwtAuthGuard, new RolesGuard('ADMIN'))
 export class AdminController {
-  constructor(private readonly adminService: AdminService) {}
+  constructor(private readonly adminService: AdminService) { }
 
   @Get('vendors')
   getAllVendors() {
@@ -24,13 +24,18 @@ export class AdminController {
   }
 
   @Patch('vendors/:userId/reject')
-  rejectVendor(@Param('userId') userId: string) {
-    return this.adminService.rejectVendor(userId);
+  rejectVendor(@Param('userId') userId: string, @Body('reason') reason: string) {
+    return this.adminService.rejectVendor(userId, reason);
   }
 
   @Get('offers/pending')
   getPendingOffers() {
     return this.adminService.getPendingOffers();
+  }
+
+  @Get('offers')
+  getAllOffers() {
+    return this.adminService.getAllOffers();
   }
 
   @Patch('offers/:offerId/approve')
@@ -39,8 +44,8 @@ export class AdminController {
   }
 
   @Patch('offers/:offerId/reject')
-  rejectOffer(@Param('offerId') offerId: string) {
-    return this.adminService.rejectOfferWithMedia(offerId);
+  rejectOffer(@Param('offerId') offerId: string, @Body('reason') reason: string) {
+    return this.adminService.rejectOfferWithMedia(offerId, reason);
   }
 
   @Get('offers/:offerId')

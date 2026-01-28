@@ -1,0 +1,341 @@
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { PrismaService } from 'prisma/prisma.service';
+import { Role } from '@prisma/client';
+import { VendorSyncService } from 'src/sync/vendor-sync.service';
+import { BrevoService } from '../mail/brevo.service';
+
+@Injectable()
+export class AdminService {
+  private readonly logger = new Logger(AdminService.name);
+
+  constructor(
+    private prisma: PrismaService,
+    private vendorSyncService: VendorSyncService,
+    private brevo: BrevoService,
+  ) { }
+
+  /* ===================== VENDORS ===================== */
+
+  async getAllVendors() {
+    const vendors = await this.prisma.vendors.findMany({
+      orderBy: { created_at: 'desc' },
+      include: { kyc_documents: true },
+    });
+
+    return vendors.map(v => ({
+      id: v.id.toString(),
+      externalVendorId: v.id,
+      userId: v.id.toString(),
+      shopName: v.shop_name,
+      ownerName: v.owner_name || '',
+      kycDocs: v.kyc_documents.map(d => d.file_url),
+      status: v.status?.toUpperCase() || 'PENDING',
+      createdAt: v.created_at,
+      phone: v.phone || '',
+      city: v.city || '',
+      state: v.state || '',
+      user: {
+        id: v.id.toString(),
+        email: v.email || '',
+        role: v.status?.toUpperCase() === 'APPROVED' ? 'VENDOR_APPROVED' : 'VENDOR_PENDING',
+      },
+    }));
+  }
+
+  async getPendingVendors() {
+    // Check both cases just to be safe, but prioritize uppercase as per user's feedback
+    const vendors = await this.prisma.vendors.findMany({
+      where: {
+        OR: [
+          { status: 'PENDING' },
+          { status: 'pending' },
+        ],
+      },
+      include: { kyc_documents: true },
+    });
+
+    return vendors.map(v => ({
+      id: v.id.toString(),
+      externalVendorId: v.id,
+      userId: v.id.toString(),
+      shopName: v.shop_name,
+      ownerName: v.owner_name || '',
+      kycDocs: v.kyc_documents.map(d => d.file_url),
+      status: 'PENDING',
+      createdAt: v.created_at,
+      phone: v.phone || '',
+      city: v.city || '',
+      state: v.state || '',
+      user: {
+        id: v.id.toString(),
+        email: v.email || '',
+        role: 'VENDOR_PENDING',
+      },
+    }));
+  }
+
+  async approveVendor(userId: string) {
+    const id = parseInt(userId);
+    const vendor = await this.prisma.vendors.findUnique({
+      where: { id },
+    });
+
+    if (!vendor) {
+      throw new NotFoundException('Vendor not found');
+    }
+
+    // Update status to 'APPROVED'
+    await this.prisma.vendors.update({
+      where: { id },
+      data: { status: 'APPROVED' },
+    });
+
+    // Notify vendor
+    if (vendor.email) {
+      try {
+        await this.brevo.sendVendorApprovedEmail({
+          toEmail: vendor.email,
+          shopName: vendor.shop_name,
+          ownerName: vendor.owner_name || 'Vendor',
+        });
+      } catch (err: any) {
+        this.logger.error(`Failed to send email to ${vendor.email}: ${err.message}`);
+      }
+    }
+
+    return { message: 'Vendor approved successfully' };
+  }
+
+  async rejectVendor(userId: string, reason?: string) {
+    const id = parseInt(userId);
+    const vendor = await this.prisma.vendors.findUnique({
+      where: { id },
+    });
+
+    if (!vendor) {
+      throw new NotFoundException('Vendor not found');
+    }
+
+    // Update status to 'rejected'
+    // Note: 'rejectionReason' column might not exist in original table yet.
+    // If it exists, we save it. If not, we just update status.
+    await this.prisma.vendors.update({
+      where: { id },
+      data: { status: 'rejected' },
+    });
+
+    return { message: 'Vendor rejected successfully' };
+  }
+
+  /* ===================== OFFERS ===================== */
+
+  async getPendingOffers() {
+    this.logger.log('Fetching pending offers from legacy table...');
+    const data = await this.prisma.offers.findMany({
+      where: {
+        OR: [
+          { status: 'PENDING' },
+          { status: 'pending' },
+        ],
+      },
+      include: {
+        vendors: {
+          select: {
+            shop_name: true,
+            owner_name: true,
+            email: true,
+            phone: true,
+          },
+        },
+      },
+    });
+
+    return data.map(o => ({
+      ...o,
+      id: o.id.toString(),
+      vendorId: o.vendor_id?.toString() || '', // ✅ CRITICAL: Map vendor_id to vendorId
+      price: o.discount_value_numeric ? parseFloat(o.discount_value_numeric.toString()) : 0,
+      storeLat: 0,
+      storeLng: 0,
+      status: (o.status?.toUpperCase() || 'PENDING') as any,
+      poster_url: o.poster_url || '', // Ensure this is mapped for the frontend
+      images: o.poster_url ? [{ id: 'poster', url: o.poster_url, status: 'APPROVED', createdAt: new Date().toISOString(), offerId: o.id.toString(), publicId: 'legacy' }] : [],
+      vendor: {
+        shopName: o.vendors?.shop_name || 'Unknown Shop',
+        ownerName: o.vendors?.owner_name || '',
+        phone: o.vendors?.phone || '',
+        user: { email: o.vendors?.email || '' }
+      }
+    }));
+  }
+
+  async getAllOffers() {
+    const data = await this.prisma.offers.findMany({
+      include: {
+        vendors: {
+          select: {
+            shop_name: true,
+            owner_name: true,
+            email: true,
+            phone: true,
+          },
+        },
+      },
+      orderBy: { created_at: 'desc' }
+    });
+
+    return data.map(o => ({
+      ...o,
+      id: o.id.toString(),
+      vendorId: o.vendor_id?.toString() || '', // ✅ CRITICAL: Map vendor_id to vendorId
+      price: o.discount_value_numeric ? parseFloat(o.discount_value_numeric.toString()) : 0,
+      storeLat: 0,
+      storeLng: 0,
+      status: (o.status?.toUpperCase() || 'PENDING') as any,
+      poster_url: o.poster_url || '', // Ensure this is mapped for the frontend
+      images: o.poster_url ? [{ id: 'poster', url: o.poster_url, status: 'APPROVED', createdAt: new Date().toISOString(), offerId: o.id.toString(), publicId: 'legacy' }] : [],
+      vendor: {
+        shopName: o.vendors?.shop_name || 'Unknown Shop',
+        ownerName: o.vendors?.owner_name || '',
+        phone: o.vendors?.phone || '',
+        user: { email: o.vendors?.email || '' }
+      }
+    }));
+  }
+
+  async approveOfferWithMedia(offerId: string) {
+    const id = parseInt(offerId);
+    const offer = await this.prisma.offers.findUnique({
+      where: { id },
+      include: { vendors: true }
+    });
+
+    if (!offer) {
+      throw new NotFoundException('Offer not found');
+    }
+
+    // 1️⃣ Update Prisma DB
+    await this.prisma.offers.update({
+      where: { id },
+      data: {
+        status: 'APPROVED',
+      },
+    });
+
+    // 2️⃣ Sync to vendor backend
+    try {
+      await this.vendorSyncService.approveOffer(offer.id);
+    } catch (err) {
+      console.warn(
+        'Vendor sync failed for offer',
+        offer.id,
+        err.message,
+      );
+    }
+
+    // 3️⃣ Notify vendor
+    try {
+      const toEmail = offer.vendors?.email;
+      if (toEmail) {
+        await this.brevo.sendOfferApprovedEmail({
+          toEmail,
+          offerTitle: offer.title,
+          shopName: offer.vendors?.shop_name || 'Vendor',
+        });
+      }
+    } catch (err: any) {
+      this.logger.error(`Failed to send offer approval email for offer ${offerId}`);
+    }
+
+    return { message: 'Offer approved successfully' };
+  }
+
+  async rejectOfferWithMedia(offerId: string, reason?: string) {
+    const id = parseInt(offerId);
+    const offer = await this.prisma.offers.findUnique({
+      where: { id },
+    });
+
+    if (!offer) {
+      throw new NotFoundException('Offer not found');
+    }
+
+    // 1️⃣ Update Prisma DB
+    await this.prisma.offers.update({
+      where: { id },
+      data: {
+        status: 'REJECTED',
+      },
+    });
+
+    // 2️⃣ Sync to vendor backend
+    await this.vendorSyncService.rejectOffer(offer.id, reason);
+
+    return { message: 'Offer rejected successfully' };
+  }
+
+  /* ===================== DETAILS ===================== */
+
+  async getOfferDetails(offerId: string) {
+    const id = parseInt(offerId);
+    const offer = await this.prisma.offers.findUnique({
+      where: { id },
+      include: {
+        vendors: true
+      },
+    });
+
+    if (!offer) {
+      throw new NotFoundException('Offer not found');
+    }
+
+    return {
+      ...offer,
+      id: offer.id.toString(),
+      vendorId: offer.vendor_id?.toString() || '', // ✅ CRITICAL: Map vendor_id to vendorId
+      price: offer.discount_value_numeric ? parseFloat(offer.discount_value_numeric.toString()) : 0,
+      storeLat: 0,
+      storeLng: 0,
+      status: (offer.status?.toUpperCase() || 'PENDING') as any,
+      poster_url: offer.poster_url || '', // Ensure this is mapped
+      images: offer.poster_url ? [{ id: 'poster', url: offer.poster_url, status: 'APPROVED', createdAt: new Date().toISOString(), offerId: offer.id.toString(), publicId: 'legacy' }] : [],
+      vendor: {
+        shopName: offer.vendors?.shop_name || 'Unknown Shop',
+        ownerName: offer.vendors?.owner_name || '',
+        phone: offer.vendors?.phone || '',
+        user: { email: offer.vendors?.email || '' }
+      }
+    };
+  }
+
+  async getVendorKyc(vendorId: string) {
+    const id = parseInt(vendorId);
+    const vendor = await this.prisma.vendors.findUnique({
+      where: { id },
+      include: { kyc_documents: true },
+    });
+
+    if (!vendor) {
+      throw new NotFoundException('Vendor not found');
+    }
+
+    // Map to expected Response format
+    return {
+      shopName: vendor.shop_name,
+      ownerName: vendor.owner_name || '',
+      status: vendor.status?.toUpperCase() || 'PENDING',
+      phone: vendor.phone || '',
+      city: vendor.city || '',
+      state: vendor.state || '',
+      address: vendor.address || '',
+      pincode: vendor.pincode || '',
+      kycDocs: vendor.kyc_documents.map(d => ({
+        type: d.doc_type,
+        url: d.file_url
+      })),
+      user: {
+        email: vendor.email || '',
+      },
+    };
+  }
+}

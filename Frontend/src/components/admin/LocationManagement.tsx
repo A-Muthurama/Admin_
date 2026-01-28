@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { states, citiesByState, pincodesByCity } from "../../data/mockData";
-import { Plus, Trash2, MapPin } from "lucide-react";
+import { Plus, Trash2, MapPin, Map, Navigation } from "lucide-react";
+import "../../styles/location-management.css";
 
 export function LocationManagement() {
   const [selectedState, setSelectedState] = useState("");
@@ -17,21 +18,27 @@ export function LocationManagement() {
     : [];
 
   return (
-    <div className="space-y-6">
+    <div className="lm-container">
       {/* States Management */}
-      <div className="bg-white rounded-xl shadow-md p-6">
-        <h3 className="text-gray-900">States Management</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="lm-card">
+        <div className="lm-card-header">
+          <h3 className="lm-card-title">
+            <Map size={24} /> States Management
+          </h3>
+          <p className="lm-card-desc">Define the operational states for the platform</p>
+        </div>
+
+        <div className="lm-content-grid">
           {/* Add State */}
-          <div>
-            <h4 className="text-gray-600 mb-3">Add New State</h4>
-            <div className="flex gap-2">
+          <div className="lm-form-section">
+            <h4 className="lm-section-title">Add New State</h4>
+            <div className="lm-input-group">
               <input
                 type="text"
                 value={newState}
                 onChange={(e) => setNewState(e.target.value)}
                 placeholder="Enter state name"
-                className="flex-1 px-4 py-2 rounded-lg border border-gray-300"
+                className="lm-input"
               />
               <button
                 onClick={() => {
@@ -40,31 +47,27 @@ export function LocationManagement() {
                     setNewState("");
                   }
                 }}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-green-500 text-white hover:bg-green-600"
+                className="lm-btn-add"
               >
-                <Plus className="w-4 h-4" />
-                Add
+                <Plus className="w-4 h-4" /> Add
               </button>
             </div>
           </div>
 
           {/* Existing States */}
-          <div>
-            <h4 className="text-gray-600 mb-3">
+          <div className="lm-form-section">
+            <h4 className="lm-section-title">
               Existing States ({states.length})
             </h4>
-            <div className="space-y-2 max-h-48 overflow-y-auto">
+            <div className="lm-list-container">
               {states.map((state) => (
-                <div
-                  key={state}
-                  className="flex items-center justify-between p-3 rounded-lg border border-gray-300 bg-gray-50"
-                >
-                  <div className="flex items-center gap-2">
-                    <MapPin className="w-4 h-4 text-gray-400" />
-                    <span className="text-gray-900">{state}</span>
+                <div key={state} className="lm-list-item">
+                  <div className="lm-item-name">
+                    <MapPin className="lm-item-icon" size={16} />
+                    <span>{state}</span>
                   </div>
-                  <button className="text-red-600 hover:text-red-700">
-                    <Trash2 className="w-4 h-4" />
+                  <button className="lm-btn-delete">
+                    <Trash2 size={16} />
                   </button>
                 </div>
               ))}
@@ -74,17 +77,23 @@ export function LocationManagement() {
       </div>
 
       {/* Cities Management */}
-      <div className="bg-white rounded-xl shadow-md p-6">
-        <h3 className="text-gray-900">Cities Management</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="lm-card">
+        <div className="lm-card-header">
+          <h3 className="lm-card-title">
+            <Navigation size={24} /> Cities Management
+          </h3>
+          <p className="lm-card-desc">Configure cities within selected states</p>
+        </div>
+
+        <div className="lm-content-grid">
           {/* Add City */}
-          <div>
-            <h4 className="text-gray-600 mb-3">Add New City</h4>
-            <div className="space-y-3">
+          <div className="lm-form-section">
+            <h4 className="lm-section-title">Add New City</h4>
+            <div className="flex flex-col gap-3">
               <select
                 value={selectedState}
                 onChange={(e) => setSelectedState(e.target.value)}
-                className="w-full px-4 py-2 rounded-lg border border-gray-300"
+                className="lm-select"
               >
                 <option value="">Select State</option>
                 {states.map((state) => (
@@ -93,14 +102,14 @@ export function LocationManagement() {
                   </option>
                 ))}
               </select>
-              <div className="flex gap-2">
+              <div className="lm-input-group">
                 <input
                   type="text"
                   value={newCity}
                   onChange={(e) => setNewCity(e.target.value)}
                   placeholder="Enter city name"
                   disabled={!selectedState}
-                  className="flex-1 px-4 py-2 rounded-lg border border-gray-300 disabled:opacity-50"
+                  className="lm-input"
                 />
                 <button
                   onClick={() => {
@@ -110,22 +119,21 @@ export function LocationManagement() {
                     }
                   }}
                   disabled={!selectedState}
-                  className="flex items-center gap-2 px-4 py-2 rounded-lg bg-green-500 text-white hover:bg-green-600 disabled:opacity-50"
+                  className="lm-btn-add"
                 >
-                  <Plus className="w-4 h-4" />
-                  Add
+                  <Plus className="w-4 h-4" /> Add
                 </button>
               </div>
             </div>
           </div>
 
           {/* Existing Cities */}
-          <div>
-            <h4 className="text-gray-600 mb-3">Cities by State</h4>
+          <div className="lm-form-section">
+            <h4 className="lm-section-title">Cities by State</h4>
             <select
               value={selectedState}
               onChange={(e) => setSelectedState(e.target.value)}
-              className="w-full px-4 py-2 rounded-lg border border-gray-300 mb-3"
+              className="lm-select mb-2"
             >
               <option value="">Select State to View Cities</option>
               {states.map((state) => (
@@ -135,25 +143,19 @@ export function LocationManagement() {
               ))}
             </select>
             {selectedState && (
-              <div className="space-y-2 max-h-48 overflow-y-auto">
-                {availableCities.map((city) => (
-                  <div
-                    key={city}
-                    className="flex items-center justify-between p-3 rounded-lg border border-gray-300 bg-gray-50"
-                  >
-                    <div className="flex items-center gap-2">
-                      <MapPin className="w-4 h-4 text-gray-400" />
-                      <span className="text-gray-900">{city}</span>
+              <div className="lm-list-container">
+                {availableCities.length > 0 ? availableCities.map((city) => (
+                  <div key={city} className="lm-list-item">
+                    <div className="lm-item-name">
+                      <MapPin className="lm-item-icon" size={16} />
+                      <span>{city}</span>
                     </div>
-                    <button className="text-red-600 hover:text-red-700">
-                      <Trash2 className="w-4 h-4" />
+                    <button className="lm-btn-delete">
+                      <Trash2 size={16} />
                     </button>
                   </div>
-                ))}
-                {availableCities.length === 0 && (
-                  <p className="text-sm text-center py-4 text-gray-500">
-                    No cities added yet
-                  </p>
+                )) : (
+                  <div className="lm-empty-state">No cities found for this state.</div>
                 )}
               </div>
             )}
@@ -162,20 +164,26 @@ export function LocationManagement() {
       </div>
 
       {/* Pincodes Management */}
-      <div className="bg-white rounded-xl shadow-md p-6">
-        <h3 className="text-gray-900">Pincodes Management</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="lm-card">
+        <div className="lm-card-header">
+          <h3 className="lm-card-title">
+            <MapPin size={24} /> Pincode Zones
+          </h3>
+          <p className="lm-card-desc">Granular control for delivery and service areas</p>
+        </div>
+
+        <div className="lm-content-grid">
           {/* Add Pincode */}
-          <div>
-            <h4 className="text-gray-600 mb-3">Add New Pincode</h4>
-            <div className="space-y-3">
+          <div className="lm-form-section">
+            <h4 className="lm-section-title">Add New Pincode</h4>
+            <div className="flex flex-col gap-3">
               <select
                 value={selectedState}
                 onChange={(e) => {
                   setSelectedState(e.target.value);
                   setSelectedCity("");
                 }}
-                className="w-full px-4 py-2 rounded-lg border border-gray-300"
+                className="lm-select"
               >
                 <option value="">Select State</option>
                 {states.map((state) => (
@@ -188,7 +196,7 @@ export function LocationManagement() {
                 value={selectedCity}
                 onChange={(e) => setSelectedCity(e.target.value)}
                 disabled={!selectedState}
-                className="w-full px-4 py-2 rounded-lg border border-gray-300 disabled:opacity-50"
+                className="lm-select disabled:opacity-50"
               >
                 <option value="">Select City</option>
                 {availableCities.map((city) => (
@@ -197,14 +205,14 @@ export function LocationManagement() {
                   </option>
                 ))}
               </select>
-              <div className="flex gap-2">
+              <div className="lm-input-group">
                 <input
                   type="text"
                   value={newPincode}
                   onChange={(e) => setNewPincode(e.target.value)}
                   placeholder="Enter pincode"
                   disabled={!selectedCity}
-                  className="flex-1 px-4 py-2 rounded-lg border border-gray-300 disabled:opacity-50"
+                  className="lm-input"
                 />
                 <button
                   onClick={() => {
@@ -216,66 +224,62 @@ export function LocationManagement() {
                     }
                   }}
                   disabled={!selectedCity}
-                  className="flex items-center gap-2 px-4 py-2 rounded-lg bg-green-500 text-white hover:bg-green-600 disabled:opacity-50"
+                  className="lm-btn-add"
                 >
-                  <Plus className="w-4 h-4" />
-                  Add
+                  <Plus className="w-4 h-4" /> Add
                 </button>
               </div>
             </div>
           </div>
 
           {/* Existing Pincodes */}
-          <div>
-            <h4 className="text-gray-600 mb-3">Pincodes by City</h4>
-            <select
-              value={selectedState}
-              onChange={(e) => {
-                setSelectedState(e.target.value);
-                setSelectedCity("");
-              }}
-              className="w-full px-4 py-2 rounded-lg border border-gray-300 mb-2"
-            >
-              <option value="">Select State</option>
-              {states.map((state) => (
-                <option key={state} value={state}>
-                  {state}
-                </option>
-              ))}
-            </select>
-            <select
-              value={selectedCity}
-              onChange={(e) => setSelectedCity(e.target.value)}
-              disabled={!selectedState}
-              className="w-full px-4 py-2 rounded-lg border border-gray-300 mb-3 disabled:opacity-50"
-            >
-              <option value="">Select City</option>
-              {availableCities.map((city) => (
-                <option key={city} value={city}>
-                  {city}
-                </option>
-              ))}
-            </select>
+          <div className="lm-form-section">
+            <h4 className="lm-section-title">Pincodes by City</h4>
+            <div className="flex flex-col gap-2 mb-2">
+              <select
+                value={selectedState}
+                onChange={(e) => {
+                  setSelectedState(e.target.value);
+                  setSelectedCity("");
+                }}
+                className="lm-select"
+              >
+                <option value="">Select State</option>
+                {states.map((state) => (
+                  <option key={state} value={state}>
+                    {state}
+                  </option>
+                ))}
+              </select>
+              <select
+                value={selectedCity}
+                onChange={(e) => setSelectedCity(e.target.value)}
+                disabled={!selectedState}
+                className="lm-select disabled:opacity-50"
+              >
+                <option value="">Select City</option>
+                {availableCities.map((city) => (
+                  <option key={city} value={city}>
+                    {city}
+                  </option>
+                ))}
+              </select>
+            </div>
+
             {selectedCity && (
-              <div className="space-y-2 max-h-48 overflow-y-auto">
-                {availablePincodes.map((pincode) => (
-                  <div
-                    key={pincode}
-                    className="flex items-center justify-between p-3 rounded-lg border border-gray-300 bg-gray-50"
-                  >
-                    <div className="flex items-center gap-2">
-                      <MapPin className="w-4 h-4 text-gray-400" />
-                      <span className="text-gray-900">{pincode}</span>
+              <div className="lm-list-container">
+                {availablePincodes.length > 0 ? availablePincodes.map((pincode) => (
+                  <div key={pincode} className="lm-list-item">
+                    <div className="lm-item-name">
+                      <MapPin className="lm-item-icon" size={16} />
+                      <span>{pincode}</span>
                     </div>
-                    <button className="text-red-600 hover:text-red-700">
-                      <Trash2 className="w-4 h-4" />
+                    <button className="lm-btn-delete">
+                      <Trash2 size={16} />
                     </button>
                   </div>
-                ))}
-                {availablePincodes.length === 0 && (
-                  <p className="text-sm text-center py-4 text-gray-500">
-                    No pincodes added yet
-                  </p>
+                )) : (
+                  <div className="lm-empty-state">No pincodes found for this city.</div>
                 )}
               </div>
             )}

@@ -1,0 +1,517 @@
+/* Vendor Details CSS */
+@import './variables.css';
+
+.vd-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    /* Adjusted padding-top to account for fixed header (80px) + spacing */
+    padding-top: 100px;
+    padding-bottom: 80px;
+    animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Back Button */
+.vd-back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-muted);
+    font-size: 13px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    background: none;
+    border: none;
+    cursor: pointer;
+    margin-bottom: 24px;
+    transition: all 0.3s ease;
+    padding: 12px 0;
+}
+
+.vd-back-btn:hover {
+    color: var(--color-plum);
+    transform: translateX(-4px);
+}
+
+/* Header Card */
+.vd-header-card {
+    background-color: var(--color-white);
+    border-radius: 32px;
+    border: 1px solid rgba(107, 33, 168, 0.1);
+    box-shadow: var(--premium-shadow);
+    padding: 48px;
+    margin-bottom: 48px;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+    position: relative;
+    overflow: hidden;
+}
+
+.vd-header-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 8px;
+    background: var(--bg-plum-gradient);
+}
+
+@media (min-width: 1024px) {
+    .vd-header-card {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+    }
+}
+
+.vd-shop-title {
+    font-size: 40px;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin: 0 0 16px 0;
+    letter-spacing: -0.04em;
+    line-height: 1.1;
+}
+
+.vd-meta-info {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 20px;
+    color: var(--text-secondary);
+    font-size: 15px;
+    font-weight: 500;
+}
+
+.vd-meta-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.vd-meta-icon {
+    color: var(--color-plum);
+    opacity: 0.7;
+}
+
+.vd-meta-divider {
+    width: 6px;
+    height: 6px;
+    background-color: #e2e8f0;
+    border-radius: 50%;
+}
+
+.vd-status-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+}
+
+@media (min-width: 1024px) {
+    .vd-status-wrapper {
+        align-items: flex-end;
+        text-align: right;
+    }
+}
+
+.vd-status-badge {
+    padding: 10px 20px;
+    border-radius: 12px;
+    font-weight: 800;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.vd-status-approved {
+    background-color: #dcfce7;
+    color: #15803d;
+}
+
+.vd-status-pending {
+    background-color: #fef9c3;
+    color: #a16207;
+}
+
+.vd-status-rejected {
+    background-color: #fee2e2;
+    color: #b91c1c;
+}
+
+.vd-id-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-light);
+    background-color: #f1f5f9;
+    padding: 6px 14px;
+    border-radius: 8px;
+}
+
+/* Section Title */
+.vd-section-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 32px;
+    padding-left: 8px;
+}
+
+.vd-section-title {
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--text-primary);
+    letter-spacing: -0.02em;
+    margin: 0;
+}
+
+.vd-section-icon {
+    color: var(--color-plum);
+}
+
+/* Documents Grid */
+.vd-doc-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 32px;
+    margin-bottom: 60px;
+}
+
+@media (min-width: 640px) {
+    .vd-doc-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (min-width: 1024px) {
+    .vd-doc-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+.vd-doc-card {
+    background-color: var(--color-white);
+    border-radius: 20px;
+    border: 1px solid rgba(107, 33, 168, 0.1);
+    overflow: hidden;
+    transition: all 0.5s cubic-bezier(0.165, 0.84, 0.44, 1);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+    cursor: pointer;
+}
+
+.vd-doc-card:hover {
+    transform: translateY(-12px);
+    box-shadow: 0 20px 50px rgba(107, 33, 168, 0.15);
+    border-color: var(--color-plum);
+}
+
+.vd-doc-preview {
+    height: 240px;
+    background-color: #f8fafc;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.vd-doc-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.8s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+.vd-doc-card:hover .vd-doc-img {
+    transform: scale(1.1);
+}
+
+/* Vendor Details CSS */
+@import './variables.css';
+
+/* ... previous CSS ... */
+
+.vd-doc-overlay {
+    position: absolute;
+    inset: 0;
+    /* Changed from odd purple to a cleaner plum/black overlay */
+    background-color: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    backdrop-filter: blur(4px);
+}
+
+.vd-doc-card:hover .vd-doc-overlay {
+    opacity: 1;
+}
+
+.vd-doc-zoom-icon {
+    color: white;
+    transform: scale(0.6);
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.vd-doc-card:hover .vd-doc-zoom-icon {
+    transform: scale(1);
+}
+
+.vd-doc-info {
+    padding: 24px;
+    background-color: var(--color-white);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.vd-doc-name {
+    font-weight: 800;
+    color: var(--text-primary);
+    font-size: 16px;
+    text-transform: capitalize;
+}
+
+.vd-doc-action-icon {
+    color: var(--color-plum);
+    opacity: 0.5;
+    transition: all 0.3s;
+}
+
+.vd-doc-card:hover .vd-doc-action-icon {
+    opacity: 1;
+    transform: scale(1.2);
+}
+
+/* Action Panel */
+.vd-action-panel {
+    background-color: var(--color-white);
+    border-radius: 24px;
+    border: 1px solid rgba(107, 33, 168, 0.1);
+    box-shadow: var(--premium-shadow);
+    padding: 40px;
+    position: relative;
+    overflow: hidden;
+}
+
+.vd-action-panel::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 6px;
+    background: var(--bg-plum-gradient);
+}
+
+.vd-action-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    margin-bottom: 32px;
+}
+
+.vd-action-icon-circle {
+    width: 56px;
+    height: 56px;
+    background-color: var(--color-plum-soft);
+    color: var(--color-plum);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.vd-action-title {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin: 0 0 6px 0;
+}
+
+.vd-action-desc {
+    font-size: 15px;
+    color: var(--text-muted);
+    margin: 0;
+    line-height: 1.6;
+}
+
+.vd-btn-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    padding-left: 76px;
+}
+
+@media (max-width: 640px) {
+    .vd-btn-group {
+        padding-left: 0;
+        flex-direction: column;
+    }
+}
+
+.vd-btn {
+    padding: 14px 32px;
+    border-radius: 14px;
+    font-size: 15px;
+    font-weight: 800;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    border: none;
+    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+    min-width: 160px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.vd-btn-approve {
+    background: var(--bg-plum-gradient);
+    color: white;
+    box-shadow: 0 8px 20px rgba(107, 33, 168, 0.25);
+}
+
+.vd-btn-approve:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 30px rgba(107, 33, 168, 0.4);
+    filter: brightness(1.1);
+}
+
+.vd-btn-reject {
+    background-color: #f1f5f9;
+    color: #475569;
+}
+
+.vd-btn-reject:hover {
+    background-color: #fee2e2;
+    color: #ef4444;
+}
+
+/* Rejection Form */
+.vd-rejection-form {
+    margin-left: 76px;
+    margin-top: 24px;
+    background-color: #fdf2f2;
+    padding: 32px;
+    border-radius: 20px;
+    border: 1px solid #fee2e2;
+    animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (max-width: 640px) {
+    .vd-rejection-form {
+        margin-left: 0;
+    }
+}
+
+.vd-textarea {
+    width: 100%;
+    min-height: 120px;
+    padding: 20px;
+    border-radius: 16px;
+    border: 1px solid #fee2e2;
+    background-color: white;
+    font-family: var(--font-body);
+    font-size: 15px;
+    margin-bottom: 24px;
+    color: var(--text-primary);
+    transition: all 0.3s;
+}
+
+.vd-textarea:focus {
+    outline: none;
+    border-color: #ef4444;
+    box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1);
+}
+
+.vd-btn-confirm-reject {
+    background-color: #ef4444;
+    color: white;
+    box-shadow: 0 4px 14px rgba(239, 68, 68, 0.3);
+}
+
+.vd-btn-confirm-reject:hover {
+    background-color: #dc2626;
+    transform: translateY(-2px);
+}
+
+.vd-btn-cancel {
+    background-color: transparent;
+    color: var(--text-muted);
+    font-weight: 700;
+}
+
+.vd-btn-cancel:hover {
+    color: var(--text-primary);
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* Lightbox */
+.vd-lightbox {
+    position: fixed;
+    inset: 0;
+    z-index: 1100;
+    background-color: rgba(0, 0, 0, 0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    animation: fadeIn 0.3s ease;
+    backdrop-filter: blur(12px);
+}
+
+.vd-lightbox-close {
+    position: absolute;
+    top: 32px;
+    right: 32px;
+    color: white;
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    cursor: pointer;
+    padding: 12px;
+    border-radius: 50%;
+    transition: all 0.3s;
+}
+
+.vd-lightbox-close:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    transform: rotate(90deg);
+}
+
+.vd-lightbox-img {
+    max-width: 90%;
+    max-height: 85vh;
+    border-radius: 16px;
+    box-shadow: 0 40px 100px rgba(0, 0, 0, 0.5);
+    border: 4px solid rgba(255, 255, 255, 0.1);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

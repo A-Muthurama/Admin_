@@ -44,16 +44,30 @@ export interface AdminVendorProfile {
   userId: string;
   shopName: string;
   ownerName: string;
-  kycDocs: string;
+  phone: string;  // Added phone
+  city: string;   // Added city
+  state: string;  // Added state
+  kycDocs: string[];
   status: BackendVendorStatus;
   createdAt: string;
   user: AdminVendorUser;
 }
 
+export interface VendorKycDoc {
+  type: string;
+  url: string;
+}
+
 export interface VendorKycResponse {
   shopName: string;
   ownerName: string;
-  kycDocs: string;
+  status: string;
+  phone: string; // Added phone
+  city: string;  // Added city
+  state: string; // Added state
+  address: string; // Added address
+  pincode: string; // Added pincode
+  kycDocs: VendorKycDoc[];
   user: {
     email: string;
   };
@@ -62,6 +76,11 @@ export interface VendorKycResponse {
 export interface AdminOfferVendorInfo {
   shopName: string;
   ownerName: string;
+  phone: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  pincode?: string;
   user: {
     email: string;
   };
@@ -77,6 +96,25 @@ export interface PendingAdminOffer {
   storeLng: number;
   status: BackendOfferStatus;
   isActive: boolean;
+  poster_url?: string;
+
+  // Database Fields (from screenshot)
+  category?: string;
+  discount_type?: string;     // e.g. "Flat Discount"
+  discount_label?: string;    // e.g. "50% OFF"
+  start_date?: string;
+  end_date?: string;
+  shop_address?: string;
+  map_link?: string;
+  buy_link?: string; // Adding for future/completeness if requested
+
+  // Keep these for backward/camelCase compatibility if backend converts them
+  discountPercentage?: number;
+  startDate?: string;
+  endDate?: string;
+  area?: string;
+  city?: string;
+
   createdAt: string;
   vendorId: string;
   vendor: AdminOfferVendorInfo;
@@ -115,8 +153,7 @@ export interface ForgotPasswordVerifyResponse {
  */
 const API = axios.create({
   baseURL:
-    import.meta.env.VITE_ADMIN_API_BASE_URL ??
-    "https://admin-api.jewellersparadise.com",
+    import.meta.env.VITE_ADMIN_API_BASE_URL ?? "http://localhost:4000",
 });
 
 /**
@@ -124,7 +161,7 @@ const API = axios.create({
  * Automatically attaches Admin JWT to every request
  */
 API.interceptors.request.use((config) => {
-  const token = localStorage.getItem("adminToken");
+  const token = sessionStorage.getItem("adminToken");
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -202,8 +239,8 @@ export const approveVendor = (userId: string) =>
  * Reject a vendor
  * - Marks vendor as REJECTED
  */
-export const rejectVendor = (userId: string) =>
-  API.patch<MessageResponse>(`/admin/vendors/${userId}/reject`);
+export const rejectVendor = (userId: string, reason: string) =>
+  API.patch<MessageResponse>(`/admin/vendors/${userId}/reject`, { reason });
 
 /**
  * Get vendor KYC documents
@@ -211,6 +248,16 @@ export const rejectVendor = (userId: string) =>
  */
 export const getVendorKyc = (vendorId: string) =>
   API.get<VendorKycResponse>(`/admin/vendors/${vendorId}/kyc`);
+
+/**
+ * Vendor Application form
+ */
+export const vendorApply = (data: {
+  email: string;
+  password?: string;
+  shopName: string;
+  ownerName?: string;
+}) => API.post<MessageResponse>("/vendor/apply", data);
 
 /* ======================================================
    OFFER MANAGEMENT APIs
@@ -222,6 +269,12 @@ export const getVendorKyc = (vendorId: string) =>
  */
 export const getPendingOffers = () =>
   API.get<PendingAdminOffer[]>("/admin/offers/pending");
+
+/**
+ * Get all offers (all statuses)
+ */
+export const getAllOffers = () =>
+  API.get<PendingAdminOffer[]>("/admin/offers");
 
 /**
  * Get full offer details
@@ -242,8 +295,8 @@ export const approveOffer = (offerId: string) =>
  * Reject an offer and its images
  * - Keeps offer hidden from users
  */
-export const rejectOffer = (offerId: string) =>
-  API.patch<MessageResponse>(`/admin/offers/${offerId}/reject`);
+export const rejectOffer = (offerId: string, reason: string) =>
+  API.patch<MessageResponse>(`/admin/offers/${offerId}/reject`, { reason });
 
 /* ======================================================
    EXPORT AXIOS INSTANCE (optional)

@@ -1,314 +1,127 @@
-// Import necessary libraries and styles
 import { useState } from "react";
-import { ShieldCheck, AlertCircle, Mail } from "lucide-react";
-import "../styles/variables.css";
+import { Mail, Lock, Eye, EyeOff, Gem, AlertCircle, ArrowRight } from "lucide-react";
 import { adminLogin } from "../api/api";
-// Define the props for the AdminLogin component
+import icon from "../assets/icon.png";
+import "../styles/auth.css";
+
 interface AdminLoginProps {
   onLogin: () => void;
   onForgotPassword: () => void;
 }
 
-// Define the possible login steps
-type LoginStep = "credentials" | "otp";
-
 export function AdminLogin({ onLogin, onForgotPassword }: AdminLoginProps) {
-  // State variables for managing login steps, credentials, OTP, and errors
-  const [step, setStep] = useState<LoginStep>("credentials");
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [error, setError] = useState("");
-  const [generatedOtp, setGeneratedOtp] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  // Handle submission of credentials
-
-  const handleCredentialsSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setIsLoading(true);
 
     try {
-      const res = await adminLogin({
-        email: username,
-        password,
-      });
-
-      // ✅ Store token
-      localStorage.setItem("adminToken", res.data.access_token);
-
-      // ✅ Complete login (bypass OTP)
+      const res = await adminLogin({ email, password });
+      sessionStorage.setItem("adminToken", res.data.access_token);
       onLogin();
-    } catch (err) {
-      setError("Invalid username or password");
+    } catch (err: any) {
+      setError(err?.response?.data?.message || "Invalid credentials. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
-  };
-
-  // Handle changes in OTP input fields
-  const handleOtpChange = (index: number, value: string) => {
-    if (value.length > 1) return;
-    if (value && !/^\d$/.test(value)) return;
-
-    const newOtp = [...otp];
-    newOtp[index] = value;
-    setOtp(newOtp);
-
-    // Auto-focus next input
-    if (value && index < 5) {
-      const nextInput = document.getElementById(`otp-${index + 1}`);
-      nextInput?.focus();
-    }
-  };
-
-  // Handle backspace navigation in OTP fields
-  const handleOtpKeyDown = (index: number, e: React.KeyboardEvent) => {
-    if (e.key === "Backspace" && !otp[index] && index > 0) {
-      const prevInput = document.getElementById(`otp-${index - 1}`);
-      prevInput?.focus();
-    }
-  };
-
-  // Handle submission of OTP
-  const handleOtpSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-
-    const enteredOtp = otp.join("");
-
-    if (enteredOtp === generatedOtp) {
-      onLogin();
-    } else {
-      setError("Invalid OTP. Please try again.");
-      setOtp(["", "", "", "", "", ""]);
-      const firstInput = document.getElementById("otp-0");
-      firstInput?.focus();
-    }
-  };
-
-  // Handle navigation back to credentials step
-  const handleBackToCredentials = () => {
-    setStep("credentials");
-    setOtp(["", "", "", "", "", ""]);
-    setError("");
   };
 
   return (
-    <div
-      className="max-w-md mx-auto"
-      style={{ backgroundColor: "var(--bg-primary)", borderRadius: "1rem" }} // Added rounded corners
-    >
-      {/* Login Card */}
-      <div
-        className="rounded-2xl shadow-xl p-8"
-        style={{
-          backgroundColor: "var(--bg-tertiary)",
-          boxShadow: "var(--card-shadow)",
-          borderRadius: "1rem", // Ensure rounded corners
-        }}
-      >
-        {/* Logo Section */}
-        <div className="flex justify-center mb-6">
-          <div
-            className="p-4 rounded-full"
-            style={{ background: "var(--color-plum-light)" }}
-          >
-            <ShieldCheck
-              className="w-8 h-8"
-              style={{ color: "var(--color-white)" }}
-            />
+    <div className="auth-page-wrapper">
+      {/* Top Header for Login Page */}
+      <header className="pj-header-container">
+        <div className="pj-brand">
+          <div className="pj-logo-wrapper">
+            <img src={icon} alt="Jewellers Paradise" className="pj-logo-icon" />
           </div>
+          <span className="pj-brand-name">JEWELLERS PARADISE</span>
         </div>
 
-        {/* Title and Description */}
-        <h2
-          className="text-center mb-2"
-          style={{ color: "var(--text-secondary)" }}
-        >
-          Admin Login
-        </h2>
-        <p className="text-center mb-6" style={{ color: "var(--text-muted)" }}>
-          {step === "credentials"
-            ? "Secure access to admin dashboard"
-            : "Enter the OTP sent to your device"}
-        </p>
+        <nav className="pj-nav-menu">
+          <button className="pj-nav-link active">HOME</button>
+          <button className="pj-nav-link">OFFERS</button>
+        </nav>
 
-        {/* Error Message */}
-        {error && (
-          <div
-            className="border rounded-lg p-3 mb-4 flex items-start gap-2"
-            style={{
-              backgroundColor: "var(--color-error)",
-              borderColor: "var(--border-color)",
-            }}
-          >
-            <AlertCircle
-              className="w-5 h-5 flex-shrink-0 mt-0.5"
-              style={{ color: "var(--color-white)" }}
-            />
-            <p className="text-sm" style={{ color: "var(--color-white)" }}>
-              {error}
-            </p>
+        <div style={{ width: '120px' }}></div>
+      </header>
+
+      <div className="auth-container">
+        <div className="auth-card">
+          <div className="auth-header">
+            <h1 className="auth-title" style={{ fontSize: '32px' }}>Admin Login</h1>
+            <p className="auth-subtitle">Welcome back! Please enter your details.</p>
           </div>
-        )}
+          {/* Error Alert */}
+          {error && (
+            <div className="auth-alert">
+              <AlertCircle size={20} color="#ef4444" />
+              <p className="auth-alert-text">{error}</p>
+            </div>
+          )}
 
-        {/* Credentials Form */}
-        {step === "credentials" ? (
-          <form onSubmit={handleCredentialsSubmit} className="space-y-4">
-            <div>
-              <label
-                className="block text-sm mb-2"
-                style={{ color: "var(--text-primary)" }}
-              >
-                Username
-              </label>
-              <input
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                placeholder="admin"
-                required
-                className="w-full px-4 py-3 rounded-lg border bg-white"
-                style={{
-                  borderColor: "var(--border-color)",
-                  transition: "var(--transition-smooth)",
-                }}
-              />
+          {/* Form */}
+          <form onSubmit={handleSubmit} className="auth-form">
+            <div className="form-group">
+              <label className="form-label">Email Address</label>
+              <div className="input-wrapper">
+                <Mail size={20} className="input-icon" />
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="admin@projectj.com"
+                  required
+                  className="form-input"
+                />
+              </div>
             </div>
 
-            <div>
-              <label
-                className="block text-sm mb-2"
-                style={{ color: "var(--text-primary)" }}
-              >
-                Password
-              </label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder={`\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022`}
-                required
-                className="w-full px-4 py-3 rounded-lg border bg-white"
-                style={{
-                  borderColor: "var(--border-color)",
-                  transition: "var(--transition-smooth)",
-                }}
-              />
+            <div className="form-group">
+              <label className="form-label">Password</label>
+              <div className="input-wrapper">
+                <Lock size={20} className="input-icon" />
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter your password"
+                  required
+                  className="form-input"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="password-toggle"
+                >
+                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
             </div>
-            <div className="text-right">
-            <button
-              type="button"
-              onClick={onForgotPassword}
-              style={{
-                color: "var(--color-plum)",
-                fontSize: "0.875rem",
-                textDecoration: "underline",
-                background: "none",
-                border: "none",
-                cursor: "pointer",
-                padding: 0,
-                      }}
-                          >
-                Forgot password?
+
+            <button type="submit" disabled={isLoading} className="auth-button">
+              {isLoading ? "Signing in..." : "Sign In"}
+              {!isLoading && <ArrowRight size={20} />}
+            </button>
+
+            <div className="auth-link">
+              <button type="button" onClick={onForgotPassword}>
+                Forgot your password?
               </button>
             </div>
-
-
-            <button
-              type="submit"
-              className="w-full py-3 rounded-lg flex items-center justify-center gap-2"
-              style={{
-                background:
-                  "linear-gradient(to right, var(--color-plum), var(--color-plum-light))",
-                color: "var(--color-white)",
-                transition: "var(--transition-smooth)",
-              }}
-            >
-              <ShieldCheck className="w-5 h-5" />
-              Login
-            </button>
           </form>
-        ) : (
-          // OTP Form
-          <form onSubmit={handleOtpSubmit} className="space-y-6">
-            <div className="flex justify-center mb-4">
-              <Mail
-                className="w-12 h-12"
-                style={{ color: "var(--color-plum-light)" }}
-              />
-            </div>
 
-            <div className="flex justify-center gap-2">
-              {otp.map((digit, index) => (
-                <input
-                  key={index}
-                  id={`otp-${index}`}
-                  type="text"
-                  inputMode="numeric"
-                  maxLength={1}
-                  value={digit}
-                  onChange={(e) => handleOtpChange(index, e.target.value)}
-                  onKeyDown={(e) => handleOtpKeyDown(index, e)}
-                  className="w-12 h-12 text-center rounded-lg border-2 bg-white"
-                  style={{
-                    borderColor: "var(--border-color)",
-                    transition: "var(--transition-smooth)",
-                  }}
-                  autoFocus={index === 0}
-                />
-              ))}
-            </div>
 
-            <button
-              type="submit"
-              className="w-full py-3 rounded-lg flex items-center justify-center gap-2"
-              style={{
-                background:
-                  "linear-gradient(to right, var(--color-plum), var(--color-plum-light))",
-                color: "var(--color-white)",
-                transition: "var(--transition-smooth)",
-              }}
-            >
-              <ShieldCheck className="w-5 h-5" />
-              Verify & Login
-            </button>
+        </div>
 
-            <button
-              type="button"
-              onClick={handleBackToCredentials}
-              className="w-full py-3 rounded-lg"
-              style={{
-                color: "var(--text-muted)",
-                backgroundColor: "var(--bg-secondary)",
-                transition: "var(--transition-smooth)",
-              }}
-            >
-              Back to Login
-            </button>
-          </form>
-        )}
-
-        {/* Demo Credentials Section */}
-        <div
-          className="mt-6 p-4 rounded-lg"
-          style={{ backgroundColor: "var(--bg-accent)" }}
-        >
-          <p className="text-xs mb-2" style={{ color: "var(--text-muted)" }}>
-            Demo Credentials:
-          </p>
-          <p className="text-xs" style={{ color: "var(--text-secondary)" }}>
-            Username: admin
-          </p>
-          <p className="text-xs" style={{ color: "var(--text-secondary)" }}>
-            Password: admin123
-          </p>
-          {step === "otp" && (
-            <p
-              className="text-xs mt-2"
-              style={{ color: "var(--text-secondary)" }}
-            >
-              OTP: {generatedOtp} (Check console)
-            </p>
-          )}
+        {/* Footer */}
+        <div className="auth-footer">
+          <p className="footer-text">© 2026 JEWELLERS PARADISE. ALL RIGHTS RESERVED.</p>
         </div>
       </div>
     </div>

@@ -4,14 +4,15 @@ import { PrismaService } from 'prisma/prisma.service';
 
 @Injectable()
 export class OfferImageService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async generateUploadSignature(offerId: string, vendorId: string) {
-    const offer = await this.prisma.offer.findUnique({
-      where: { id: offerId },
+    const id = parseInt(offerId);
+    const offer = await this.prisma.offers.findUnique({
+      where: { id },
     });
 
-    if (!offer || offer.vendorId !== vendorId || offer.status !== 'APPROVED') {
+    if (!offer || offer.vendor_id?.toString() !== vendorId || offer.status !== 'APPROVED') {
       throw new ForbiddenException('Image upload not allowed');
     }
 
@@ -35,12 +36,10 @@ export class OfferImageService {
   }
 
   async saveImage(offerId: string, url: string, publicId: string) {
-    return this.prisma.offerImage.create({
-      data: {
-        offerId,
-        url,
-        publicId,
-      },
+    // Update the offer poster_url since offerImage model is gone
+    return this.prisma.offers.update({
+      where: { id: parseInt(offerId) },
+      data: { poster_url: url },
     });
   }
 }

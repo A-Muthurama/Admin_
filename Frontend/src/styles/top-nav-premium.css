@@ -1,0 +1,169 @@
+/* Premium horizontal navbar - Reference Theme */
+@import url('https://fonts.googleapis.com/css2?family=Marcellus&family=Cormorant+Garamond:wght@600;700&display=swap');
+@import './variables.css';
+
+:root {
+    --navbar-height: 85px;
+    /* Slightly taller for the new logo scale */
+}
+
+.pj-header-container {
+    height: var(--navbar-height);
+    background-color: #ffffff;
+    /* Set to white to match the logo background */
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 5%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    border-bottom: 1px solid rgba(94, 22, 53, 0.08);
+    backdrop-filter: blur(10px);
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.pj-main-layout {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: calc(var(--navbar-height) + 40px) 40px 120px 40px;
+    animation: fadeInPage 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.pj-brand {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 10px 0;
+    transition: transform 0.2s ease;
+}
+
+.pj-brand:hover {
+    transform: scale(1.02);
+}
+
+.pj-logo-wrapper {
+    height: 55px;
+    display: flex;
+    align-items: center;
+    background: transparent;
+}
+
+.pj-logo-icon {
+    height: 100%;
+    width: auto;
+    object-fit: contain;
+    /* This makes the white background of the image transparent against a white/light bg */
+    mix-blend-mode: multiply;
+}
+
+.pj-brand-name {
+    font-family: 'Cormorant Garamond', serif;
+    /* Elegant high-contrast serif from image */
+    font-size: 28px;
+    /* Slightly larger for Garamond */
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    letter-spacing: 0.12em;
+    background: linear-gradient(135deg, #4C0F2D 0%, #d4af37 50%, #4C0F2D 100%);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.05);
+    animation: goldShine 6s linear infinite;
+    text-transform: uppercase;
+}
+
+@keyframes goldShine {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    100% {
+        background-position: 200% 50%;
+    }
+}
+
+.pj-nav-menu {
+    display: flex;
+    align-items: center;
+    gap: 40px;
+    background: transparent;
+    padding: 0;
+    border-radius: 0;
+}
+
+.pj-nav-link {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: #a39499;
+    /* Brighter grayish-plum for better visibility */
+    text-decoration: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 10px 0;
+    border-radius: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.pj-nav-link:hover {
+    color: var(--color-plum);
+}
+
+.pj-nav-link.active {
+    color: var(--color-plum);
+    background: transparent;
+    box-shadow: none;
+}
+
+.pj-nav-link.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background-color: var(--color-plum);
+}
+
+.pj-btn-action {
+    background: var(--color-plum);
+    color: #ffffff !important;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    padding: 14px 28px;
+    border-radius: 50px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 4px 12px rgba(76, 15, 45, 0.1);
+}
+
+.pj-btn-action:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(76, 15, 45, 0.2);
+    filter: brightness(1.1);
+}
+
+@keyframes fadeInPage {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
