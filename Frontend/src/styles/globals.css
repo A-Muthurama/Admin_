@@ -87,6 +87,12 @@
    TAILWIND THEME MAPPING
 ===================================================== */
 @theme inline {
+
+  --color-brand: var(--color-plum);
+  --color-brand-hover: var(--color-plum-light);
+  --color-brand-dark: var(--color-plum-dark);
+
+  --color-brand-foreground: #ffffff;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -147,10 +153,6 @@
   textarea,
   select {
     @apply bg-input-background text-foreground border-border;
-  }
-
-  button {
-    @apply text-foreground;
   }
 }
 
