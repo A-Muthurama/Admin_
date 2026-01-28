@@ -153,7 +153,7 @@ export interface ForgotPasswordVerifyResponse {
  */
 const API = axios.create({
   baseURL:
-    import.meta.env.VITE_ADMIN_API_BASE_URL ?? "http://localhost:4000",
+    "https://admin-api.jewellersparadise.com",
 });
 
 /**
