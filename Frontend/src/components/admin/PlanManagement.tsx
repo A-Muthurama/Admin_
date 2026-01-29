@@ -3,7 +3,7 @@ import { SubscriptionPlan } from '../../types';
 import { Edit2, Save, X } from 'lucide-react';
 import "../../styles/plan-management.css";
 
-const API_BASE_URL = 'http://localhost:4000';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
 
 export function PlanManagement() {
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
