@@ -21,6 +21,15 @@ export type BackendRole = "ADMIN" | "VENDOR_PENDING" | "VENDOR_APPROVED";
 export type BackendOfferStatus = "PENDING" | "APPROVED" | "REJECTED";
 export type BackendMediaStatus = "PENDING" | "APPROVED" | "REJECTED";
 export type BackendVendorStatus = "PENDING" | "APPROVED" | "REJECTED";
+export type BackendPlanStatus = "ACTIVE" | "INACTIVE";
+
+export interface SubscriptionPlan {
+  id: string;
+  name: string;
+  price: number;
+  posts: number;
+  months: number;
+}
 
 export interface AdminLoginRequest {
   email: string;
@@ -297,6 +306,34 @@ export const approveOffer = (offerId: string) =>
  */
 export const rejectOffer = (offerId: string, reason: string) =>
   API.patch<MessageResponse>(`/admin/offers/${offerId}/reject`, { reason });
+
+/* ======================================================
+   PLAN MANAGEMENT APIs
+   ====================================================== */
+
+/**
+ * Get all subscription plans
+ */
+export const getAllPlans = () =>
+  API.get<{ success: boolean; data: SubscriptionPlan[] }>("/plans");
+
+/**
+ * Create a new plan
+ */
+export const createPlan = (data: Omit<SubscriptionPlan, "id">) =>
+  API.post<{ success: boolean; data: SubscriptionPlan }>("/plans", data);
+
+/**
+ * Update an existing plan
+ */
+export const updatePlan = (id: string, data: Partial<SubscriptionPlan>) =>
+  API.patch<{ success: boolean; data: SubscriptionPlan }>(`/plans/${id}`, data);
+
+/**
+ * Delete a plan
+ */
+export const deletePlan = (id: string) =>
+  API.delete<{ success: boolean }>(`/plans/${id}`);
 
 /* ======================================================
    EXPORT AXIOS INSTANCE (optional)

@@ -1,13 +1,7 @@
 import { useState, useEffect } from 'react';
-import { SubscriptionPlan } from '../../types';
+import { SubscriptionPlan, getAllPlans, createPlan, updatePlan, deletePlan } from '../../api/api';
 import { Edit2, Save, X, Plus, Trash2 } from 'lucide-react';
 import "../../styles/plan-management.css";
-
-// Fallback to production URL if env var is missing, then localhost
-const PROD_API = 'https://jewellery-backend.onrender.com';
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
-
-console.log(' API_BASE_URL:', API_BASE_URL); // Debug log
 
 export function PlanManagement() {
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
@@ -29,16 +23,16 @@ export function PlanManagement() {
   const fetchPlans = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${API_BASE_URL}/plans`);
-      const result = await response.json();
+      const result = await getAllPlans();
+      const plansData = result.data;
 
-      if (result.success && Array.isArray(result.data)) {
-        if (result.data.length === 0) {
+      if (plansData.success && Array.isArray(plansData.data)) {
+        if (plansData.data.length === 0) {
           console.log('ℹ️ No plans found in database.');
           setPlans([]);
         } else {
           // Map database plans to frontend format
-          const mappedPlans = result.data.map((plan: any) => ({
+          const mappedPlans = plansData.data.map((plan: any) => ({
             id: plan.id.toString(),
             name: plan.name,
             price: plan.price,
@@ -48,13 +42,11 @@ export function PlanManagement() {
           setPlans(mappedPlans);
         }
       } else {
-        console.error('❌ Failed to fetch plans:', result.message);
+        console.error('❌ Failed to fetch plans:', plansData.success ? 'No data' : 'Server error');
         setPlans([]);
       }
     } catch (error) {
       console.error('❌ Error fetching plans:', error);
-      // Don't use defaults on error, show what we have (likely empty)
-      // unless we want to keep existing plans if this was a refresh
       alert('Could not fetch plans from server. Please check if the backend is running.');
     } finally {
       setLoading(false);
@@ -74,51 +66,39 @@ export function PlanManagement() {
     console.log('🆕 Is new plan?', isNewPlan);
 
     try {
-      let response;
+      let result;
       if (isNewPlan) {
         // CREATE (POST)
         console.log('📤 Sending POST request to create plan...');
-        response = await fetch(`${API_BASE_URL}/plans`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            name: editValues.name,
-            price: editValues.price,
-            posts: editValues.posts,
-            months: editValues.months,
-          }),
+        result = await createPlan({
+          name: editValues.name,
+          price: editValues.price,
+          posts: editValues.posts,
+          months: editValues.months,
         });
       } else {
         // UPDATE (PATCH)
         console.log(`📤 Sending PATCH request to update plan ${planId}...`);
-        response = await fetch(`${API_BASE_URL}/plans/${planId}`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            name: editValues.name,
-            price: editValues.price,
-            posts: editValues.posts,
-            months: editValues.months,
-          }),
+        result = await updatePlan(planId, {
+          name: editValues.name,
+          price: editValues.price,
+          posts: editValues.posts,
+          months: editValues.months,
         });
       }
 
-      const result = await response.json();
-      console.log('📡 API Response:', result);
+      const plansData = result.data;
+      console.log('📡 API Response:', plansData);
 
-      if (result.success) {
+      if (plansData.success) {
         // Refresh plans from server to get correct IDs and updated timestamps
         console.log('✅ Plan saved successfully, refreshing list...');
         await fetchPlans();
         setEditingPlan(null);
         alert(isNewPlan ? 'Plan created successfully!' : 'Plan updated successfully!');
       } else {
-        console.error('❌ Server error detail:', result.error || result.message);
-        alert('Failed to save plan: ' + (result.message || result.error || 'Check console for details'));
-
-        // Don't update local state here if server call failed, 
-        // because fetchPlans hasn't been called and we want the user to stay in edit mode
-        // but we should probably keep the values they typed.
+        console.error('❌ Server error detail:', (plansData as any).error || (plansData as any).message);
+        alert('Failed to save plan: ' + ((plansData as any).message || (plansData as any).error || 'Check console for details'));
       }
 
     } catch (error) {
@@ -143,17 +123,15 @@ export function PlanManagement() {
     }
 
     try {
-      const response = await fetch(`${API_BASE_URL}/plans/${planId}`, {
-        method: 'DELETE',
-      });
-      const result = await response.json();
+      const result = await deletePlan(planId);
+      const plansData = result.data;
 
-      if (result.success) {
+      if (plansData.success) {
         setPlans(plans.filter(p => p.id !== planId));
         alert('Plan deleted successfully');
       } else {
-        console.error('❌ Server delete error:', result);
-        alert('Failed to delete plan: ' + (result.message || result.error || 'Unknown error'));
+        console.error('❌ Server delete error:', plansData);
+        alert('Failed to delete plan: ' + ((plansData as any).message || (plansData as any).error || 'Unknown error'));
       }
     } catch (error) {
       console.error('❌ Error deleting plan:', error);
