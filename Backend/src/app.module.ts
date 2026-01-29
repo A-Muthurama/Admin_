@@ -10,6 +10,7 @@ import { OfferModule } from './offer/offer.module';
 import { UserModule } from './user/user.module';
 import { SyncModule } from './sync/sync.module';
 import { InternalModule } from './internal/internal.module';
+import { PlansModule } from './plans/plans.module';
 
 @Module({
   imports: [
@@ -24,9 +25,10 @@ import { InternalModule } from './internal/internal.module';
     UserModule,
     SyncModule,
     InternalModule,
+    PlansModule,
     // other modules
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule { }

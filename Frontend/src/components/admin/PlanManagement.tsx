@@ -1,11 +1,13 @@
-import { useState } from 'react';
-import { subscriptionPlans } from '../../data/mockData';
+import { useState, useEffect } from 'react';
 import { SubscriptionPlan } from '../../types';
-import { Edit2, Save, X, Bookmark } from 'lucide-react';
+import { Edit2, Save, X } from 'lucide-react';
 import "../../styles/plan-management.css";
 
+const API_BASE_URL = 'http://localhost:4000';
+
 export function PlanManagement() {
-  const [plans, setPlans] = useState(subscriptionPlans);
+  const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
+  const [loading, setLoading] = useState(true);
   const [editingPlan, setEditingPlan] = useState<string | null>(null);
   const [editValues, setEditValues] = useState<{ price: number; posts: number; months: number }>({
     price: 0,
@@ -13,23 +15,87 @@ export function PlanManagement() {
     months: 1
   });
 
+  // Fetch plans from database on component mount
+  useEffect(() => {
+    fetchPlans();
+  }, []);
+
+  const fetchPlans = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(`${API_BASE_URL}/plans`);
+      const result = await response.json();
+
+      if (result.success) {
+        // Map database plans to frontend format
+        const mappedPlans = result.data.map((plan: any) => ({
+          id: plan.id.toString(),
+          name: plan.name,
+          price: plan.price,
+          posts: plan.posts,
+          months: plan.months
+        }));
+        setPlans(mappedPlans);
+      }
+    } catch (error) {
+      console.error('Error fetching plans:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleEdit = (plan: SubscriptionPlan) => {
     setEditingPlan(plan.id);
     setEditValues({ price: plan.price, posts: plan.posts, months: plan.months });
   };
 
-  const handleSave = (planId: string) => {
-    setPlans(plans.map(p =>
-      p.id === planId
-        ? { ...p, price: editValues.price, posts: editValues.posts, months: editValues.months }
-        : p
-    ));
-    setEditingPlan(null);
+  const handleSave = async (planId: string) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/plans/${planId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          price: editValues.price,
+          posts: editValues.posts,
+          months: editValues.months,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        // Update local state with saved values
+        setPlans(plans.map(p =>
+          p.id === planId
+            ? { ...p, price: editValues.price, posts: editValues.posts, months: editValues.months }
+            : p
+        ));
+        setEditingPlan(null);
+        alert('Plan updated successfully!');
+      } else {
+        alert('Failed to update plan: ' + result.message);
+      }
+    } catch (error) {
+      console.error('Error updating plan:', error);
+      alert('Error updating plan. Please try again.');
+    }
   };
 
   const handleCancel = () => {
     setEditingPlan(null);
   };
+
+  if (loading) {
+    return (
+      <div className="pm-container">
+        <div className="pm-header-card">
+          <p>Loading plans...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="pm-container">

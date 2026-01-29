@@ -105,6 +105,16 @@ model AdminPasswordReset {
   @@index([adminId, createdAt])
 }
 
+model plans {
+  id         Int      @id @default(autoincrement())
+  name       String   @db.VarChar(50)
+  price      Int
+  posts      Int
+  months     Int
+  created_at DateTime @default(now()) @db.Timestamp(6)
+  updated_at DateTime @updatedAt @db.Timestamp(6)
+}
+
 enum OfferStatus {
   PENDING
   APPROVED
