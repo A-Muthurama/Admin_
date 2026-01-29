@@ -1,4 +1,4 @@
-import { Controller, Get, Patch, Param, UseGuards, Body } from '@nestjs/common';
+import { Controller, Get, Patch, Param, UseGuards, Body, Delete } from '@nestjs/common';
 import { AdminService } from './admin.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
@@ -56,5 +56,15 @@ export class AdminController {
   @Get('vendors/:vendorId/kyc')
   getVendorKyc(@Param('vendorId') vendorId: string) {
     return this.adminService.getVendorKyc(vendorId);
+  }
+
+  @Delete('vendors/:userId')
+  deleteVendor(@Param('userId') userId: string) {
+    return this.adminService.deleteVendor(userId);
+  }
+
+  @Delete('offers/:offerId')
+  deleteOffer(@Param('offerId') offerId: string) {
+    return this.adminService.deleteOffer(offerId);
   }
 }

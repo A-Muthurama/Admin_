@@ -335,6 +335,18 @@ export const updatePlan = (id: string, data: Partial<SubscriptionPlan>) =>
 export const deletePlan = (id: string) =>
   API.delete<{ success: boolean }>(`/plans/${id}`);
 
+/**
+ * Delete a vendor
+ */
+export const deleteVendor = (userId: string) =>
+  API.delete<MessageResponse>(`/admin/vendors/${userId}`);
+
+/**
+ * Delete an offer
+ */
+export const deleteOffer = (offerId: string) =>
+  API.delete<MessageResponse>(`/admin/offers/${offerId}`);
+
 /* ======================================================
    EXPORT AXIOS INSTANCE (optional)
    ====================================================== */

@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState } from "react";
-import { ArrowLeft, CheckCircle, XCircle, ShoppingBag, Store, ChevronRight, Maximize2, X, MapPin, Calendar, Tag, PlayCircle, User, Phone, Hash, ExternalLink } from "lucide-react";
-import { AdminOfferDetails, approveOffer, getOfferDetails, rejectOffer } from "../../api/api";
+import { ArrowLeft, CheckCircle, XCircle, ShoppingBag, Store, ChevronRight, Maximize2, X, MapPin, Calendar, Tag, PlayCircle, User, Phone, Hash, ExternalLink, Trash2 } from "lucide-react";
+import { AdminOfferDetails, approveOffer, getOfferDetails, rejectOffer, deleteOffer } from "../../api/api";
 import "../../styles/offer-details.css";
 
 interface OfferDetailsPageProps {
@@ -89,7 +89,21 @@ export function OfferDetailsPage({ offerId, onBack, onStatusChange }: OfferDetai
         }
     };
 
+    const handleRemove = async () => {
+        if (!window.confirm("Are you sure you want to remove this offer? This action cannot be undone.")) return;
+        setActionLoading(true);
+        try {
+            await deleteOffer(offerId);
+            onBack(); // Go back to list after deletion
+        } catch {
+            alert("Failed to delete offer.");
+        } finally {
+            setActionLoading(false);
+        }
+    };
+
     const isPending = details?.status === 'PENDING';
+    const isApproved = details?.status === 'APPROVED';
     const activeMedia = details?.images[activeMediaIndex];
     const isVideo = activeMedia ? /\.(mp4|webm|ogg|mov)$/i.test(activeMedia.url) : false;
 
@@ -359,6 +373,31 @@ export function OfferDetailsPage({ offerId, onBack, onStatusChange }: OfferDetai
                                             </div>
                                         </div>
                                     )}
+                                </div>
+                            )}
+                            {isApproved && (
+                                <div className="od-action-panel">
+                                    <div className="od-action-title" style={{ color: '#ef4444' }}>
+                                        Manage Offer
+                                    </div>
+                                    <div className="od-action-btn-group">
+                                        <button
+                                            onClick={handleRemove}
+                                            disabled={actionLoading}
+                                            className="od-btn"
+                                            style={{
+                                                backgroundColor: '#fee2e2',
+                                                color: '#ef4444',
+                                                border: '1px solid #fecaca',
+                                                flex: 1
+                                            }}
+                                        >
+                                            <Trash2 size={16} /> Remove Offer
+                                        </button>
+                                    </div>
+                                    <p className="text-xs text-gray-400 mt-2 text-center">
+                                        Removing this offer will permanently delete it from the system.
+                                    </p>
                                 </div>
                             )}
                         </div>

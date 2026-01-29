@@ -55,177 +55,229 @@
 /* Plan Card */
 .pm-card {
     background-color: var(--color-white);
-    border-radius: 16px;
-    border: 1px solid var(--border-color);
-    padding: 24px;
+    border-radius: 20px;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    padding: 32px 24px;
     display: flex;
     flex-direction: column;
-    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     position: relative;
     overflow: hidden;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
 }
 
 .pm-card:hover {
     transform: translateY(-8px);
-    box-shadow: var(--card-shadow-hover);
-    border-color: var(--color-gold-primary);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
 
-.pm-card:hover::before {
+.pm-card::before {
     content: '';
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
-    height: 6px;
-    background: linear-gradient(to right, var(--color-plum), var(--color-gold-primary));
+    height: 4px;
+    background: linear-gradient(90deg, #4C0F2D, #d4af37);
+    opacity: 0.8;
 }
 
 .pm-plan-name {
-    font-family: var(--font-heading);
-    font-size: 20px;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 24px;
     font-weight: 700;
-    color: var(--text-primary);
+    color: #1a1a1a;
     text-align: center;
-    margin-bottom: 16px;
+    margin-bottom: 24px;
+    letter-spacing: 0.02em;
 }
 
 /* Display Mode */
 .pm-price-display {
     text-align: center;
-    margin-bottom: 24px;
+    margin-bottom: 32px;
 }
 
 .pm-price-val {
-    font-size: 32px;
-    font-weight: 800;
-    color: var(--color-plum);
+    font-size: 42px;
+    font-weight: 700;
+    color: #4C0F2D;
+    font-family: 'Inter', sans-serif;
+    letter-spacing: -0.02em;
 }
 
 .pm-stats-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 12px;
-    margin-bottom: 24px;
+    gap: 16px;
+    margin-bottom: 32px;
 }
 
 .pm-stat-box {
-    background-color: var(--bg-tertiary);
-    border-radius: 8px;
-    padding: 12px;
+    background-color: #fcfcfc;
+    border-radius: 12px;
+    padding: 16px 8px;
     text-align: center;
+    border: 1px solid #f0f0f0;
+    transition: background-color 0.2s;
+}
+
+.pm-stat-box:hover {
+    background-color: #f8f8f8;
 }
 
 .pm-stat-num {
     font-weight: 700;
-    font-size: 18px;
-    color: var(--text-primary);
+    font-size: 20px;
+    color: #1a1a1a;
+    font-family: 'Inter', sans-serif;
 }
 
 .pm-stat-label {
-    font-size: 11px;
+    font-size: 10px;
     text-transform: uppercase;
-    color: var(--text-light);
+    color: #666;
     font-weight: 600;
-    margin-top: 2px;
+    margin-top: 4px;
+    letter-spacing: 0.05em;
 }
 
 .pm-btn-edit {
     width: 100%;
-    background-color: var(--bg-primary);
-    color: var(--color-plum);
-    border: 1px solid var(--border-color);
-    padding: 10px;
-    border-radius: 8px;
+    background-color: white;
+    color: #4C0F2D;
+    border: 1px solid #4C0F2D;
+    padding: 12px;
+    border-radius: 12px;
     font-weight: 600;
     cursor: pointer;
-    transition: var(--transition-fast);
+    transition: all 0.2s ease;
     display: flex;
-    /**/
     align-items: center;
     justify-content: center;
     gap: 8px;
+    font-size: 14px;
 }
 
 .pm-btn-edit:hover {
-    background-color: var(--color-plum);
+    background-color: #4C0F2D;
     color: white;
-    border-color: var(--color-plum);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(76, 15, 45, 0.15);
 }
 
 /* Edit Mode */
 .pm-edit-form {
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    margin-bottom: 20px;
+    gap: 16px;
+    margin-bottom: 24px;
 }
 
 .pm-input-group {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 6px;
 }
 
 .pm-label {
     font-size: 11px;
     font-weight: 700;
     text-transform: uppercase;
-    color: var(--text-muted);
+    color: #666;
+    margin-left: 4px;
 }
 
 .pm-input {
     width: 100%;
-    padding: 8px 12px;
-    border-radius: 6px;
-    border: 1px solid var(--border-color);
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid #e5e5e5;
     text-align: center;
     font-weight: 600;
-    color: var(--text-primary);
-    background-color: var(--bg-tertiary);
+    color: #1a1a1a;
+    background-color: white;
+    transition: all 0.2s;
 }
 
 .pm-input:focus {
     outline: none;
-    border-color: var(--color-plum);
-    background-color: white;
+    border-color: #4C0F2D;
+    box-shadow: 0 0 0 3px rgba(76, 15, 45, 0.05);
 }
 
 .pm-action-row {
     display: flex;
-    gap: 8px;
+    gap: 10px;
 }
 
-.pm-btn-save {
+.pm-btn-save:not(button[style]) {
+    /* Targeting the save button in the card, excluding the inline styled Add Plan button which we'll fix separately if needed, but actually I should update the JSX for Add Plan button class */
     flex: 1;
-    background-color: var(--color-success);
+    background: linear-gradient(135deg, #4C0F2D 0%, #721644 100%);
     color: white;
     border: none;
-    padding: 8px;
-    border-radius: 6px;
-    font-size: 13px;
+    padding: 10px;
+    border-radius: 10px;
+    font-size: 14px;
     font-weight: 600;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 4px;
+    gap: 6px;
+    transition: all 0.2s;
+}
+
+.pm-btn-save:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(76, 15, 45, 0.2);
+}
+
+.pm-btn-add {
+    background: linear-gradient(135deg, #4C0F2D 0%, #4C0F2D 100%);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 50px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(76, 15, 45, 0.15);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.pm-btn-add:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(76, 15, 45, 0.25);
+    filter: brightness(1.1);
 }
 
 .pm-btn-cancel {
     flex: 1;
-    background-color: var(--bg-secondary);
-    color: var(--text-muted);
+    background-color: #f5f5f5;
+    color: #666;
     border: none;
-    padding: 8px;
-    border-radius: 6px;
-    font-size: 13px;
+    padding: 10px;
+    border-radius: 10px;
+    font-size: 14px;
     font-weight: 600;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 4px;
+    gap: 6px;
+    transition: all 0.2s;
+}
+
+.pm-btn-cancel:hover {
+    background-color: #eeeeee;
+    color: #333;
 }
 
 /* Features Section */

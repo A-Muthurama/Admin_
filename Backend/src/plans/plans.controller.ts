@@ -1,5 +1,5 @@
-import { Controller, Get, Param, ParseIntPipe, Patch, Body } from '@nestjs/common';
-import { PlansService, UpdatePlanDto } from './plans.service';
+import { Controller, Get, Param, ParseIntPipe, Patch, Body, Post, Delete } from '@nestjs/common';
+import { PlansService, UpdatePlanDto, CreatePlanDto } from './plans.service';
 
 @Controller('plans')
 export class PlansController {
@@ -38,6 +38,28 @@ export class PlansController {
     }
 
     /**
+     * POST /plans
+     * Create a new plan
+     */
+    @Post()
+    async createPlan(@Body() createData: CreatePlanDto) {
+        try {
+            const newPlan = await this.plansService.createPlan(createData);
+            return {
+                success: true,
+                message: 'Plan created successfully',
+                data: newPlan,
+            };
+        } catch (error) {
+            return {
+                success: false,
+                message: 'Failed to create plan',
+                error: error.message,
+            };
+        }
+    }
+
+    /**
      * PATCH /plans/:id
      * Update a plan (Admin only)
      */
@@ -57,6 +79,27 @@ export class PlansController {
             return {
                 success: false,
                 message: 'Failed to update plan',
+                error: error.message,
+            };
+        }
+    }
+
+    /**
+     * DELETE /plans/:id
+     * Delete a plan
+     */
+    @Delete(':id')
+    async deletePlan(@Param('id', ParseIntPipe) id: number) {
+        try {
+            await this.plansService.deletePlan(id);
+            return {
+                success: true,
+                message: 'Plan deleted successfully',
+            };
+        } catch (error) {
+            return {
+                success: false,
+                message: 'Failed to delete plan',
                 error: error.message,
             };
         }

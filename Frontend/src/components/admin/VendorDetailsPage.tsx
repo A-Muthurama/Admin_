@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { ArrowLeft, CheckCircle, XCircle, Mail, Calendar, Shield, ExternalLink, Users, Briefcase, Maximize2, X, MapPin, Phone } from "lucide-react";
-import { VendorKycResponse, approveVendor, getVendorKyc, rejectVendor } from "../../api/api";
+import { ArrowLeft, CheckCircle, XCircle, Mail, Calendar, Shield, ExternalLink, Users, Briefcase, Maximize2, X, MapPin, Phone, Trash2 } from "lucide-react";
+import { VendorKycResponse, approveVendor, getVendorKyc, rejectVendor, deleteVendor } from "../../api/api";
 import "../../styles/vendor-details.css"; // Import the new CSS
 
 interface VendorDetailsPageProps {
@@ -62,10 +62,24 @@ export function VendorDetailsPage({ vendorId, onBack, onStatusChange }: VendorDe
         }
     };
 
+    const handleRemove = async () => {
+        if (!window.confirm("Are you sure you want to remove this vendor? This action cannot be undone and will delete all associated data.")) return;
+        setActionLoading(true);
+        try {
+            await deleteVendor(vendorId);
+            onBack(); // Go back to list
+        } catch {
+            alert("Failed to delete vendor.");
+        } finally {
+            setActionLoading(false);
+        }
+    };
+
     if (isLoading) return <div className="py-20 text-center text-gray-500">Loading vendor details...</div>;
     if (error || !kycDetails) return <div className="py-20 text-center text-red-500">{error || "Vendor not found"}</div>;
 
     const isPending = kycDetails.status === 'PENDING';
+    const isApproved = kycDetails.status === 'APPROVED';
 
     return (
         <div className="vd-container">
@@ -191,6 +205,36 @@ export function VendorDetailsPage({ vendorId, onBack, onStatusChange }: VendorDe
                             </div>
                         </div>
                     )}
+                </div>
+            )}
+
+            {isApproved && (
+                <div className="vd-action-panel" style={{ marginTop: '20px', borderColor: '#fecaca', background: '#fef2f2' }}>
+                    <div className="vd-action-header">
+                        <div className="vd-action-icon-circle" style={{ background: '#fee2e2', color: '#ef4444' }}>
+                            <Trash2 size={24} />
+                        </div>
+                        <div>
+                            <h3 className="vd-action-title" style={{ color: '#ef4444' }}>Manage Vendor</h3>
+                            <p className="vd-action-desc" style={{ color: '#b91c1c' }}>Removing this vendor will permanently delete their account and all associated offers.</p>
+                        </div>
+                    </div>
+                    <div className="vd-btn-group">
+                        <button
+                            onClick={handleRemove}
+                            disabled={actionLoading}
+                            className="vd-btn"
+                            style={{
+                                backgroundColor: '#fee2e2',
+                                color: '#ef4444',
+                                border: '1px solid #fecaca',
+                                justifyContent: 'center',
+                                fontWeight: 600
+                            }}
+                        >
+                            <Trash2 size={18} /> Remove Vendor
+                        </button>
+                    </div>
                 </div>
             )}
 

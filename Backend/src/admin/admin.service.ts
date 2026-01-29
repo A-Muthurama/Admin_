@@ -338,4 +338,32 @@ export class AdminService {
       },
     };
   }
+
+  /* ===================== DELETE ===================== */
+
+  async deleteVendor(userId: string) {
+    const id = parseInt(userId);
+    try {
+      await this.prisma.vendors.delete({
+        where: { id },
+      });
+      return { message: 'Vendor deleted successfully' };
+    } catch (err) {
+      this.logger.error(`Failed to delete vendor ${id}: ${err.message}`);
+      throw new NotFoundException('Vendor not found or could not be deleted');
+    }
+  }
+
+  async deleteOffer(offerId: string) {
+    const id = parseInt(offerId);
+    try {
+      await this.prisma.offers.delete({
+        where: { id },
+      });
+      return { message: 'Offer deleted successfully' };
+    } catch (err) {
+      this.logger.error(`Failed to delete offer ${id}: ${err.message}`);
+      throw new NotFoundException('Offer not found or could not be deleted');
+    }
+  }
 }
