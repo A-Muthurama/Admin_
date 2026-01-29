@@ -5,13 +5,22 @@ import { AppModule } from './app.module';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  const allowedOrigins = [
+    'http://localhost:5173',
+    'http://localhost:3001',
+    'https://admin.jewellersparadise.com',
+    'https://admin-panel-projectj.vercel.app',
+    'https://jewellersparadise.com',
+  ];
+
   app.enableCors({
-    origin: [
-      'http://localhost:5173',
-      'http://localhost:3001',
-      'https://admin.jewellersparadise.com',
-      'https://admin-panel-projectj.vercel.app',
-    ],
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.some(o => origin.startsWith(o))) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
     credentials: true,
   });
 
