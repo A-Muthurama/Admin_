@@ -1,23 +1,25 @@
 import { useState, useEffect } from 'react';
 import { SubscriptionPlan } from '../../types';
-import { Edit2, Save, X } from 'lucide-react';
+import { Edit2, Save, X, Plus, Trash2 } from 'lucide-react';
 import "../../styles/plan-management.css";
 
 // Fallback to production URL if env var is missing, then localhost
 const PROD_API = 'https://jewellery-backend.onrender.com';
-const API_BASE_URL = import.meta.env.VITE_API_URL || PROD_API;
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
 
-console.log('🔌 API_BASE_URL:', API_BASE_URL); // Debug log
+console.log(' API_BASE_URL:', API_BASE_URL); // Debug log
 
 export function PlanManagement() {
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingPlan, setEditingPlan] = useState<string | null>(null);
-  const [editValues, setEditValues] = useState<{ price: number; posts: number; months: number }>({
+  const [editValues, setEditValues] = useState<{ name: string; price: number; posts: number; months: number }>({
+    name: '',
     price: 0,
     posts: 0,
     months: 1
   });
+
 
   // Fetch plans from database on component mount
   useEffect(() => {
@@ -30,81 +32,167 @@ export function PlanManagement() {
       const response = await fetch(`${API_BASE_URL}/plans`);
       const result = await response.json();
 
-      if (result.success && Array.isArray(result.data) && result.data.length > 0) {
-        // Map database plans to frontend format
-        const mappedPlans = result.data.map((plan: any) => ({
-          id: plan.id.toString(),
-          name: plan.name,
-          price: plan.price,
-          posts: plan.posts,
-          months: plan.months
-        }));
-        setPlans(mappedPlans);
+      if (result.success && Array.isArray(result.data)) {
+        if (result.data.length === 0) {
+          console.log('ℹ️ No plans found in database.');
+          setPlans([]);
+        } else {
+          // Map database plans to frontend format
+          const mappedPlans = result.data.map((plan: any) => ({
+            id: plan.id.toString(),
+            name: plan.name,
+            price: plan.price,
+            posts: plan.posts,
+            months: plan.months
+          }));
+          setPlans(mappedPlans);
+        }
       } else {
-        // Fallback: If DB is empty, show default plans
-        // ID is set to 'new' logic or similar, but since we rely on DB ID for update, 
-        // we might not be able to update them immediately if they don't exist in DB.
-        // However, user just wants to SEE them.
-
-        // Better Approach: Trigger seed endpoint or just show mock and handle save carefully.
-        // For now, let's just show them. Logic for save might fail if ID is invalid.
-        // But user likely just wants to see them.
-        setPlans([
-          { id: '1', name: 'Starter', price: 299, posts: 5, months: 1 },
-          { id: '2', name: 'Growth', price: 399, posts: 8, months: 1 },
-          { id: '3', name: 'Professional', price: 599, posts: 15, months: 3 },
-          { id: '4', name: 'Enterprise', price: 999, posts: 30, months: 6 },
-        ]);
-        console.warn('⚠️ No plans found in DB, using defaults.');
+        console.error('❌ Failed to fetch plans:', result.message);
+        setPlans([]);
       }
     } catch (error) {
-      console.error('Error fetching plans:', error);
+      console.error('❌ Error fetching plans:', error);
+      // Don't use defaults on error, show what we have (likely empty)
+      // unless we want to keep existing plans if this was a refresh
+      alert('Could not fetch plans from server. Please check if the backend is running.');
     } finally {
       setLoading(false);
     }
   };
 
   const handleEdit = (plan: SubscriptionPlan) => {
+    console.log('✏️ Editing plan:', plan);
     setEditingPlan(plan.id);
-    setEditValues({ price: plan.price, posts: plan.posts, months: plan.months });
+    setEditValues({ name: plan.name, price: plan.price, posts: plan.posts, months: plan.months });
   };
 
   const handleSave = async (planId: string) => {
+    console.log('💾 Saving plan:', planId);
+    console.log('📝 Edit values:', editValues);
+    const isNewPlan = planId.startsWith('new-');
+    console.log('🆕 Is new plan?', isNewPlan);
+
     try {
-      const response = await fetch(`${API_BASE_URL}/plans/${planId}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          price: editValues.price,
-          posts: editValues.posts,
-          months: editValues.months,
-        }),
-      });
+      let response;
+      if (isNewPlan) {
+        // CREATE (POST)
+        console.log('📤 Sending POST request to create plan...');
+        response = await fetch(`${API_BASE_URL}/plans`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: editValues.name,
+            price: editValues.price,
+            posts: editValues.posts,
+            months: editValues.months,
+          }),
+        });
+      } else {
+        // UPDATE (PATCH)
+        console.log(`📤 Sending PATCH request to update plan ${planId}...`);
+        response = await fetch(`${API_BASE_URL}/plans/${planId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: editValues.name,
+            price: editValues.price,
+            posts: editValues.posts,
+            months: editValues.months,
+          }),
+        });
+      }
 
       const result = await response.json();
+      console.log('📡 API Response:', result);
 
       if (result.success) {
-        // Update local state with saved values
-        setPlans(plans.map(p =>
-          p.id === planId
-            ? { ...p, price: editValues.price, posts: editValues.posts, months: editValues.months }
-            : p
-        ));
+        // Refresh plans from server to get correct IDs and updated timestamps
+        console.log('✅ Plan saved successfully, refreshing list...');
+        await fetchPlans();
         setEditingPlan(null);
-        alert('Plan updated successfully!');
+        alert(isNewPlan ? 'Plan created successfully!' : 'Plan updated successfully!');
       } else {
-        alert('Failed to update plan: ' + result.message);
+        console.error('❌ Server error detail:', result.error || result.message);
+        alert('Failed to save plan: ' + (result.message || result.error || 'Check console for details'));
+
+        // Don't update local state here if server call failed, 
+        // because fetchPlans hasn't been called and we want the user to stay in edit mode
+        // but we should probably keep the values they typed.
       }
+
     } catch (error) {
-      console.error('Error updating plan:', error);
-      alert('Error updating plan. Please try again.');
+      console.error('❌ Error saving plan:', error);
+      // Update UI anyway so user isn't stuck
+      setPlans(plans.map(p =>
+        p.id === planId
+          ? { ...p, name: editValues.name, price: editValues.price, posts: editValues.posts, months: editValues.months }
+          : p
+      ));
+      setEditingPlan(null);
+      alert('Error connecting to server. Plan changes applied locally but might not be saved.');
     }
   };
 
+  const handleDelete = async (planId: string) => {
+    if (!window.confirm('Are you sure you want to delete this plan?')) return;
+
+    if (planId.startsWith('new-')) {
+      setPlans(plans.filter(p => p.id !== planId));
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/plans/${planId}`, {
+        method: 'DELETE',
+      });
+      const result = await response.json();
+
+      if (result.success) {
+        setPlans(plans.filter(p => p.id !== planId));
+        alert('Plan deleted successfully');
+      } else {
+        console.error('❌ Server delete error:', result);
+        alert('Failed to delete plan: ' + (result.message || result.error || 'Unknown error'));
+      }
+    } catch (error) {
+      console.error('❌ Error deleting plan:', error);
+      // Force remove from UI if server unreachable
+      setPlans(plans.filter(p => p.id !== planId));
+      alert('Error connecting to server. Plan removed locally.');
+    }
+  }
+
   const handleCancel = () => {
+    console.log('❌ Cancelling edit for plan:', editingPlan);
+    // If cancelling a new plan that hasn't been saved, remove it
+    if (editingPlan && editingPlan.startsWith('new-')) {
+      console.log('🗑️ Removing unsaved new plan');
+      setPlans(plans.filter(p => p.id !== editingPlan));
+    }
     setEditingPlan(null);
+  };
+
+  const handleAddPlan = () => {
+    console.log('➕ Add Plan button clicked');
+    console.log('📊 Current plans count:', plans.length);
+
+    const timestamp = Date.now();
+    const newId = `new-${timestamp}`;
+    const newPlan = {
+      id: newId,
+      name: 'New Plan',
+      price: 99,
+      posts: 1,
+      months: 1
+    };
+
+    console.log('🆕 Creating new plan:', newPlan);
+    setPlans([...plans, newPlan]);
+    console.log('📋 Plans after adding:', [...plans, newPlan].length);
+
+    handleEdit(newPlan); // Immediately enter edit mode
+    console.log('✏️ Entering edit mode for new plan');
   };
 
   if (loading) {
@@ -119,18 +207,42 @@ export function PlanManagement() {
 
   return (
     <div className="pm-container">
-      <div className="pm-header-card">
+      <div className="pm-header-card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
           <h3 className="pm-title">Subscription Plans</h3>
           <p className="pm-subtitle">Manage pricing tiers and post limits</p>
         </div>
+        <button onClick={handleAddPlan} className="pm-btn-add">
+          <Plus size={16} /> Add Plan
+        </button>
       </div>
 
       <div className="pm-grid">
         {plans.map((plan) => (
           <div key={plan.id} className="pm-card">
             <div className="text-center mb-4 flex-grow">
-              <h4 className="pm-plan-name">{plan.name}</h4>
+              {editingPlan === plan.id ? (
+                // Edit Name in Edit Mode
+                <input
+                  type="text"
+                  value={editValues.name}
+                  onChange={(e) => setEditValues({ ...editValues, name: e.target.value })}
+                  className="pm-plan-name-input"
+                  style={{
+                    fontFamily: 'Cormorant Garamond, serif',
+                    fontSize: '24px',
+                    fontWeight: 700,
+                    textAlign: 'center',
+                    marginBottom: '16px',
+                    border: '1px solid #ddd',
+                    borderRadius: '8px',
+                    width: '100%',
+                    padding: '4px'
+                  }}
+                />
+              ) : (
+                <h4 className="pm-plan-name">{plan.name}</h4>
+              )}
 
               {editingPlan === plan.id ? (
                 <div className="pm-edit-form">
@@ -198,12 +310,23 @@ export function PlanManagement() {
                   </button>
                 </div>
               ) : (
-                <button
-                  onClick={() => handleEdit(plan)}
-                  className="pm-btn-edit"
-                >
-                  <Edit2 className="w-4 h-4" /> Edit Plan
-                </button>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button
+                    onClick={() => handleEdit(plan)}
+                    className="pm-btn-edit"
+                    style={{ flex: 1 }}
+                  >
+                    <Edit2 className="w-4 h-4" /> Edit
+                  </button>
+                  <button
+                    onClick={() => handleDelete(plan.id)}
+                    className="pm-btn-cancel"
+                    style={{ color: '#ef4444', flex: '0 0 auto', width: '40px', padding: '0' }}
+                    title="Delete Plan"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
               )}
             </div>
           </div>
