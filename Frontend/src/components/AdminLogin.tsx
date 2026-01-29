@@ -44,8 +44,8 @@ export function AdminLogin({ onLogin, onForgotPassword }: AdminLoginProps) {
         </div>
 
         <nav className="pj-nav-menu">
-          <button className="pj-nav-link active">HOME</button>
-          <button className="pj-nav-link">OFFERS</button>
+          <a href="https://jewellersparadise.com/" className="pj-nav-link active">HOME</a>
+          <a href="https://www.jewellersparadise.com/offers" className="pj-nav-link">OFFERS</a>
         </nav>
 
         <div style={{ width: '120px' }}></div>
