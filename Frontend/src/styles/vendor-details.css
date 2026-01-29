@@ -230,10 +230,6 @@
     transform: scale(1.1);
 }
 
-/* Vendor Details CSS */
-@import './variables.css';
-
-/* ... previous CSS ... */
 
 .vd-doc-overlay {
     position: absolute;
