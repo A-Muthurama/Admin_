@@ -12,7 +12,7 @@ async function bootstrap() {
       'http://localhost:5173',
       'http://localhost:3001',
       'https://admin.jewellersparadise.com',
-      'https://admin-panel-projectj.vercel.app',
+      'https://admin-api.jewellersparadise.com',
       'https://jewellersparadise.com',
     ],
     credentials: true,

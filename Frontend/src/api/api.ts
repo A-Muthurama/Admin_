@@ -164,7 +164,7 @@ const API = axios.create({
   baseURL:
     import.meta.env.VITE_API_URL ||
     import.meta.env.VITE_ADMIN_API_BASE_URL ||
-    "https://api.jewellersparadise.com",
+    "https://admin-api.jewellersparadise.com",
 });
 
 /**
