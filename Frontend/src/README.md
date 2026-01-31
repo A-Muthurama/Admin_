@@ -1,10 +1,10 @@
-# 🏆 JewelDeals Admin Panel
+# 🏆 Jewellers Paradise Admin Panel
 
-A premium admin control panel for managing the JewelDeals jewellery marketplace platform.
+A premium admin control panel for managing the Jewellers Paradise jewellery marketplace platform.
 
 ## 🎯 Overview
 
-This is a standalone admin panel application for managing vendors, offers, subscription plans, and locations in the JewelDeals marketplace.
+This is a standalone admin panel application for managing vendors, offers, subscription plans, and locations in the Jewellers Paradise marketplace.
 
 ## ✨ Features
 
@@ -124,7 +124,7 @@ jeweldeals-admin/
 Create a `.env` file in the root directory:
 
 ```env
-VITE_APP_NAME=JewelDeals Admin
+VITE_APP_NAME=Jewellers Paradise Admin
 VITE_API_URL=your_api_url
 ```
 
@@ -278,7 +278,7 @@ npm install
 
 ## 📄 License
 
-Private - JewelDeals Marketplace Platform
+Private - Jewellers Paradise Marketplace Platform
 
 ## 👥 Support
 

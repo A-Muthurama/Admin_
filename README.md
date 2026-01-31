@@ -1,5 +1,5 @@
 
-  # Jewellery Offers Marketplace
+# 💎 Jewellers Paradise
 
   Run `npm i` to install the dependencies.
 

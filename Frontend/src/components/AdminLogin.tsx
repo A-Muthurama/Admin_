@@ -75,7 +75,7 @@ export function AdminLogin({ onLogin, onForgotPassword }: AdminLoginProps) {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="admin@projectj.com"
+                  placeholder="admin@jewellersparadise.com"
                   required
                   className="form-input"
                 />
