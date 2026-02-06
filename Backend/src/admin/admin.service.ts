@@ -91,13 +91,13 @@ export class AdminService {
     const daysCount = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
     // Convert to IST for storage (UTC + 5:30)
-    // We add the offset to the current UTC time so that the stored timestamp value 
-    // represents the IST wall-clock time.
     const istOffset = 5.5 * 60 * 60 * 1000;
     const approvedAtIST = new Date(now.getTime() + istOffset);
 
+    this.logger.log(`Approving vendor ${id}. CreatedAt: ${createdAt}, Now: ${now}, Days: ${daysCount}, ApprovedAtIST: ${approvedAtIST}`);
+
     // Update status to 'APPROVED'
-    await this.prisma.vendors.update({
+    const updatedVendor = await this.prisma.vendors.update({
       where: { id },
       data: {
         status: 'APPROVED',
@@ -105,6 +105,7 @@ export class AdminService {
         days_count: daysCount
       },
     });
+    this.logger.log(`Vendor ${id} updated. DB Result - ApprovedAt: ${updatedVendor.approved_at}, Days: ${updatedVendor.days_count}`);
 
     // Notify vendor
     if (vendor.email) {
