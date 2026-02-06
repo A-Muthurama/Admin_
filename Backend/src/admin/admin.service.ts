@@ -84,10 +84,26 @@ export class AdminService {
       throw new NotFoundException('Vendor not found');
     }
 
+    // Calculate days since creation
+    const now = new Date();
+    const createdAt = vendor.created_at || now;
+    const diffTime = Math.abs(now.getTime() - createdAt.getTime());
+    const daysCount = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    // Convert to IST for storage (UTC + 5:30)
+    // We add the offset to the current UTC time so that the stored timestamp value 
+    // represents the IST wall-clock time.
+    const istOffset = 5.5 * 60 * 60 * 1000;
+    const approvedAtIST = new Date(now.getTime() + istOffset);
+
     // Update status to 'APPROVED'
     await this.prisma.vendors.update({
       where: { id },
-      data: { status: 'APPROVED' },
+      data: {
+        status: 'APPROVED',
+        approved_at: approvedAtIST,
+        days_count: daysCount
+      },
     });
 
     // Notify vendor

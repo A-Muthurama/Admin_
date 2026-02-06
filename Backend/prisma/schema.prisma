@@ -78,6 +78,8 @@ model vendors {
   reset_password_token   String?
   reset_password_expires DateTime?       @db.Timestamp(6)
   profile_picture_url    String?
+  approved_at            DateTime?       @db.Timestamp(6)
+  days_count             Int?            @default(0)
   reasons                String?
   kyc_documents          kyc_documents[]
   offers                 offers[]

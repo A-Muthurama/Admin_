@@ -21,7 +21,7 @@ export class BrevoService {
   }) {
     const apiKey = process.env.BREVO_API_KEY;
     const senderEmail = process.env.BREVO_SENDER_EMAIL;
-    const senderName = process.env.BREVO_SENDER_NAME ?? 'Jewellery Admin';
+    const senderName = process.env.BREVO_SENDER_NAME ?? 'Jewellers Paradise Admin';
 
     if (!apiKey || !senderEmail) {
       this.logger.warn(
