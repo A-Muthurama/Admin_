@@ -134,8 +134,7 @@ export class AdminService {
     }
 
     // Update status to 'rejected'
-    // Note: 'rejectionReason' column might not exist in original table yet.
-    // If it exists, we save it. If not, we just update status.
+    // Note: 'rejectionReason' 
     await this.prisma.vendors.update({
       where: { id },
       data: {

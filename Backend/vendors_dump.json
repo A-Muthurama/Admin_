@@ -1,0 +1,44 @@
+[
+  {
+    "id": 12,
+    "shop_name": "xyxxxx",
+    "status": "pending",
+    "rejection_reason": null
+  },
+  {
+    "id": 11,
+    "shop_name": "Joy Alukkas",
+    "status": "APPROVED",
+    "rejection_reason": null
+  },
+  {
+    "id": 10,
+    "shop_name": "Fbjrjrh",
+    "status": "pending",
+    "rejection_reason": null
+  },
+  {
+    "id": 7,
+    "shop_name": "GRT Jewellery",
+    "status": "pending",
+    "rejection_reason": null
+  },
+  {
+    "id": 3,
+    "shop_name": "Tanshiq",
+    "status": "APPROVED",
+    "rejection_reason": null
+  },
+  {
+    "id": 2,
+    "shop_name": "Kalyan jewellers",
+    "status": "APPROVED",
+    "rejection_reason": null
+  },
+  {
+    "id": 1,
+    "shop_name": "Malabar Gold",
+    "status": "APPROVED",
+    "rejection_reason": null
+  }
+]
