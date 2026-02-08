@@ -138,7 +138,10 @@ export class AdminService {
     // If it exists, we save it. If not, we just update status.
     await this.prisma.vendors.update({
       where: { id },
-      data: { status: 'rejected' },
+      data: {
+        status: 'REJECTED',
+        rejection_reason: reason,
+      },
     });
 
     return { message: 'Vendor rejected successfully' };
