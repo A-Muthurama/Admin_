@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { LogOut, Diamond } from "lucide-react";
+import { LogOut, Menu, X } from "lucide-react";
 import { VendorManagement } from "./admin/VendorManagement";
 import { OfferManagement } from "./admin/OfferManagement";
 import { LocationManagement } from "./admin/LocationManagement";
@@ -22,6 +22,7 @@ export function AdminDashboard({ onLogout }: AdminDashboardProps) {
   const [viewingVendorId, setViewingVendorId] = useState<string | null>(null);
   const [viewingOfferId, setViewingOfferId] = useState<string | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // Sync state with URL on Load and on Browser Back/Forward
   useEffect(() => {
@@ -76,6 +77,7 @@ export function AdminDashboard({ onLogout }: AdminDashboardProps) {
     setActiveTab(item.id);
     setViewingVendorId(null);
     setViewingOfferId(null);
+    setIsMobileMenuOpen(false);
     window.history.pushState({ tab: item.id }, '', item.path);
   };
 
@@ -98,13 +100,14 @@ export function AdminDashboard({ onLogout }: AdminDashboardProps) {
   return (
     <div className="w-full">
       {/* Dashboard Header - Always Visible */}
-      <header className="pj-header-container">
+      <header className={`pj-header-container ${isMobileMenuOpen ? 'menu-open' : ''}`}>
         <div
           className="pj-brand"
           onClick={() => {
             setActiveTab('vendors');
             setViewingVendorId(null);
             setViewingOfferId(null);
+            setIsMobileMenuOpen(false);
             window.history.pushState({ tab: 'vendors' }, '', '/vendors');
           }}
           style={{ cursor: 'pointer' }}
@@ -115,7 +118,15 @@ export function AdminDashboard({ onLogout }: AdminDashboardProps) {
           <span className="pj-brand-name">JEWELLERS PARADISE</span>
         </div>
 
-        <nav className="pj-nav-menu">
+        {/* Hamburger Icon */}
+        <button
+          className="pj-mobile-toggle"
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+        >
+          {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+        </button>
+
+        <nav className={`pj-nav-menu ${isMobileMenuOpen ? 'mobile-open' : ''}`}>
           {menuItems.map((item) => (
             <button
               key={item.id}
@@ -125,9 +136,15 @@ export function AdminDashboard({ onLogout }: AdminDashboardProps) {
               {item.label}
             </button>
           ))}
+          <div className="pj-nav-footer-mobile">
+            <button onClick={onLogout} className="pj-btn-action flex items-center gap-2 w-full justify-center">
+              <LogOut size={16} color="white" />
+              <span style={{ color: 'white' }}>Logout</span>
+            </button>
+          </div>
         </nav>
 
-        <div>
+        <div className="pj-header-actions">
           <button onClick={onLogout} className="pj-btn-action flex items-center gap-2">
             <LogOut size={16} color="white" />
             <span style={{ color: 'white' }}>Logout</span>

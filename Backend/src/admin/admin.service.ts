@@ -124,6 +124,7 @@ export class AdminService {
   }
 
   async rejectVendor(userId: string, reason?: string) {
+    this.logger.log(`Rejecting vendor ${userId} with reason: "${reason}"`);
     const id = parseInt(userId);
     const vendor = await this.prisma.vendors.findUnique({
       where: { id },

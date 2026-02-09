@@ -288,6 +288,64 @@
     font-weight: 500;
 }
 
+/* Mobile Responsive */
+@media (max-width: 1024px) {
+    .vm-controls {
+        padding: 24px;
+    }
+
+    .vm-table th,
+    .vm-table td {
+        padding: 16px 20px;
+    }
+}
+
+@media (max-width: 768px) {
+    .vm-controls {
+        padding: 20px;
+    }
+
+    .vm-search-wrapper {
+        max-width: 100%;
+    }
+
+    .vm-filters {
+        overflow-x: auto;
+        padding: 4px;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        /* Hide scrollbar for clean look */
+    }
+
+    .vm-filters::-webkit-scrollbar {
+        display: none;
+    }
+
+    .vm-filter-btn {
+        padding: 8px 16px;
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+
+    .vm-table th:nth-child(2),
+    .vm-table td:nth-child(2),
+    .vm-table th:nth-child(3),
+    .vm-table td:nth-child(3) {
+        display: none;
+        /* Hide Contact and Role on mobile table to prevent overflow */
+    }
+
+    .vm-avatar {
+        width: 40px;
+        height: 40px;
+        font-size: 16px;
+    }
+
+    .vm-shop-name {
+        font-size: 14px;
+    }
+}
+
 @keyframes fadeIn {
     from {
         opacity: 0;

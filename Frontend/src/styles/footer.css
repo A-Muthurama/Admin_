@@ -20,3 +20,13 @@
     letter-spacing: 0.08em;
     margin: 0;
 }
+
+@media (max-width: 768px) {
+    .app-footer {
+        padding: 16px 20px;
+    }
+
+    .app-footer .footer-text {
+        font-size: 10px;
+    }
+}

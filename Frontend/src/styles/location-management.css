@@ -226,6 +226,30 @@
     border: 1px dashed var(--border-color);
 }
 
+/* Mobile Responsive */
+@media (max-width: 600px) {
+    .lm-container {
+        gap: 20px;
+    }
+
+    .lm-card {
+        padding: 16px;
+    }
+
+    .lm-input-group {
+        flex-direction: column;
+    }
+
+    .lm-btn-add {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .lm-card-title {
+        font-size: 18px;
+    }
+}
+
 @keyframes fadeIn {
     from {
         opacity: 0;

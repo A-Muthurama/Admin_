@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Mail, Lock, Eye, EyeOff, Gem, AlertCircle, ArrowRight } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, AlertCircle, ArrowRight, Menu, X } from "lucide-react";
 import { adminLogin } from "../api/api";
 import icon from "../assets/icon.png";
 import "../styles/auth.css";
@@ -15,6 +15,7 @@ export function AdminLogin({ onLogin, onForgotPassword }: AdminLoginProps) {
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,7 +36,7 @@ export function AdminLogin({ onLogin, onForgotPassword }: AdminLoginProps) {
   return (
     <div className="auth-page-wrapper">
       {/* Top Header for Login Page */}
-      <header className="pj-header-container">
+      <header className={`pj-header-container ${isMobileMenuOpen ? 'menu-open' : ''}`}>
         <div className="pj-brand">
           <div className="pj-logo-wrapper">
             <img src={icon} alt="Jewellers Paradise" className="pj-logo-icon" />
@@ -43,12 +44,20 @@ export function AdminLogin({ onLogin, onForgotPassword }: AdminLoginProps) {
           <span className="pj-brand-name">JEWELLERS PARADISE</span>
         </div>
 
-        <nav className="pj-nav-menu">
+        {/* Hamburger Icon */}
+        <button
+          className="pj-mobile-toggle"
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+        >
+          {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+        </button>
+
+        <nav className={`pj-nav-menu ${isMobileMenuOpen ? 'mobile-open' : ''}`}>
           <a href="https://jewellersparadise.com/" className="pj-nav-link active">HOME</a>
           <a href="https://www.jewellersparadise.com/offers" className="pj-nav-link">OFFERS</a>
         </nav>
 
-        <div style={{ width: '120px' }}></div>
+        <div className="pj-header-actions" style={{ width: '120px' }}></div>
       </header>
 
       <div className="auth-container">

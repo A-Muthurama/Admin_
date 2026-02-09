@@ -490,6 +490,57 @@
     border: 4px solid rgba(255, 255, 255, 0.1);
 }
 
+/* Final Mobile View Fixes */
+@media (max-width: 768px) {
+    .vd-container {
+        padding: 85px 20px 60px;
+    }
+
+    .vd-header-card {
+        padding: 32px 24px;
+        margin-bottom: 32px;
+    }
+
+    .vd-shop-title {
+        font-size: 28px;
+    }
+
+    .vd-meta-info {
+        gap: 12px;
+        font-size: 14px;
+    }
+
+    .vd-meta-divider {
+        display: none;
+    }
+
+    .vd-action-panel {
+        padding: 24px;
+    }
+
+    .vd-action-header {
+        gap: 12px;
+    }
+
+    .vd-action-icon-circle {
+        width: 48px;
+        height: 48px;
+    }
+
+    .vd-action-title {
+        font-size: 18px;
+    }
+
+    .vd-btn {
+        width: 100%;
+        padding: 12px 20px;
+    }
+
+    .vd-rejection-form {
+        padding: 20px;
+    }
+}
+
 @keyframes fadeIn {
     from {
         opacity: 0;

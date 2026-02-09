@@ -24,7 +24,9 @@ export class AdminController {
   }
 
   @Patch('vendors/:userId/reject')
-  rejectVendor(@Param('userId') userId: string, @Body('reason') reason: string) {
+  rejectVendor(@Param('userId') userId: string, @Body() body: any) {
+    console.log('Reject Vendor Request:', { userId, body });
+    const reason = body.reason;
     return this.adminService.rejectVendor(userId, reason);
   }
 

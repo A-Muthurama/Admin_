@@ -555,6 +555,55 @@
     cursor: pointer;
 }
 
+/* Final Mobile View Fixes */
+@media (max-width: 1024px) {
+    .od-layout-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .od-main-media {
+        margin: 0 auto;
+    }
+}
+
+@media (max-width: 768px) {
+    .od-container {
+        padding: 85px 20px 60px;
+    }
+
+    .od-header-card {
+        padding: 24px;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .od-title {
+        font-size: 24px;
+    }
+
+    .od-price-tag {
+        align-items: flex-start;
+        margin-top: 16px;
+    }
+
+    .od-icon-box {
+        width: 56px;
+        height: 56px;
+    }
+
+    .od-stat-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .od-btn {
+        width: 100%;
+    }
+
+    .od-action-btn-group {
+        flex-direction: column;
+    }
+}
+
 @keyframes fadeIn {
     from {
         opacity: 0;

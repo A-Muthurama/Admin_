@@ -10,7 +10,6 @@
 .pj-header-container {
     height: var(--navbar-height);
     background-color: #ffffff;
-    /* Set to white to match the logo background */
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -23,6 +22,7 @@
     border-bottom: 1px solid rgba(94, 22, 53, 0.08);
     backdrop-filter: blur(10px);
     font-family: Arial, Helvetica, sans-serif;
+    transition: all 0.3s ease;
 }
 
 .pj-main-layout {
@@ -38,6 +38,7 @@
     gap: 16px;
     padding: 10px 0;
     transition: transform 0.2s ease;
+    z-index: 1001;
 }
 
 .pj-brand:hover {
@@ -55,17 +56,13 @@
     height: 100%;
     width: auto;
     object-fit: contain;
-    /* This makes the white background of the image transparent against a white/light bg */
     mix-blend-mode: multiply;
 }
 
 .pj-brand-name {
     font-family: 'Cormorant Garamond', serif;
-    /* Elegant high-contrast serif from image */
     font-size: 28px;
-    /* Slightly larger for Garamond */
     font-weight: 700;
-    letter-spacing: 0.02em;
     letter-spacing: 0.12em;
     background: linear-gradient(135deg, #4C0F2D 0%, #d4af37 50%, #4C0F2D 100%);
     background-size: 200% auto;
@@ -92,8 +89,6 @@
     align-items: center;
     gap: 40px;
     background: transparent;
-    padding: 0;
-    border-radius: 0;
 }
 
 .pj-nav-link {
@@ -101,27 +96,20 @@
     font-size: 14px;
     font-weight: 600;
     color: #a39499;
-    /* Brighter grayish-plum for better visibility */
     text-decoration: none;
     background: none;
     border: none;
     cursor: pointer;
     padding: 10px 0;
-    border-radius: 0;
     text-transform: uppercase;
     letter-spacing: 0.15em;
     position: relative;
     transition: all 0.3s ease;
 }
 
-.pj-nav-link:hover {
-    color: var(--color-plum);
-}
-
+.pj-nav-link:hover,
 .pj-nav-link.active {
     color: var(--color-plum);
-    background: transparent;
-    box-shadow: none;
 }
 
 .pj-nav-link.active::after {
@@ -132,6 +120,11 @@
     width: 100%;
     height: 2px;
     background-color: var(--color-plum);
+}
+
+.pj-header-actions {
+    display: flex;
+    align-items: center;
 }
 
 .pj-btn-action {
@@ -154,6 +147,103 @@
     transform: translateY(-2px);
     box-shadow: 0 8px 20px rgba(76, 15, 45, 0.2);
     filter: brightness(1.1);
+}
+
+.pj-mobile-toggle {
+    display: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--color-plum);
+    padding: 8px;
+    z-index: 1001;
+}
+
+.pj-nav-footer-mobile {
+    display: none;
+    margin-top: auto;
+    padding-top: 40px;
+}
+
+/* Responsive Styles */
+@media (max-width: 1024px) {
+    .pj-nav-menu {
+        gap: 20px;
+    }
+
+    .pj-brand-name {
+        font-size: 22px;
+    }
+}
+
+@media (max-width: 900px) {
+    .pj-header-container {
+        padding: 0 20px;
+    }
+
+    .pj-mobile-toggle {
+        display: block;
+    }
+
+    .pj-nav-menu {
+        position: fixed;
+        top: 0;
+        right: -100%;
+        width: 300px;
+        height: 100vh;
+        background-color: white;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: flex-start;
+        padding: 100px 40px 40px;
+        gap: 24px;
+        box-shadow: -10px 0 30px rgba(0, 0, 0, 0.05);
+        transition: right 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        z-index: 1000;
+    }
+
+    .pj-nav-menu.mobile-open {
+        right: 0;
+    }
+
+    .pj-nav-link {
+        width: 100%;
+        font-size: 16px;
+        padding: 12px 0;
+    }
+
+    .pj-nav-link.active::after {
+        left: 0;
+        bottom: 0;
+        width: 40px;
+    }
+
+    .pj-header-actions {
+        display: none;
+    }
+
+    .pj-nav-footer-mobile {
+        display: block;
+        width: 100%;
+    }
+
+    .pj-main-layout {
+        padding: calc(var(--navbar-height) + 20px) 20px 80px 20px;
+    }
+
+    .pj-brand-name {
+        font-size: 18px;
+    }
+
+    .pj-logo-wrapper {
+        height: 45px;
+    }
+}
+
+@media (max-width: 480px) {
+    .pj-brand-name {
+        display: none;
+    }
 }
 
 @keyframes fadeInPage {
