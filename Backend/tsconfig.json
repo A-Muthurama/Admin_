@@ -1,6 +1,14 @@
 {
-  "include": ["src/**/*.ts", "prisma/**/*.ts"],
-  "exclude": ["node_modules", "dist", "test"],
+  "include": [
+    "src/**/*.ts",
+    "prisma/**/*.ts",
+    "*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "test"
+  ],
   "compilerOptions": {
     "module": "nodenext",
     "moduleResolution": "nodenext",
@@ -23,6 +31,10 @@
     "noImplicitAny": false,
     "strictBindCallApply": false,
     "noFallthroughCasesInSwitch": false,
-    "types": ["multer", "node", "express"]
+    "types": [
+      "multer",
+      "node",
+      "express"
+    ]
   }
 }
