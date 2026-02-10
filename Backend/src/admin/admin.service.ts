@@ -37,7 +37,7 @@ export class AdminService {
       user: {
         id: v.id.toString(),
         email: v.email || '',
-        role: v.status?.toUpperCase() === 'APPROVED' ? 'VENDOR_APPROVED' : 'VENDOR_PENDING',
+        role: v.status?.toUpperCase() === 'APPROVED' ? 'VENDOR_APPROVED' : v.status?.toUpperCase() === 'SUSPENDED' ? 'VENDOR_PENDING' : 'VENDOR_PENDING',
       },
     }));
   }
@@ -145,6 +145,28 @@ export class AdminService {
     });
 
     return { message: 'Vendor rejected successfully' };
+  }
+
+  async suspendVendor(userId: string) {
+    this.logger.log(`Suspending vendor ${userId}`);
+    const id = parseInt(userId);
+    const vendor = await this.prisma.vendors.findUnique({
+      where: { id },
+    });
+
+    if (!vendor) {
+      throw new NotFoundException('Vendor not found');
+    }
+
+    // Update status to 'SUSPENDED'
+    await this.prisma.vendors.update({
+      where: { id },
+      data: {
+        status: 'SUSPENDED',
+      },
+    });
+
+    return { message: 'Vendor suspended successfully' };
   }
 
   /* ===================== OFFERS ===================== */

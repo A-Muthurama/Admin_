@@ -30,6 +30,11 @@ export class AdminController {
     return this.adminService.rejectVendor(userId, reason);
   }
 
+  @Patch('vendors/:userId/suspend')
+  suspendVendor(@Param('userId') userId: string) {
+    return this.adminService.suspendVendor(userId);
+  }
+
   @Get('offers/pending')
   getPendingOffers() {
     return this.adminService.getPendingOffers();

@@ -57,7 +57,7 @@ export function VendorManagement({ onViewVendor }: VendorManagementProps) {
             </div>
 
             <div className="vm-filters">
-              {(["ALL", "PENDING", "APPROVED", "REJECTED"] as const).map(status => (
+              {(["ALL", "PENDING", "APPROVED", "REJECTED", "SUSPENDED"] as const).map(status => (
                 <button
                   key={status}
                   onClick={() => setFilterStatus(status)}
@@ -142,7 +142,8 @@ export function VendorManagement({ onViewVendor }: VendorManagementProps) {
                     </td>
                     <td>
                       <span className={`vm-badge ${vendor.status === 'APPROVED' ? 'vm-badge-status-approved' :
-                        vendor.status === 'PENDING' ? 'vm-badge-status-pending' : 'vm-badge-status-rejected'
+                        vendor.status === 'PENDING' ? 'vm-badge-status-pending' :
+                          vendor.status === 'SUSPENDED' ? 'vm-badge-status-suspended' : 'vm-badge-status-rejected'
                         }`}>
                         {vendor.status}
                       </span>

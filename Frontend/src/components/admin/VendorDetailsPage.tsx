@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { ArrowLeft, CheckCircle, XCircle, Mail, ExternalLink, Users, Maximize2, X, MapPin, Phone, Trash2, Shield } from "lucide-react";
-import { VendorKycResponse, approveVendor, getVendorKyc, rejectVendor, deleteVendor } from "../../api/api";
+import { VendorKycResponse, approveVendor, getVendorKyc, rejectVendor, deleteVendor, suspendVendor } from "../../api/api";
 import "../../styles/vendor-details.css"; // Import the new CSS
 import { toast } from "sonner";
 import { ConfirmationModal } from "../common/ConfirmationModal";
@@ -71,6 +71,20 @@ export function VendorDetailsPage({ vendorId, onBack, onStatusChange }: VendorDe
         }
     };
 
+    const handleSuspend = async () => {
+        setActionLoading(true);
+        try {
+            await suspendVendor(vendorId);
+            onStatusChange();
+            await fetchDetails();
+            toast.success("Vendor suspended successfully.");
+        } catch (err: any) {
+            toast.error("Failed to suspend vendor.");
+        } finally {
+            setActionLoading(false);
+        }
+    };
+
     const handleRemove = async () => {
         setIsConfirmModalOpen(true);
     };
@@ -128,8 +142,9 @@ export function VendorDetailsPage({ vendorId, onBack, onStatusChange }: VendorDe
                 </div>
 
                 <div className="vd-status-wrapper">
-                    <span className={`vd - status - badge ${kycDetails.status === 'APPROVED' ? 'vd-status-approved' :
-                        kycDetails.status === 'PENDING' ? 'vd-status-pending' : 'vd-status-rejected'
+                    <span className={`vd-status-badge ${kycDetails.status === 'APPROVED' ? 'vd-status-approved' :
+                        kycDetails.status === 'PENDING' ? 'vd-status-pending' :
+                            kycDetails.status === 'SUSPENDED' ? 'vd-status-suspended' : 'vd-status-rejected'
                         } `}>
                         {kycDetails.status}
                     </span>
@@ -234,6 +249,22 @@ export function VendorDetailsPage({ vendorId, onBack, onStatusChange }: VendorDe
                         </div>
                     </div>
                     <div className="vd-btn-group">
+                        {kycDetails.status !== 'SUSPENDED' && (
+                            <button
+                                onClick={handleSuspend}
+                                disabled={actionLoading}
+                                className="vd-btn"
+                                style={{
+                                    backgroundColor: '#f3f4f6',
+                                    color: '#374151',
+                                    border: '1px solid #d1d5db',
+                                    justifyContent: 'center',
+                                    fontWeight: 600
+                                }}
+                            >
+                                <XCircle size={18} /> Suspend Vendor
+                            </button>
+                        )}
                         <button
                             onClick={handleRemove}
                             disabled={actionLoading}
@@ -246,7 +277,7 @@ export function VendorDetailsPage({ vendorId, onBack, onStatusChange }: VendorDe
                                 fontWeight: 600
                             }}
                         >
-                            <Trash2 size={18} /> Remove Vendor
+                            <Trash2 size={18} /> Permanently Remove
                         </button>
                     </div>
                 </div>

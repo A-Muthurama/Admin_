@@ -247,6 +247,12 @@
     color: #b91c1c;
 }
 
+.vm-badge-status-suspended {
+    background-color: #f3f4f6;
+    color: #374151;
+    border: 1px solid #d1d5db;
+}
+
 /* View Button */
 .vm-btn-view {
     display: inline-flex;

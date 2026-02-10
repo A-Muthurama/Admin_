@@ -20,7 +20,7 @@ declare global {
 export type BackendRole = "ADMIN" | "VENDOR_PENDING" | "VENDOR_APPROVED";
 export type BackendOfferStatus = "PENDING" | "APPROVED" | "REJECTED";
 export type BackendMediaStatus = "PENDING" | "APPROVED" | "REJECTED";
-export type BackendVendorStatus = "PENDING" | "APPROVED" | "REJECTED";
+export type BackendVendorStatus = "PENDING" | "APPROVED" | "REJECTED" | "SUSPENDED";
 export type BackendPlanStatus = "ACTIVE" | "INACTIVE";
 
 export interface SubscriptionPlan {
@@ -252,6 +252,12 @@ export const approveVendor = (userId: string) =>
  */
 export const rejectVendor = (userId: string, reason: string) =>
   API.patch<MessageResponse>(`/admin/vendors/${userId}/reject`, { reason });
+
+/**
+ * Suspend a vendor
+ */
+export const suspendVendor = (userId: string) =>
+  API.patch<MessageResponse>(`/admin/vendors/${userId}/suspend`);
 
 /**
  * Get vendor KYC documents

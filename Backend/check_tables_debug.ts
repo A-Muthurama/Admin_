@@ -13,13 +13,7 @@ async function main() {
         console.log('vendors table error:', e.message);
     }
 
-    try {
-        const vendorProfileTable = await prisma.vendorProfile.findMany();
-        console.log('VendorProfile table count:', vendorProfileTable.length);
-        console.log(vendorProfileTable);
-    } catch (e) {
-        console.log('VendorProfile table error:', e.message);
-    }
+    // VendorProfile model doesn't exist - using 'vendors' table only
 }
 
 main().finally(() => prisma.$disconnect());
