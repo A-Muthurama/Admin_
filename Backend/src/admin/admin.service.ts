@@ -274,24 +274,41 @@ export class AdminService {
     const id = parseInt(offerId);
     const offer = await this.prisma.offers.findUnique({
       where: { id },
+      include: { vendors: true },
     });
 
     if (!offer) {
       throw new NotFoundException('Offer not found');
     }
 
-    // 1️⃣ Update Prisma DB
-    await this.prisma.offers.update({
+    // 1️⃣ Sync to vendor backend
+    try {
+      await this.vendorSyncService.rejectOffer(offer.id, reason);
+    } catch (err) {
+      this.logger.warn(`Vendor sync failed during rejection for offer ${id}: ${err.message}`);
+    }
+
+    // 2️⃣ Notify vendor
+    try {
+      const toEmail = offer.vendors?.email;
+      if (toEmail) {
+        await this.brevo.sendOfferRejectedEmail({
+          toEmail,
+          offerTitle: offer.title,
+          shopName: offer.vendors?.shop_name || 'Vendor',
+          reason,
+        });
+      }
+    } catch (err: any) {
+      this.logger.error(`Failed to send offer rejection email for offer ${offerId}: ${err.message}`);
+    }
+
+    // 3️⃣ Delete from Prisma DB (Primary Goal)
+    await this.prisma.offers.delete({
       where: { id },
-      data: {
-        status: 'REJECTED',
-      },
     });
 
-    // 2️⃣ Sync to vendor backend
-    await this.vendorSyncService.rejectOffer(offer.id, reason);
-
-    return { message: 'Offer rejected successfully' };
+    return { message: 'Offer rejected and deleted successfully' };
   }
 
   /* ===================== DETAILS ===================== */

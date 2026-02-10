@@ -155,4 +155,36 @@ export class BrevoService {
       htmlContent,
     });
   }
+  async sendOfferRejectedEmail(params: {
+    toEmail: string;
+    offerTitle?: string;
+    shopName?: string;
+    reason?: string;
+  }) {
+    const title = params.offerTitle
+      ? this.escapeHtml(params.offerTitle)
+      : 'your offer';
+    const shop = params.shopName ? this.escapeHtml(params.shopName) : 'your shop';
+    const reason = params.reason ? this.escapeHtml(params.reason) : 'No reason provided';
+
+    const htmlContent = this.wrapTemplate(`
+      <h2 style="margin:0 0 10px 0;font-size:18px;color:#ef4444;">Offer rejected</h2>
+      <p style="margin:0 0 14px 0;color:#374151;font-size:14px;line-height:20px;">
+        Your offer <strong>${title}</strong> for <strong>${shop}</strong> has been rejected.
+      </p>
+      <div style="background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;padding:12px;margin-bottom:14px;">
+        <h3 style="margin:0 0 4px 0;font-size:14px;color:#991b1b;">Reason:</h3>
+        <p style="margin:0;color:#b91c1c;font-size:14px;">${reason}</p>
+      </div>
+      <p style="margin:0;color:#6b7280;font-size:13px;">
+        Please review the guidelines and try again.
+      </p>
+    `);
+
+    await this.sendEmail({
+      toEmail: params.toEmail,
+      subject: 'Update on your offer submission',
+      htmlContent,
+    });
+  }
 }
