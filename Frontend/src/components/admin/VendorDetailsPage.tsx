@@ -108,6 +108,7 @@ export function VendorDetailsPage({ vendorId, onBack, onStatusChange }: VendorDe
 
     const isPending = kycDetails.status === 'PENDING';
     const isApproved = kycDetails.status === 'APPROVED';
+    const isSuspended = kycDetails.status === 'SUSPENDED';
 
     return (
         <div className="vd-container">
@@ -237,48 +238,65 @@ export function VendorDetailsPage({ vendorId, onBack, onStatusChange }: VendorDe
                 </div>
             )}
 
-            {isApproved && (
-                <div className="vd-action-panel" style={{ marginTop: '20px', borderColor: '#fecaca', background: '#fef2f2' }}>
+            {(isApproved || isSuspended) && (
+                <div className="vd-action-panel" style={{ marginTop: '20px', borderColor: isSuspended ? '#bbf7d0' : '#fecaca', background: isSuspended ? '#f0fdf4' : '#fef2f2' }}>
                     <div className="vd-action-header">
-                        <div className="vd-action-icon-circle" style={{ background: '#fee2e2', color: '#ef4444' }}>
-                            <Trash2 size={24} />
+                        <div className="vd-action-icon-circle" style={{ background: isSuspended ? '#dcfce7' : '#fee2e2', color: isSuspended ? '#16a34a' : '#ef4444' }}>
+                            {isSuspended ? <CheckCircle size={24} /> : <Trash2 size={24} />}
                         </div>
                         <div>
-                            <h3 className="vd-action-title" style={{ color: '#ef4444' }}>Manage Vendor</h3>
-                            <p className="vd-action-desc" style={{ color: '#b91c1c' }}>Removing this vendor will permanently delete their account and all associated offers.</p>
+                            <h3 className="vd-action-title" style={{ color: isSuspended ? '#16a34a' : '#ef4444' }}>
+                                {isSuspended ? 'Reactivate Vendor' : 'Manage Vendor'}
+                            </h3>
+                            <p className="vd-action-desc" style={{ color: isSuspended ? '#15803d' : '#b91c1c' }}>
+                                {isSuspended
+                                    ? 'This vendor is currently suspended. You can reactivate them to restore their access.'
+                                    : 'Removing this vendor will permanently delete their account and all associated offers.'}
+                            </p>
                         </div>
                     </div>
                     <div className="vd-btn-group">
-                        {kycDetails.status !== 'SUSPENDED' && (
+                        {isSuspended ? (
                             <button
-                                onClick={handleSuspend}
+                                onClick={handleApprove}
                                 disabled={actionLoading}
-                                className="vd-btn"
-                                style={{
-                                    backgroundColor: '#f3f4f6',
-                                    color: '#374151',
-                                    border: '1px solid #d1d5db',
-                                    justifyContent: 'center',
-                                    fontWeight: 600
-                                }}
+                                className="vd-btn vd-btn-approve"
+                                style={{ width: '240px' }}
                             >
-                                <XCircle size={18} /> Suspend Vendor
+                                <CheckCircle size={18} /> Reactivate Vendor
                             </button>
+                        ) : (
+                            <>
+                                <button
+                                    onClick={handleSuspend}
+                                    disabled={actionLoading}
+                                    className="vd-btn"
+                                    style={{
+                                        backgroundColor: '#f3f4f6',
+                                        color: '#374151',
+                                        border: '1px solid #d1d5db',
+                                        justifyContent: 'center',
+                                        fontWeight: 600
+                                    }}
+                                >
+                                    <XCircle size={18} /> Suspend Vendor
+                                </button>
+                                <button
+                                    onClick={handleRemove}
+                                    disabled={actionLoading}
+                                    className="vd-btn"
+                                    style={{
+                                        backgroundColor: '#fee2e2',
+                                        color: '#ef4444',
+                                        border: '1px solid #fecaca',
+                                        justifyContent: 'center',
+                                        fontWeight: 600
+                                    }}
+                                >
+                                    <Trash2 size={18} /> Permanently Remove
+                                </button>
+                            </>
                         )}
-                        <button
-                            onClick={handleRemove}
-                            disabled={actionLoading}
-                            className="vd-btn"
-                            style={{
-                                backgroundColor: '#fee2e2',
-                                color: '#ef4444',
-                                border: '1px solid #fecaca',
-                                justifyContent: 'center',
-                                fontWeight: 600
-                            }}
-                        >
-                            <Trash2 size={18} /> Permanently Remove
-                        </button>
                     </div>
                 </div>
             )}
