@@ -46,7 +46,8 @@ export class AdminController {
   }
 
   @Patch('offers/:offerId/reject')
-  rejectOffer(@Param('offerId') offerId: string, @Body('reason') reason: string) {
+  rejectOffer(@Param('offerId') offerId: string, @Body() body: any) {
+    const reason = body.reason;
     return this.adminService.rejectOfferWithMedia(offerId, reason);
   }
 

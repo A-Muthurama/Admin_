@@ -65,8 +65,11 @@ export function OfferDetailsPage({ offerId, onBack, onStatusChange }: OfferDetai
             // Refresh details
             const data = await getOfferDetails(offerId);
             setDetails(data.data);
-        } catch {
-            alert("Action failed.");
+            alert("Offer approved successfully.");
+        } catch (err: any) {
+            console.error("Failed to approve offer", err);
+            const serverMessage = err.response?.data?.message || err.message || "Unknown error";
+            alert(`Failed to approve offer: ${serverMessage}`);
         } finally {
             setActionLoading(false);
         }
@@ -76,14 +79,18 @@ export function OfferDetailsPage({ offerId, onBack, onStatusChange }: OfferDetai
         if (!rejectionReason.trim()) return;
         setActionLoading(true);
         try {
-            await rejectOffer(offerId, rejectionReason);
+            console.log("Attempting to reject offer:", offerId, "with reason:", rejectionReason);
+            const response = await rejectOffer(offerId, rejectionReason);
+            console.log("Rejection response:", response.data);
+
             setIsRejecting(false);
             onStatusChange();
-            // Refresh details
-            const data = await getOfferDetails(offerId);
-            setDetails(data.data);
-        } catch {
-            alert("Action failed.");
+            onBack();
+            alert("Offer rejected and deleted successfully.");
+        } catch (err: any) {
+            console.error("Critical: Failed to reject offer", err);
+            const serverMessage = err.response?.data?.message || err.message || "Unknown error";
+            alert(`Failed to reject offer: ${serverMessage}`);
         } finally {
             setActionLoading(false);
         }

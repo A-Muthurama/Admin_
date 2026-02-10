@@ -271,42 +271,61 @@ export class AdminService {
   }
 
   async rejectOfferWithMedia(offerId: string, reason?: string) {
+    this.logger.log(`Rejecting offer ${offerId} with reason: "${reason}"`);
     const id = parseInt(offerId);
+
+    if (isNaN(id)) {
+      this.logger.error(`Invalid offer ID format: ${offerId}`);
+      throw new Error(`Invalid offer ID: ${offerId}`);
+    }
+
     const offer = await this.prisma.offers.findUnique({
       where: { id },
       include: { vendors: true },
     });
 
     if (!offer) {
+      this.logger.warn(`Offer ${id} not found for rejection.`);
       throw new NotFoundException('Offer not found');
     }
 
-    // 1️⃣ Sync to vendor backend
+    // 1️⃣ Sync to vendor backend (Internal sync might fail, so we wrap it)
     try {
+      this.logger.log(`Syncing rejection for offer ${id} to vendor backend...`);
       await this.vendorSyncService.rejectOffer(offer.id, reason);
-    } catch (err) {
-      this.logger.warn(`Vendor sync failed during rejection for offer ${id}: ${err.message}`);
+    } catch (err: any) {
+      this.logger.warn(`Vendor sync failed (ignored) for offer ${id}: ${err.message}`);
     }
 
-    // 2️⃣ Notify vendor
+    // 2️⃣ Notify vendor via Email
     try {
       const toEmail = offer.vendors?.email;
       if (toEmail) {
+        this.logger.log(`Sending rejection email for offer ${id} to ${toEmail}...`);
         await this.brevo.sendOfferRejectedEmail({
           toEmail,
           offerTitle: offer.title,
           shopName: offer.vendors?.shop_name || 'Vendor',
           reason,
         });
+      } else {
+        this.logger.warn(`No email found for vendor of offer ${id}.`);
       }
     } catch (err: any) {
-      this.logger.error(`Failed to send offer rejection email for offer ${offerId}: ${err.message}`);
+      this.logger.error(`Failed to send offer rejection email for offer ${id}: ${err.message}`);
     }
 
     // 3️⃣ Delete from Prisma DB (Primary Goal)
-    await this.prisma.offers.delete({
-      where: { id },
-    });
+    try {
+      this.logger.log(`Deleting offer ${id} from database...`);
+      await this.prisma.offers.delete({
+        where: { id },
+      });
+      this.logger.log(`Offer ${id} successfully deleted.`);
+    } catch (err: any) {
+      this.logger.error(`Database deletion failed for offer ${id}: ${err.message}`);
+      throw err; // Re-throw DB error as it's critical
+    }
 
     return { message: 'Offer rejected and deleted successfully' };
   }
