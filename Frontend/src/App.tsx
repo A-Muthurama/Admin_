@@ -3,6 +3,8 @@ import { AdminLogin } from "./components/AdminLogin";
 import { AdminDashboard } from "./components/AdminDashboard";
 import { ForgotPassword } from "./components/ForgotPassword";
 
+import { Toaster } from 'sonner';
+
 import "./styles/variables.css";
 import "./styles/typography.css";
 import "./styles/premium-ui.css";
@@ -25,6 +27,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen w-full flex flex-col">
+      <Toaster position="top-right" expand={true} richColors />
       {view === "dashboard" ? (
         <AdminDashboard onLogout={handleLogout} />
       ) : (

@@ -11,6 +11,7 @@ import { UserModule } from './user/user.module';
 import { SyncModule } from './sync/sync.module';
 import { InternalModule } from './internal/internal.module';
 import { PlansModule } from './plans/plans.module';
+import { NotificationsModule } from './notifications/notifications.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { PlansModule } from './plans/plans.module';
     SyncModule,
     InternalModule,
     PlansModule,
+    NotificationsModule,
     // other modules
   ],
   controllers: [AppController],

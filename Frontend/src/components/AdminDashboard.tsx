@@ -10,6 +10,8 @@ import { OfferDetailsPage } from "./admin/OfferDetailsPage";
 import { Footer } from "./Footer";
 import icon from "../assets/icon.png";
 import "../styles/top-nav-premium.css"; // The new premium styles
+import { socketService } from "../api/socket";
+import { toast } from "sonner";
 
 interface AdminDashboardProps {
   onLogout: () => void;
@@ -65,6 +67,46 @@ export function AdminDashboard({ onLogout }: AdminDashboardProps) {
     window.addEventListener('popstate', handleLocationChange);
     return () => window.removeEventListener('popstate', handleLocationChange);
   }, []);
+
+  // Live Updates via WebSockets
+  useEffect(() => {
+    socketService.connect();
+
+    socketService.on('new_vendor', (data) => {
+      console.log('Real-time: New Vendor Application', data);
+      toast.info(`New Vendor Application: ${data.shopName}`, {
+        description: `Owner: ${data.ownerName}`,
+        action: {
+          label: 'View',
+          onClick: () => handleViewVendor(data.id.toString())
+        },
+      });
+      // Refresh the list if we are on the vendors tab
+      if (activeTab === 'vendors') {
+        handleStatusChange();
+      }
+    });
+
+    socketService.on('new_offer', (data) => {
+      console.log('Real-time: New Offer Submitted', data);
+      toast.success(`New Offer Submitted: ${data.title}`, {
+        description: `Wait for approval`,
+        action: {
+          label: 'View',
+          onClick: () => handleViewOffer(data.id.toString())
+        },
+      });
+      // Refresh the list if we are on the offers tab
+      if (activeTab === 'offers') {
+        handleStatusChange();
+      }
+    });
+
+    return () => {
+      socketService.off('new_vendor');
+      socketService.off('new_offer');
+    };
+  }, [activeTab]);
 
   const menuItems = [
     { id: "vendors" as AdminTab, label: "Vendors", path: '/vendors' },

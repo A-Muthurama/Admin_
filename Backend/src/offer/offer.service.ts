@@ -3,11 +3,14 @@ import { PrismaService } from 'prisma/prisma.service';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import { CreateOfferDto } from './dto/create-offer.dto';
 
+import { NotificationsGateway } from '../notifications/notifications.gateway';
+
 @Injectable()
 export class OfferService {
   constructor(
     private prisma: PrismaService,
     private cloudinary: CloudinaryService,
+    private notificationsGateway: NotificationsGateway,
   ) { }
 
   async createOfferWithImage(
@@ -35,6 +38,13 @@ export class OfferService {
         poster_url: uploadResult.secure_url,
         status: 'pending',
       },
+    });
+
+    // 3️⃣ Notify Admins via WebSockets
+    this.notificationsGateway.broadcastNotification('new_offer', {
+      id: offer.id,
+      title: offer.title,
+      vendorId: vendorId,
     });
 
     return {
