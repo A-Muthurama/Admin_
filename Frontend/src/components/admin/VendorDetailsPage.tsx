@@ -1,7 +1,9 @@
-import React, { useEffect, useState } from "react";
-import { ArrowLeft, CheckCircle, XCircle, Mail, Calendar, Shield, ExternalLink, Users, Briefcase, Maximize2, X, MapPin, Phone, Trash2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { ArrowLeft, CheckCircle, XCircle, Mail, ExternalLink, Users, Maximize2, X, MapPin, Phone, Trash2, Shield } from "lucide-react";
 import { VendorKycResponse, approveVendor, getVendorKyc, rejectVendor, deleteVendor } from "../../api/api";
 import "../../styles/vendor-details.css"; // Import the new CSS
+import { toast } from "sonner";
+import { ConfirmationModal } from "../common/ConfirmationModal";
 
 interface VendorDetailsPageProps {
     vendorId: string;
@@ -17,6 +19,7 @@ export function VendorDetailsPage({ vendorId, onBack, onStatusChange }: VendorDe
     const [rejectionReason, setRejectionReason] = useState("");
     const [actionLoading, setActionLoading] = useState(false);
     const [previewImage, setPreviewImage] = useState<{ url: string, type: string } | null>(null);
+    const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
 
     const fetchDetails = async () => {
         setIsLoading(true);
@@ -40,8 +43,11 @@ export function VendorDetailsPage({ vendorId, onBack, onStatusChange }: VendorDe
             await approveVendor(vendorId);
             onStatusChange();
             await fetchDetails();
-        } catch {
-            alert("Failed to approve vendor.");
+            toast.success("Vendor approved successfully.");
+        } catch (err: any) {
+            console.error("Failed to approve vendor", err);
+            const msg = err.response?.data?.message || err.message || "Unknown error";
+            toast.error(`Approval Failed: ${msg}`);
         } finally {
             setActionLoading(false);
         }
@@ -55,21 +61,29 @@ export function VendorDetailsPage({ vendorId, onBack, onStatusChange }: VendorDe
             setIsRejecting(false);
             onStatusChange();
             await fetchDetails();
-        } catch {
-            alert("Failed to reject vendor.");
+            toast.success("Vendor rejected successfully.");
+        } catch (err: any) {
+            console.error("Failed to reject vendor", err);
+            const msg = err.response?.data?.message || err.message || "Unknown error";
+            toast.error(`Rejection Failed: ${msg}`);
         } finally {
             setActionLoading(false);
         }
     };
 
     const handleRemove = async () => {
-        if (!window.confirm("Are you sure you want to remove this vendor? This action cannot be undone and will delete all associated data.")) return;
+        setIsConfirmModalOpen(true);
+    };
+
+    const executeRemove = async () => {
+        setIsConfirmModalOpen(false);
         setActionLoading(true);
         try {
             await deleteVendor(vendorId);
             onBack(); // Go back to list
+            toast.success("Vendor deleted successfully.");
         } catch {
-            alert("Failed to delete vendor.");
+            toast.error("Failed to delete vendor.");
         } finally {
             setActionLoading(false);
         }
@@ -114,9 +128,9 @@ export function VendorDetailsPage({ vendorId, onBack, onStatusChange }: VendorDe
                 </div>
 
                 <div className="vd-status-wrapper">
-                    <span className={`vd-status-badge ${kycDetails.status === 'APPROVED' ? 'vd-status-approved' :
+                    <span className={`vd - status - badge ${kycDetails.status === 'APPROVED' ? 'vd-status-approved' :
                         kycDetails.status === 'PENDING' ? 'vd-status-pending' : 'vd-status-rejected'
-                        }`}>
+                        } `}>
                         {kycDetails.status}
                     </span>
                     <div className="vd-id-tag">ID: {vendorId ? vendorId.slice(0, 8) : 'N/A'}</div>
@@ -247,6 +261,18 @@ export function VendorDetailsPage({ vendorId, onBack, onStatusChange }: VendorDe
                     <img src={previewImage.url} alt="Full view" className="vd-lightbox-img" onClick={e => e.stopPropagation()} />
                 </div>
             )}
+
+            <ConfirmationModal
+                isOpen={isConfirmModalOpen}
+                onClose={() => setIsConfirmModalOpen(false)}
+                onConfirm={executeRemove}
+                title="Remove Vendor?"
+                message="Are you sure you want to remove this vendor? This action cannot be undone and will delete ALL associated data including offers."
+                confirmText="Yes, Remove Vendor"
+                cancelText="Cancel"
+                type="danger"
+                isLoading={actionLoading}
+            />
         </div>
     );
 }

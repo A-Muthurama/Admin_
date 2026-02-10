@@ -3,6 +3,8 @@ import React, { useEffect, useState } from "react";
 import { ArrowLeft, CheckCircle, XCircle, ShoppingBag, Store, ChevronRight, Maximize2, X, MapPin, Calendar, Tag, PlayCircle, User, Phone, Hash, ExternalLink, Trash2 } from "lucide-react";
 import { AdminOfferDetails, approveOffer, getOfferDetails, rejectOffer, deleteOffer } from "../../api/api";
 import "../../styles/offer-details.css";
+import { toast } from "sonner";
+import { ConfirmationModal } from "../common/ConfirmationModal";
 
 interface OfferDetailsPageProps {
     offerId: string;
@@ -40,6 +42,7 @@ export function OfferDetailsPage({ offerId, onBack, onStatusChange }: OfferDetai
     const [actionLoading, setActionLoading] = useState(false);
     const [activeMediaIndex, setActiveMediaIndex] = useState(0);
     const [previewImage, setPreviewImage] = useState<string | null>(null);
+    const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
 
     useEffect(() => {
         const fetchDetails = async () => {
@@ -60,16 +63,26 @@ export function OfferDetailsPage({ offerId, onBack, onStatusChange }: OfferDetai
     const handleApprove = async () => {
         setActionLoading(true);
         try {
-            await approveOffer(offerId);
+            console.log("Approve request started for offer:", offerId);
+            const res = await approveOffer(offerId);
+            console.log("Approve successful:", res.data);
+
+            toast.success("Offer approved successfully.");
+
+            // Refresh parent list
             onStatusChange();
-            // Refresh details
-            const data = await getOfferDetails(offerId);
-            setDetails(data.data);
-            alert("Offer approved successfully.");
+
+            // Refresh local details
+            try {
+                const data = await getOfferDetails(offerId);
+                setDetails(data.data);
+            } catch (err) {
+                console.warn("Details refresh failed (ignoring as action succeeded):", err);
+            }
         } catch (err: any) {
-            console.error("Failed to approve offer", err);
+            console.error("Critical: Failed to approve offer", err);
             const serverMessage = err.response?.data?.message || err.message || "Unknown error";
-            alert(`Failed to approve offer: ${serverMessage}`);
+            toast.error(`Approval Failed: ${serverMessage}`);
         } finally {
             setActionLoading(false);
         }
@@ -79,31 +92,36 @@ export function OfferDetailsPage({ offerId, onBack, onStatusChange }: OfferDetai
         if (!rejectionReason.trim()) return;
         setActionLoading(true);
         try {
-            console.log("Attempting to reject offer:", offerId, "with reason:", rejectionReason);
+            console.log("Reject request started for offer:", offerId, "reason:", rejectionReason);
             const response = await rejectOffer(offerId, rejectionReason);
-            console.log("Rejection response:", response.data);
+            console.log("Reject successful:", response.data);
 
+            toast.success("Offer rejected and deleted successfully.");
             setIsRejecting(false);
             onStatusChange();
             onBack();
-            alert("Offer rejected and deleted successfully.");
         } catch (err: any) {
-            console.error("Critical: Failed to reject offer", err);
+            console.error("Critical Error: Failed to reject offer", err);
             const serverMessage = err.response?.data?.message || err.message || "Unknown error";
-            alert(`Failed to reject offer: ${serverMessage}`);
+            toast.error(`Rejection Failed: ${serverMessage}`);
         } finally {
             setActionLoading(false);
         }
     };
 
     const handleRemove = async () => {
-        if (!window.confirm("Are you sure you want to remove this offer? This action cannot be undone.")) return;
+        setIsConfirmModalOpen(true);
+    };
+
+    const executeRemove = async () => {
+        setIsConfirmModalOpen(false);
         setActionLoading(true);
         try {
             await deleteOffer(offerId);
             onBack(); // Go back to list after deletion
+            toast.success("Offer removed successfully.");
         } catch {
-            alert("Failed to delete offer.");
+            toast.error("Failed to delete offer.");
         } finally {
             setActionLoading(false);
         }
@@ -477,6 +495,18 @@ export function OfferDetailsPage({ offerId, onBack, onStatusChange }: OfferDetai
                     )}
                 </>
             )}
+
+            <ConfirmationModal
+                isOpen={isConfirmModalOpen}
+                onClose={() => setIsConfirmModalOpen(false)}
+                onConfirm={executeRemove}
+                title="Remove Offer?"
+                message="Are you sure you want to remove this offer? This action cannot be undone and it will be permanently deleted."
+                confirmText="Yes, Remove"
+                cancelText="Cancel"
+                type="danger"
+                isLoading={actionLoading}
+            />
         </div>
     );
 }

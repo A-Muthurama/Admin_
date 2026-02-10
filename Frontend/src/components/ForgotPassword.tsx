@@ -5,9 +5,9 @@ import {
   adminForgotPasswordVerify,
   adminForgotPasswordReset,
 } from "../api/api";
-import { Footer } from "./Footer";
 import icon from "../assets/icon.png";
 import "../styles/auth.css";
+import { toast } from "sonner";
 
 interface ForgotPasswordProps {
   onBack: () => void;
@@ -106,7 +106,7 @@ export function ForgotPassword({ onBack }: ForgotPasswordProps) {
         reset_token: resetToken,
         password,
       });
-      alert(res.data.message ?? "Password reset successful");
+      toast.success(res.data.message ?? "Password reset successful");
       onBack();
     } catch (e: any) {
       setError(e?.response?.data?.message ?? "Failed to reset password");

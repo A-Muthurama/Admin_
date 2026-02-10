@@ -2,6 +2,7 @@ import { useState } from "react";
 import { states, citiesByState, pincodesByCity } from "../../data/mockData";
 import { Plus, Trash2, MapPin, Map, Navigation } from "lucide-react";
 import "../../styles/location-management.css";
+import { toast } from "sonner";
 
 export function LocationManagement() {
   const [selectedState, setSelectedState] = useState("");
@@ -43,7 +44,7 @@ export function LocationManagement() {
               <button
                 onClick={() => {
                   if (newState.trim()) {
-                    alert(`State "${newState}" added successfully!`);
+                    toast.success(`State "${newState}" added successfully!`);
                     setNewState("");
                   }
                 }}
@@ -114,7 +115,7 @@ export function LocationManagement() {
                 <button
                   onClick={() => {
                     if (newCity.trim() && selectedState) {
-                      alert(`City "${newCity}" added to ${selectedState}!`);
+                      toast.success(`City "${newCity}" added to ${selectedState}!`);
                       setNewCity("");
                     }
                   }}
@@ -217,7 +218,7 @@ export function LocationManagement() {
                 <button
                   onClick={() => {
                     if (newPincode.trim() && selectedCity) {
-                      alert(
+                      toast.success(
                         `Pincode "${newPincode}" added to ${selectedCity}!`
                       );
                       setNewPincode("");

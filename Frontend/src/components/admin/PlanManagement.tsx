@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { SubscriptionPlan, getAllPlans, createPlan, updatePlan, deletePlan } from '../../api/api';
 import { Edit2, Save, X, Plus, Trash2 } from 'lucide-react';
 import "../../styles/plan-management.css";
+import { toast } from 'sonner';
+import { ConfirmationModal } from '../common/ConfirmationModal';
 
 export function PlanManagement() {
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
@@ -13,6 +15,9 @@ export function PlanManagement() {
     posts: 0,
     months: 1
   });
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  const [planToDelete, setPlanToDelete] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
 
   // Fetch plans from database on component mount
@@ -47,7 +52,7 @@ export function PlanManagement() {
       }
     } catch (error) {
       console.error('❌ Error fetching plans:', error);
-      alert('Could not fetch plans from server. Please check if the backend is running.');
+      toast.error('Could not fetch plans from server.');
     } finally {
       setLoading(false);
     }
@@ -95,10 +100,10 @@ export function PlanManagement() {
         console.log('✅ Plan saved successfully, refreshing list...');
         await fetchPlans();
         setEditingPlan(null);
-        alert(isNewPlan ? 'Plan created successfully!' : 'Plan updated successfully!');
+        toast.success(isNewPlan ? 'Plan created successfully!' : 'Plan updated successfully!');
       } else {
         console.error('❌ Server error detail:', (plansData as any).error || (plansData as any).message);
-        alert('Failed to save plan: ' + ((plansData as any).message || (plansData as any).error || 'Check console for details'));
+        toast.error('Failed to save plan: ' + ((plansData as any).message || (plansData as any).error || 'Unknown error'));
       }
 
     } catch (error) {
@@ -110,34 +115,45 @@ export function PlanManagement() {
           : p
       ));
       setEditingPlan(null);
-      alert('Error connecting to server. Plan changes applied locally but might not be saved.');
+      toast.error('Error connecting to server. Plan changes might not be saved.');
     }
   };
 
-  const handleDelete = async (planId: string) => {
-    if (!window.confirm('Are you sure you want to delete this plan?')) return;
+  const handleDelete = (planId: string) => {
+    setPlanToDelete(planId);
+    setIsConfirmModalOpen(true);
+  };
 
-    if (planId.startsWith('new-')) {
-      setPlans(plans.filter(p => p.id !== planId));
+  const executeDelete = async () => {
+    if (!planToDelete) return;
+
+    if (planToDelete.startsWith('new-')) {
+      setPlans(plans.filter(p => p.id !== planToDelete));
+      setIsConfirmModalOpen(false);
       return;
     }
 
+    setIsDeleting(true);
     try {
-      const result = await deletePlan(planId);
+      const result = await deletePlan(planToDelete);
       const plansData = result.data;
 
       if (plansData.success) {
-        setPlans(plans.filter(p => p.id !== planId));
-        alert('Plan deleted successfully');
+        setPlans(plans.filter(p => p.id !== planToDelete));
+        toast.success('Plan deleted successfully');
       } else {
         console.error('❌ Server delete error:', plansData);
-        alert('Failed to delete plan: ' + ((plansData as any).message || (plansData as any).error || 'Unknown error'));
+        toast.error('Failed to delete plan: ' + ((plansData as any).message || (plansData as any).error || 'Unknown error'));
       }
     } catch (error) {
       console.error('❌ Error deleting plan:', error);
       // Force remove from UI if server unreachable
-      setPlans(plans.filter(p => p.id !== planId));
-      alert('Error connecting to server. Plan removed locally.');
+      setPlans(plans.filter(p => p.id !== planToDelete));
+      toast.error('Error connecting to server. Plan removed locally.');
+    } finally {
+      setIsDeleting(false);
+      setIsConfirmModalOpen(false);
+      setPlanToDelete(null);
     }
   }
 
@@ -335,6 +351,17 @@ export function PlanManagement() {
           </div>
         </div>
       </div>
+      <ConfirmationModal
+        isOpen={isConfirmModalOpen}
+        onClose={() => setIsConfirmModalOpen(false)}
+        onConfirm={executeDelete}
+        title="Delete Plan?"
+        message="Are you sure you want to delete this subscription plan? Existing vendors on this plan will not be affected until their renewal."
+        confirmText="Yes, Delete"
+        cancelText="Cancel"
+        type="danger"
+        isLoading={isDeleting}
+      />
     </div>
   );
 }
