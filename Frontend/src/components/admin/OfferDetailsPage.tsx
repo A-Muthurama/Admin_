@@ -1,6 +1,6 @@
 
 import { useEffect, useState } from "react";
-import { ArrowLeft, CheckCircle, XCircle, ShoppingBag, Store, X, MapPin, Calendar, Tag, PlayCircle, User, Phone, Trash2 } from "lucide-react";
+import { ArrowLeft, CheckCircle, XCircle, ShoppingBag, Store, X, MapPin, Calendar, Tag, PlayCircle, User, Phone, Trash2, ExternalLink } from "lucide-react";
 import { AdminOfferDetails, approveOffer, getOfferDetails, rejectOffer, deleteOffer } from "../../api/api";
 import "../../styles/offer-details.css";
 import { toast } from "sonner";
@@ -12,23 +12,43 @@ interface OfferDetailsPageProps {
     onStatusChange: () => void;
 }
 
+const getOrdinalSuffix = (day: number) => {
+    if (day > 3 && day < 21) return 'th';
+    switch (day % 10) {
+        case 1: return "st";
+        case 2: return "nd";
+        case 3: return "rd";
+        default: return "th";
+    }
+};
+
 const formatDate = (dateString: any) => {
-    if (!dateString) return '—';
+    if (!dateString) return null;
     try {
         const d = new Date(dateString);
         if (isNaN(d.getTime())) {
-            if (typeof dateString === 'string' && dateString.length > 5) {
-                return dateString.split('T')[0];
+            // Check if it's already a formatted string or just the date part
+            if (typeof dateString === 'string' && dateString.split('-').length === 3) {
+                const parts = dateString.split('T')[0].split('-');
+                if (parts.length === 3) {
+                    const year = parseInt(parts[0]);
+                    const month = parseInt(parts[1]) - 1;
+                    const day = parseInt(parts[2]);
+                    const d2 = new Date(year, month, day);
+                    if (!isNaN(d2.getTime())) {
+                        const day2 = d2.getDate();
+                        const month2 = d2.toLocaleDateString('en-GB', { month: 'short' });
+                        return `${day2}${getOrdinalSuffix(day2)} ${month2} ${d2.getFullYear()}`;
+                    }
+                }
             }
-            return '—';
+            return null;
         }
-        return d.toLocaleDateString('en-GB', {
-            day: 'numeric',
-            month: 'short',
-            year: 'numeric'
-        });
+        const day = d.getDate();
+        const month = d.toLocaleDateString('en-GB', { month: 'short' });
+        return `${day}${getOrdinalSuffix(day)} ${month} ${d.getFullYear()}`;
     } catch {
-        return '—';
+        return null;
     }
 };
 
@@ -118,6 +138,8 @@ export function OfferDetailsPage({ offerId, onBack, onStatusChange }: OfferDetai
     const activeMedia = details?.images[activeMediaIndex];
     const isVideo = activeMedia ? /\.(mp4|webm|ogg|mov)$/i.test(activeMedia.url) : false;
 
+    const offerDate = details ? formatDate(details.createdAt || (details as any).created_at) : null;
+
     return (
         <div className="od-container">
             <div className="od-nav-bar">
@@ -159,8 +181,12 @@ export function OfferDetailsPage({ offerId, onBack, onStatusChange }: OfferDetai
                                             <Store size={14} className="text-gray-400" />
                                             <span className="font-semibold text-gray-700">{details.vendor.shopName}</span>
                                         </div>
-                                        <span className="text-gray-300">•</span>
-                                        <span className="text-gray-500 font-medium">{formatDate(details.createdAt)}</span>
+                                        {offerDate && (
+                                            <>
+                                                <span className="text-gray-300">•</span>
+                                                <span className="text-gray-500 font-medium">{offerDate}</span>
+                                            </>
+                                        )}
                                     </div>
                                 </div>
                                 <div className="od-header-badges-row">
@@ -202,7 +228,7 @@ export function OfferDetailsPage({ offerId, onBack, onStatusChange }: OfferDetai
                                         <div className="od-stat-icon-wrapper"><Calendar size={18} /></div>
                                         <div className="od-stat-label">Validity</div>
                                         <div className="od-stat-value">
-                                            {formatDate(details.start_date || details.startDate)}
+                                            {formatDate(details.start_date || details.startDate) || 'Start Date N/A'}
                                             {(details.end_date || details.endDate) ? ` to ${formatDate(details.end_date || details.endDate)}` : ' (Ongoing)'}
                                         </div>
                                     </div>
@@ -210,9 +236,38 @@ export function OfferDetailsPage({ offerId, onBack, onStatusChange }: OfferDetai
                                         <div className="od-stat-icon-wrapper"><MapPin size={18} /></div>
                                         <div className="od-stat-label">Location</div>
                                         <div className="od-stat-value text-sm">
-                                            {details.shop_address || details.vendor.address || 'N/A'}
+                                            {details.shop_address || details.vendor.address || 'Address not available'}
                                         </div>
+                                        {details.map_link && (
+                                            <a
+                                                href={details.map_link}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="od-stat-action-link"
+                                                style={{ marginTop: '8px', display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--color-plum)', fontWeight: 600, fontSize: '13px', textDecoration: 'none' }}
+                                            >
+                                                <ExternalLink size={14} /> View on Map
+                                            </a>
+                                        )}
                                     </div>
+                                    {details.buy_link && (
+                                        <div className="od-stat-card">
+                                            <div className="od-stat-icon-wrapper" style={{ background: 'rgba(5, 150, 105, 0.1)', color: '#059669' }}>
+                                                <ShoppingBag size={18} />
+                                            </div>
+                                            <div className="od-stat-label">Buy Now</div>
+                                            <div className="od-stat-value">Direct Link</div>
+                                            <a
+                                                href={details.buy_link}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="od-stat-action-link"
+                                                style={{ marginTop: '8px', display: 'flex', alignItems: 'center', gap: '4px', color: '#059669', fontWeight: 600, fontSize: '13px', textDecoration: 'none' }}
+                                            >
+                                                <ExternalLink size={14} /> Product Page
+                                            </a>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
 

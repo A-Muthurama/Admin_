@@ -229,13 +229,18 @@ export class AdminService {
     return data.map(o => ({
       ...o,
       id: o.id.toString(),
+      createdAt: o.created_at?.toISOString() || '',
       vendorId: o.vendor_id?.toString() || '', // ✅ CRITICAL: Map vendor_id to vendorId
       price: o.discount_value_numeric ? parseFloat(o.discount_value_numeric.toString()) : 0,
       storeLat: 0,
       storeLng: 0,
       status: (o.status?.toUpperCase() || 'PENDING') as any,
-      poster_url: o.poster_url || '', // Ensure this is mapped for the frontend
-      images: o.poster_url ? [{ id: 'poster', url: o.poster_url, status: 'APPROVED', createdAt: new Date().toISOString(), offerId: o.id.toString(), publicId: 'legacy' }] : [],
+      poster_url: o.poster_url || '',
+      video_url: o.video_url || '',
+      images: [
+        ...(o.poster_url ? [{ id: `poster-${o.id}`, url: o.poster_url, status: 'APPROVED', createdAt: new Date().toISOString(), offerId: o.id.toString(), publicId: 'legacy-p' }] : []),
+        ...(o.video_url ? [{ id: `video-${o.id}`, url: o.video_url, status: 'APPROVED', createdAt: new Date().toISOString(), offerId: o.id.toString(), publicId: 'legacy-v' } as any] : [])
+      ],
       vendor: {
         shopName: o.vendors?.shop_name || 'Unknown Shop',
         ownerName: o.vendors?.owner_name || '',
@@ -374,13 +379,18 @@ export class AdminService {
     return {
       ...offer,
       id: offer.id.toString(),
+      createdAt: offer.created_at?.toISOString() || '',
       vendorId: offer.vendor_id?.toString() || '', // ✅ CRITICAL: Map vendor_id to vendorId
       price: offer.discount_value_numeric ? parseFloat(offer.discount_value_numeric.toString()) : 0,
       storeLat: 0,
       storeLng: 0,
       status: (offer.status?.toUpperCase() || 'PENDING') as any,
-      poster_url: offer.poster_url || '', // Ensure this is mapped
-      images: offer.poster_url ? [{ id: 'poster', url: offer.poster_url, status: 'APPROVED', createdAt: new Date().toISOString(), offerId: offer.id.toString(), publicId: 'legacy' }] : [],
+      poster_url: offer.poster_url || '',
+      video_url: offer.video_url || '',
+      images: [
+        ...(offer.poster_url ? [{ id: `poster-${offer.id}`, url: offer.poster_url, status: 'APPROVED', createdAt: new Date().toISOString(), offerId: offer.id.toString(), publicId: 'legacy-p' }] : []),
+        ...(offer.video_url ? [{ id: `video-${offer.id}`, url: offer.video_url, status: 'APPROVED', createdAt: new Date().toISOString(), offerId: offer.id.toString(), publicId: 'legacy-v' } as any] : [])
+      ],
       vendor: {
         shopName: offer.vendors?.shop_name || 'Unknown Shop',
         ownerName: offer.vendors?.owner_name || '',
