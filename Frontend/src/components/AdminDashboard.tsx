@@ -195,7 +195,10 @@ export function AdminDashboard({ onLogout }: AdminDashboardProps) {
       </header>
 
       {/* Main Content Area */}
-      <main className={isDetailView ? "p-10 pt-32 pb-32 animate-fade-in" : "pj-main-layout"}>
+      <main
+        className={isDetailView ? "animate-fade-in" : "pj-main-layout"}
+        style={isDetailView ? { padding: '130px 40px 100px 40px', maxWidth: '1400px', margin: '0 auto' } : {}}
+      >
         <div className="fadeInPage">
           {viewingVendorId ? (
             <VendorDetailsPage

@@ -142,8 +142,28 @@ export function OfferDetailsPage({ offerId, onBack, onStatusChange }: OfferDetai
 
     return (
         <div className="od-container">
-            <div className="od-nav-bar">
-                <button onClick={onBack} className="od-back-btn">
+            <div className="od-nav-bar" style={{ marginBottom: '24px', display: 'flex' }}>
+                <button
+                    onClick={() => {
+                        console.log("Back button clicked");
+                        onBack();
+                    }}
+                    className="od-back-btn"
+                    style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        background: 'var(--color-plum-soft)',
+                        color: 'var(--color-plum)',
+                        border: '1px solid var(--border-accent)',
+                        padding: '10px 20px',
+                        borderRadius: '12px',
+                        fontWeight: '800',
+                        cursor: 'pointer',
+                        fontSize: '14px',
+                        boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
+                    }}
+                >
                     <ArrowLeft size={18} />
                     <span>Back to Offers</span>
                 </button>
@@ -255,23 +275,14 @@ export function OfferDetailsPage({ offerId, onBack, onStatusChange }: OfferDetai
                                             <div className="od-stat-icon-wrapper">
                                                 <ShoppingBag size={18} />
                                             </div>
-                                            <div className="od-stat-label">Buy Online</div>
-                                            <div className="od-stat-value">
-                                                {(() => {
-                                                    try {
-                                                        const url = new URL(details.buy_link);
-                                                        return url.hostname.replace('www.', '');
-                                                    } catch {
-                                                        return 'Product Page';
-                                                    }
-                                                })()}
-                                            </div>
+                                            <div className="od-stat-label">Buy Link</div>
+                                            <div className="od-stat-value">Available Online</div>
                                             <a
                                                 href={details.buy_link}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 className="od-stat-action-link"
-                                                style={{ marginTop: '8px', display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--color-plum)', fontWeight: 700, fontSize: '13px', textDecoration: 'none' }}
+                                                style={{ marginTop: '8px', display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--color-plum)', fontWeight: 700, fontSize: '14px', textDecoration: 'none' }}
                                             >
                                                 <ExternalLink size={14} /> Visit Store
                                             </a>
