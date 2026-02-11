@@ -2,7 +2,6 @@ import { useState } from "react";
 import { AdminLogin } from "./components/AdminLogin";
 import { AdminDashboard } from "./components/AdminDashboard";
 import { ForgotPassword } from "./components/ForgotPassword";
-
 import { Toaster } from 'sonner';
 
 import "./styles/variables.css";

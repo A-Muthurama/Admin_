@@ -127,6 +127,7 @@ export interface PendingAdminOffer {
   createdAt: string;
   vendorId: string;
   vendor: AdminOfferVendorInfo;
+  rejection_reason?: string;
 }
 
 export interface OfferImage {

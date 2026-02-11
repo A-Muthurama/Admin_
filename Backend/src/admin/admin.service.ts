@@ -337,19 +337,23 @@ export class AdminService {
       this.logger.error(`Failed to send offer rejection email for offer ${id}: ${err.message}`);
     }
 
-    // 3️⃣ Delete from Prisma DB (Primary Goal)
+    // 3️⃣ Update Prisma DB to REJECTED (instead of deleting)
     try {
-      this.logger.log(`Deleting offer ${id} from database...`);
-      await this.prisma.offers.delete({
+      this.logger.log(`Setting offer ${id} status to REJECTED...`);
+      await this.prisma.offers.update({
         where: { id },
+        data: {
+          status: 'REJECTED',
+          rejection_reason: reason,
+        },
       });
-      this.logger.log(`Offer ${id} successfully deleted.`);
+      this.logger.log(`Offer ${id} status successfully set to REJECTED.`);
     } catch (err: any) {
-      this.logger.error(`Database deletion failed for offer ${id}: ${err.message}`);
-      throw err; // Re-throw DB error as it's critical
+      this.logger.error(`Database update failed for offer ${id}: ${err.message}`);
+      throw err;
     }
 
-    return { message: 'Offer rejected and deleted successfully' };
+    return { message: 'Offer rejected successfully' };
   }
 
   /* ===================== DETAILS ===================== */
