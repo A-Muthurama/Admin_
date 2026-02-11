@@ -3,17 +3,29 @@
 .od-container {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 20px 20px 60px 20px;
+    padding: 20px 16px 80px 16px;
     animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (min-width: 768px) {
+    .od-container {
+        padding: 24px 24px 100px 24px;
+    }
 }
 
 /* New Back Navigation */
 .od-nav-bar {
-    margin-bottom: 32px;
+    margin-bottom: 24px;
     display: flex;
     align-items: center;
     position: relative;
     z-index: 10;
+}
+
+@media (max-width: 768px) {
+    .od-nav-bar {
+        margin-bottom: 20px;
+    }
 }
 
 .od-back-btn {
@@ -112,15 +124,17 @@
     display: flex;
     flex-direction: column;
     gap: 8px;
+    width: 100%;
 }
 
 .od-title {
-    font-size: 24px;
+    font-size: 22px;
     font-weight: 800;
     color: var(--text-primary);
     margin: 0;
     letter-spacing: -0.04em;
     line-height: 1.2;
+    word-break: break-word;
 }
 
 @media (min-width: 768px) {
@@ -557,52 +571,72 @@
     cursor: pointer;
 }
 
-/* Final Mobile View Fixes */
-@media (max-width: 1024px) {
-    .od-layout-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .od-main-media {
-        margin: 0 auto;
-    }
-}
-
 @media (max-width: 768px) {
     .od-container {
-        padding: 85px 20px 60px;
+        padding: 10px 12px 60px 12px;
     }
 
     .od-header-card {
-        padding: 24px;
-        flex-direction: column;
-        align-items: flex-start;
+        padding: 20px 16px;
+        border-radius: 16px;
     }
 
     .od-title {
-        font-size: 24px;
+        font-size: 20px;
     }
 
-    .od-price-tag {
+    .od-meta-row {
+        flex-direction: column;
         align-items: flex-start;
-        margin-top: 16px;
+        gap: 6px;
     }
 
-    .od-icon-box {
-        width: 56px;
-        height: 56px;
+    .od-meta-row span.text-gray-300 {
+        display: none;
+        /* Hide bullets on mobile vertical list */
+    }
+
+    .od-header-badges-row {
+        gap: 8px;
+    }
+
+    .od-status-pill {
+        padding: 4px 10px;
+        font-size: 10px;
+    }
+
+    .od-card {
+        padding: 20px 16px;
+        border-radius: 16px;
+        margin-bottom: 20px;
+    }
+
+    .od-layout-grid {
+        gap: 20px;
     }
 
     .od-stat-grid {
         grid-template-columns: 1fr;
+        gap: 12px;
     }
 
-    .od-btn {
-        width: 100%;
+    .od-main-media {
+        max-width: 100%;
+        border-radius: 16px;
     }
 
-    .od-action-btn-group {
-        flex-direction: column;
+    .od-thumbnails {
+        gap: 8px;
+    }
+
+    .od-thumb-item {
+        width: 60px;
+        height: 60px;
+    }
+
+    .od-action-panel {
+        padding: 20px 16px;
+        border-radius: 16px;
     }
 }
 
