@@ -73,10 +73,11 @@
 
 .pj-brand-name {
     font-family: 'Cormorant Garamond', serif;
-    font-size: 32px;
+    /* Fluid font size: 24px on mobile, scales to 36px on desktop */
+    font-size: clamp(24px, 4vw, 36px);
     font-weight: 700;
-    line-height: 1;
-    letter-spacing: 0.08em;
+    line-height: 0.9;
+    letter-spacing: 0.1em;
     background: linear-gradient(135deg, #4C0F2D 0%, #d4af37 50%, #4C0F2D 100%);
     background-size: 200% auto;
     -webkit-background-clip: text;
@@ -169,7 +170,8 @@
     cursor: pointer;
     color: var(--color-plum);
     padding: 8px;
-    z-index: 1001;
+    z-index: 2001;
+    /* Above sidebar */
 }
 
 .pj-nav-footer-mobile {
@@ -182,10 +184,6 @@
 @media (max-width: 1024px) {
     .pj-nav-menu {
         gap: 20px;
-    }
-
-    .pj-brand-name {
-        font-size: 24px;
     }
 }
 
@@ -202,17 +200,20 @@
         position: fixed;
         top: 0;
         right: -100%;
-        width: 300px;
+        width: 80%;
+        max-width: 320px;
         height: 100vh;
-        background-color: white;
+        background-color: #ffffff;
         flex-direction: column;
-        align-items: flex-start;
+        align-items: center;
+        /* Center links for a cleaner look */
         justify-content: flex-start;
-        padding: 100px 40px 40px;
-        gap: 24px;
-        box-shadow: -10px 0 30px rgba(0, 0, 0, 0.05);
+        padding: 120px 24px 40px;
+        gap: 12px;
+        box-shadow: -15px 0 40px rgba(76, 15, 45, 0.1);
         transition: right 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-        z-index: 1000;
+        z-index: 2000;
+        /* Sidebar above almost everything */
     }
 
     .pj-nav-menu.mobile-open {
@@ -221,22 +222,27 @@
 
     .pj-nav-link {
         width: 100%;
-        font-size: 18px;
-        padding: 16px 0;
+        font-size: 15px;
+        font-weight: 600;
+        padding: 16px 20px;
         text-align: center;
         letter-spacing: 0.2em;
-        border-bottom: 1px solid rgba(0, 0, 0, 0.03);
+        color: var(--text-muted);
+        border: none;
+        transition: all 0.3s ease;
+        border-radius: 12px;
     }
 
     .pj-nav-link.active::after {
         display: none;
+        /* Removed the line completely as requested */
     }
 
     .pj-nav-link.active {
         color: var(--color-plum);
         font-weight: 800;
         background: var(--color-plum-soft);
-        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(94, 22, 53, 0.05);
     }
 
     .pj-header-actions {
@@ -253,7 +259,7 @@
     }
 
     .pj-brand-name {
-        font-size: 18px;
+        line-height: 0.95;
     }
 
     .pj-logo-wrapper {
@@ -264,17 +270,17 @@
 @media (max-width: 450px) {
     .pj-brand-name {
         display: block;
-        font-size: 25px;
-        line-height: 1.1;
-        max-width: 140px;
+        font-size: 28px;
+        line-height: 1;
+        max-width: 160px;
     }
 
     .pj-logo-wrapper {
-        height: 40px;
+        height: 44px;
     }
 
     .pj-brand {
-        gap: 10px;
+        gap: 12px;
     }
 }
 
