@@ -209,7 +209,7 @@ export function OfferDetailsPage({ offerId, onBack, onStatusChange }: OfferDetai
                         <div className="od-info-section">
                             <div className="od-card">
                                 <div className="flex items-center gap-2 mb-6 border-b border-gray-100 pb-4">
-                                    <Tag size={18} className="text-purple-700" />
+                                    <Tag size={18} style={{ color: 'var(--color-plum)' }} />
                                     <h3 className="text-lg font-bold text-gray-900 uppercase tracking-wide m-0">About this Offer</h3>
                                 </div>
                                 <div className="mb-8">
@@ -252,7 +252,7 @@ export function OfferDetailsPage({ offerId, onBack, onStatusChange }: OfferDetai
                                     </div>
                                     {details.buy_link && (
                                         <div className="od-stat-card">
-                                            <div className="od-stat-icon-wrapper" style={{ background: 'rgba(5, 150, 105, 0.1)', color: '#059669' }}>
+                                            <div className="od-stat-icon-wrapper">
                                                 <ShoppingBag size={18} />
                                             </div>
                                             <div className="od-stat-label">Buy Now</div>
@@ -262,7 +262,7 @@ export function OfferDetailsPage({ offerId, onBack, onStatusChange }: OfferDetai
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 className="od-stat-action-link"
-                                                style={{ marginTop: '8px', display: 'flex', alignItems: 'center', gap: '4px', color: '#059669', fontWeight: 600, fontSize: '13px', textDecoration: 'none' }}
+                                                style={{ marginTop: '8px', display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--color-plum)', fontWeight: 600, fontSize: '13px', textDecoration: 'none' }}
                                             >
                                                 <ExternalLink size={14} /> Product Page
                                             </a>
@@ -273,7 +273,7 @@ export function OfferDetailsPage({ offerId, onBack, onStatusChange }: OfferDetai
 
                             <div className="od-card">
                                 <div className="flex items-center gap-2 mb-6 border-b border-gray-100 pb-4">
-                                    <Store size={18} className="text-purple-700" />
+                                    <Store size={18} style={{ color: 'var(--color-plum)' }} />
                                     <h3 className="text-lg font-bold text-gray-900 uppercase tracking-wide m-0">Merchant Info</h3>
                                 </div>
                                 <div className="od-stat-grid">
@@ -328,7 +328,7 @@ export function OfferDetailsPage({ offerId, onBack, onStatusChange }: OfferDetai
 
                             {isRejected && (
                                 <div className="od-action-panel">
-                                    <div className="od-action-title" style={{ color: '#ef4444' }}>Offer Rejected</div>
+                                    <div className="od-action-title" style={{ color: 'var(--color-error)' }}>Offer Rejected</div>
                                     {details.rejection_reason && (
                                         <div className="mb-4 p-3 bg-red-50 border border-red-100 rounded-lg">
                                             <div className="text-xs font-bold text-red-400 uppercase tracking-wider mb-1">Reason</div>
@@ -348,9 +348,9 @@ export function OfferDetailsPage({ offerId, onBack, onStatusChange }: OfferDetai
 
                             {isApproved && (
                                 <div className="od-action-panel">
-                                    <div className="od-action-title" style={{ color: '#ef4444' }}>Manage Offer</div>
+                                    <div className="od-action-title" style={{ color: 'var(--color-error)' }}>Manage Offer</div>
                                     <div className="od-action-btn-group">
-                                        <button onClick={handleRemove} disabled={actionLoading} className="od-btn" style={{ backgroundColor: '#fee2e2', color: '#ef4444', border: '1px solid #fecaca', flex: 1 }}>
+                                        <button onClick={handleRemove} disabled={actionLoading} className="od-btn" style={{ backgroundColor: 'var(--color-plum-soft)', color: 'var(--color-plum)', border: '1px solid var(--border-accent)', flex: 1 }}>
                                             <Trash2 size={16} /> Remove Offer
                                         </button>
                                     </div>

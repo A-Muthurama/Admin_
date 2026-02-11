@@ -198,23 +198,23 @@
 }
 
 .od-status-pill.approved {
-    color: #047857;
-    background: #ecfdf5;
-    border-color: #d1fae5;
+    color: var(--color-success);
+    background: #f0fdf4;
+    border-color: #dcfce7;
 }
 
 .od-status-pill.approved .od-pill-dot {
-    background: #10b981;
+    background: var(--color-success);
 }
 
 .od-status-pill.rejected {
-    color: #b91c1c;
+    color: var(--color-error);
     background: #fef2f2;
     border-color: #fee2e2;
 }
 
 .od-status-pill.rejected .od-pill-dot {
-    background: #ef4444;
+    background: var(--color-error);
 }
 
 .od-status-pill.discount {
@@ -473,27 +473,27 @@
 }
 
 .od-btn-approve {
-    background: #059669;
+    background: var(--color-success);
     color: white;
 }
 
 .od-btn-approve:hover {
-    background: #047857;
+    background: #2d5037;
     transform: translateY(-2px);
-    box-shadow: 0 8px 15px rgba(5, 150, 105, 0.2);
+    box-shadow: 0 8px 15px rgba(61, 107, 74, 0.2);
 }
 
 .od-btn-reject {
     background: #ffffff;
-    border: 2px solid #e11d48;
-    color: #e11d48;
+    border: 2px solid var(--color-error);
+    color: var(--color-error);
 }
 
 .od-btn-reject:hover {
-    background: #e11d48;
+    background: var(--color-error);
     color: white;
     transform: translateY(-2px);
-    box-shadow: 0 8px 15px rgba(225, 29, 72, 0.2);
+    box-shadow: 0 8px 15px rgba(168, 74, 79, 0.2);
 }
 
 .od-rejection-area {
