@@ -270,17 +270,21 @@
 @media (max-width: 450px) {
     .pj-brand-name {
         display: block;
-        font-size: 28px;
-        line-height: 1;
-        max-width: 160px;
+        font-size: 24px;
+        /* Balanced size for mobile */
+        line-height: 0.95;
+        max-width: 220px;
+        /* Increased to prevent S/E from cutting off */
+        margin-right: 10px;
     }
 
     .pj-logo-wrapper {
-        height: 44px;
+        height: 42px;
     }
 
     .pj-brand {
-        gap: 12px;
+        gap: 8px;
+        /* Slightly tighter gap to save space */
     }
 }
 
