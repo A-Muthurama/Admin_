@@ -73,9 +73,10 @@
 
 .pj-brand-name {
     font-family: 'Cormorant Garamond', serif;
-    font-size: 28px;
+    font-size: 32px;
     font-weight: 700;
-    letter-spacing: 0.12em;
+    line-height: 1;
+    letter-spacing: 0.08em;
     background: linear-gradient(135deg, #4C0F2D 0%, #d4af37 50%, #4C0F2D 100%);
     background-size: 200% auto;
     -webkit-background-clip: text;
@@ -184,7 +185,7 @@
     }
 
     .pj-brand-name {
-        font-size: 22px;
+        font-size: 24px;
     }
 }
 
@@ -220,14 +221,22 @@
 
     .pj-nav-link {
         width: 100%;
-        font-size: 16px;
-        padding: 12px 0;
+        font-size: 18px;
+        padding: 16px 0;
+        text-align: center;
+        letter-spacing: 0.2em;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.03);
     }
 
     .pj-nav-link.active::after {
-        left: 0;
-        bottom: 0;
-        width: 40px;
+        display: none;
+    }
+
+    .pj-nav-link.active {
+        color: var(--color-plum);
+        font-weight: 800;
+        background: var(--color-plum-soft);
+        border-radius: 8px;
     }
 
     .pj-header-actions {
@@ -252,20 +261,20 @@
     }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 450px) {
     .pj-brand-name {
         display: block;
-        font-size: 14px;
+        font-size: 25px;
         line-height: 1.1;
-        max-width: 100px;
+        max-width: 140px;
     }
 
     .pj-logo-wrapper {
-        height: 36px;
+        height: 40px;
     }
 
     .pj-brand {
-        gap: 8px;
+        gap: 10px;
     }
 }
 

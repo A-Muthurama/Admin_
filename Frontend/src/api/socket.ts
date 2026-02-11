@@ -8,7 +8,7 @@ class SocketService {
     connect() {
         if (!this.socket) {
             this.socket = io(SOCKET_URL, {
-                transports: ['websocket'],
+                transports: ['polling', 'websocket'], // Allow polling fallback for production
                 reconnection: true,
             });
 

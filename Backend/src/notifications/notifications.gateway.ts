@@ -9,8 +9,14 @@ import { Logger } from '@nestjs/common';
 
 @WebSocketGateway({
     cors: {
-        origin: '*', // For development. Adjust for production.
+        origin: [
+            'https://admin.jewellersparadise.com',
+            'https://www.admin.jewellersparadise.com',
+            'https://jewellersparadise.com',
+        ],
+        credentials: true,
     },
+    transports: ['polling', 'websocket'],
 })
 export class NotificationsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @WebSocketServer()
