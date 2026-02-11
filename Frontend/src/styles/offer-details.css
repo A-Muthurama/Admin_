@@ -3,15 +3,17 @@
 .od-container {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 10px 20px 60px 20px;
+    padding: 20px 20px 60px 20px;
     animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* New Back Navigation */
 .od-nav-bar {
-    margin-bottom: 24px;
+    margin-bottom: 32px;
     display: flex;
     align-items: center;
+    position: relative;
+    z-index: 10;
 }
 
 .od-back-btn {

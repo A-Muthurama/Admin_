@@ -1,6 +1,6 @@
 
 import { useEffect, useState } from "react";
-import { ArrowLeft, CheckCircle, XCircle, ShoppingBag, Store, X, MapPin, Calendar, Tag, PlayCircle, User, Phone, Trash2, ExternalLink } from "lucide-react";
+import { ArrowLeft, CheckCircle, XCircle, ShoppingBag, Store, X, MapPin, Calendar, Tag, PlayCircle, User, Phone, Trash2, ExternalLink, Mail } from "lucide-react";
 import { AdminOfferDetails, approveOffer, getOfferDetails, rejectOffer, deleteOffer } from "../../api/api";
 import "../../styles/offer-details.css";
 import { toast } from "sonner";
@@ -255,16 +255,25 @@ export function OfferDetailsPage({ offerId, onBack, onStatusChange }: OfferDetai
                                             <div className="od-stat-icon-wrapper">
                                                 <ShoppingBag size={18} />
                                             </div>
-                                            <div className="od-stat-label">Buy Now</div>
-                                            <div className="od-stat-value">Direct Link</div>
+                                            <div className="od-stat-label">Buy Online</div>
+                                            <div className="od-stat-value">
+                                                {(() => {
+                                                    try {
+                                                        const url = new URL(details.buy_link);
+                                                        return url.hostname.replace('www.', '');
+                                                    } catch {
+                                                        return 'Product Page';
+                                                    }
+                                                })()}
+                                            </div>
                                             <a
                                                 href={details.buy_link}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 className="od-stat-action-link"
-                                                style={{ marginTop: '8px', display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--color-plum)', fontWeight: 600, fontSize: '13px', textDecoration: 'none' }}
+                                                style={{ marginTop: '8px', display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--color-plum)', fontWeight: 700, fontSize: '13px', textDecoration: 'none' }}
                                             >
-                                                <ExternalLink size={14} /> Product Page
+                                                <ExternalLink size={14} /> Visit Store
                                             </a>
                                         </div>
                                     )}
@@ -291,6 +300,13 @@ export function OfferDetailsPage({ offerId, onBack, onStatusChange }: OfferDetai
                                         <div className="od-stat-icon-wrapper"><Phone size={18} /></div>
                                         <div className="od-stat-label">Phone</div>
                                         <div className="od-stat-value">{details.vendor.phone || 'N/A'}</div>
+                                    </div>
+                                    <div className="od-stat-card">
+                                        <div className="od-stat-icon-wrapper"><Mail size={18} /></div>
+                                        <div className="od-stat-label">Email</div>
+                                        <div className="od-stat-value" style={{ fontSize: '12px', wordBreak: 'break-all' }}>
+                                            {details.vendor.user?.email || 'N/A'}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
