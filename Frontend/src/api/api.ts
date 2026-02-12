@@ -116,7 +116,7 @@ export interface PendingAdminOffer {
   end_date?: string;
   shop_address?: string;
   map_link?: string;
-  buy_link?: string; // Adding for future/completeness if requested
+  buy_link?: string; 
 
   // Keep these for backward/camelCase compatibility if backend converts them
   discountPercentage?: number;

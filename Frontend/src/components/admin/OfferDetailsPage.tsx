@@ -205,7 +205,7 @@ export function OfferDetailsPage({ offerId, onBack, onStatusChange }: OfferDetai
                             <div className="od-icon-box">
                                 <ShoppingBag size={32} />
                             </div>
-                            <div className="wrapper-title-badges" style={{ flex: 1 }}>
+                            <div className="wrapper-title-badges" style={{ flex: 1, minWidth: 0 }}>
                                 <div className="od-title-group">
                                     <h1 className="od-title">{details.title}</h1>
                                     <div className="od-meta-row">
@@ -399,7 +399,7 @@ export function OfferDetailsPage({ offerId, onBack, onStatusChange }: OfferDetai
                                     {details.rejection_reason && (
                                         <div className="mb-4 p-3 bg-red-50 border border-red-100 rounded-lg">
                                             <div className="text-xs font-bold text-red-400 uppercase tracking-wider mb-1">Reason</div>
-                                            <p className="text-sm text-red-700">{details.rejection_reason}</p>
+                                            <p className="text-sm text-red-700 od-rejection-text">{details.rejection_reason}</p>
                                         </div>
                                     )}
                                     <div className="od-action-btn-group">
