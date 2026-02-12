@@ -67,8 +67,23 @@ export function OfferDetailsPage({ offerId, onBack, onStatusChange }: OfferDetai
         const fetchDetails = async () => {
             setIsLoading(true);
             try {
-                const data = await getOfferDetails(offerId);
-                setDetails(data.data);
+                const response = await getOfferDetails(offerId);
+                const offerData = response.data;
+
+                // FIX: If video_url exists but is NOT in the images array, inject it manually
+                if (offerData.video_url && !offerData.images.some(img => img.url === offerData.video_url)) {
+                    console.log("Injecting missing video into images array:", offerData.video_url);
+                    offerData.images.unshift({
+                        id: `video-${Date.now()}`,
+                        url: offerData.video_url,
+                        publicId: 'video-placeholder',
+                        status: 'APPROVED',
+                        createdAt: new Date().toISOString(),
+                        offerId: offerData.id
+                    } as any);
+                }
+
+                setDetails(offerData);
             } catch (err) {
                 console.error("Failed to fetch offer details", err);
                 setError("Failed to load offer.");
@@ -137,13 +152,6 @@ export function OfferDetailsPage({ offerId, onBack, onStatusChange }: OfferDetai
     const isRejected = details?.status === 'REJECTED';
     const activeMedia = details?.images[activeMediaIndex];
     const isVideo = activeMedia ? (activeMedia.id.startsWith('video-') || /\.(mp4|webm|ogg|mov|m3u8)$/i.test(activeMedia.url)) : false;
-
-    console.log("Offer Details Debug:", {
-        video_url: details?.video_url,
-        images: details?.images,
-        activeMedia,
-        isVideo
-    });
 
     const offerDate = details ? formatDate(details.createdAt || (details as any).created_at) : null;
 
