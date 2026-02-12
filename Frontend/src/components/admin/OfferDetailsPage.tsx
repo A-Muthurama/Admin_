@@ -138,6 +138,13 @@ export function OfferDetailsPage({ offerId, onBack, onStatusChange }: OfferDetai
     const activeMedia = details?.images[activeMediaIndex];
     const isVideo = activeMedia ? (activeMedia.id.startsWith('video-') || /\.(mp4|webm|ogg|mov|m3u8)$/i.test(activeMedia.url)) : false;
 
+    console.log("Offer Details Debug:", {
+        video_url: details?.video_url,
+        images: details?.images,
+        activeMedia,
+        isVideo
+    });
+
     const offerDate = details ? formatDate(details.createdAt || (details as any).created_at) : null;
 
     return (
@@ -447,7 +454,7 @@ export function OfferDetailsPage({ offerId, onBack, onStatusChange }: OfferDetai
                     {previewImage && (
                         <div className="vd-lightbox" onClick={() => setPreviewImage(null)}>
                             <button className="vd-lightbox-close" onClick={() => setPreviewImage(null)}><X size={32} /></button>
-                            {/\.(mp4|webm|ogg|mov)$/i.test(previewImage) ? (
+                            {/\.(mp4|webm|ogg|mov|m3u8)$/i.test(previewImage) || (previewImage.includes('video-') || (details?.images?.find(i => i.url === previewImage)?.id.startsWith('video-'))) ? (
                                 <video src={previewImage} controls autoPlay className="vd-lightbox-img" onClick={e => e.stopPropagation()} />
                             ) : (
                                 <img src={previewImage} alt="Full view" className="vd-lightbox-img" onClick={e => e.stopPropagation()} />
