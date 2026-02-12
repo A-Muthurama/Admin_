@@ -140,7 +140,7 @@ export function AdminDashboard({ onLogout }: AdminDashboardProps) {
   const isDetailView = !!viewingVendorId || !!viewingOfferId;
 
   return (
-    <div className="w-full">
+    <div className="w-full flex flex-col min-h-screen">
       {/* Dashboard Header - Always Visible */}
       <header className={`pj-header-container ${isMobileMenuOpen ? 'menu-open' : ''}`}>
         <div
@@ -195,7 +195,7 @@ export function AdminDashboard({ onLogout }: AdminDashboardProps) {
       </header>
 
       {/* Main Content Area */}
-      <main className={isDetailView ? "pj-detail-layout animate-fade-in" : "pj-main-layout"}>
+      <main className={isDetailView ? "pj-detail-layout animate-fade-in" : "pj-main-layout"} style={{ flex: 1 }}>
         <div className="fadeInPage">
           {viewingVendorId ? (
             <VendorDetailsPage

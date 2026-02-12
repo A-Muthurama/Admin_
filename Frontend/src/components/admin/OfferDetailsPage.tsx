@@ -270,6 +270,24 @@ export function OfferDetailsPage({ offerId, onBack, onStatusChange }: OfferDetai
                                             </a>
                                         )}
                                     </div>
+                                    {details.buy_link && (
+                                        <div className="od-stat-card">
+                                            <div className="od-stat-icon-wrapper">
+                                                <ShoppingBag size={18} />
+                                            </div>
+                                            <div className="od-stat-label">Buy Link</div>
+                                            <div style={{ marginTop: '12px' }}>
+                                                <a
+                                                    href={details.buy_link}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="od-btn-visit"
+                                                >
+                                                    Visit Store <ExternalLink size={16} />
+                                                </a>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
 
@@ -409,20 +427,6 @@ export function OfferDetailsPage({ offerId, onBack, onStatusChange }: OfferDetai
                         </div>
                     )}
                 </>
-            )}
-
-            {details?.buy_link && (
-                <div className="od-sticky-footer">
-                    <a
-                        href={details.buy_link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="od-sticky-btn"
-                    >
-                        <ExternalLink size={18} />
-                        Visit Store Online
-                    </a>
-                </div>
             )}
 
             <ConfirmationModal
