@@ -276,16 +276,16 @@ export function OfferDetailsPage({ offerId, onBack, onStatusChange }: OfferDetai
                                                 <ShoppingBag size={18} />
                                             </div>
                                             <div className="od-stat-label">Buy Link</div>
-                                            <div style={{ marginTop: '12px' }}>
-                                                <a
-                                                    href={details.buy_link}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="od-btn-visit"
-                                                >
-                                                    Visit Store <ExternalLink size={16} />
-                                                </a>
-                                            </div>
+                                            <div className="od-stat-value">Available Online</div>
+                                            <a
+                                                href={details.buy_link}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="od-stat-action-link"
+                                                style={{ marginTop: '8px', display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--color-plum)', fontWeight: 700, fontSize: '14px', textDecoration: 'none' }}
+                                            >
+                                                <ExternalLink size={14} /> Visit Store
+                                            </a>
                                         </div>
                                     )}
                                 </div>

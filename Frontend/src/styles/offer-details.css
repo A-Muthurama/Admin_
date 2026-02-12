@@ -651,28 +651,3 @@
         transform: translateY(0);
     }
 }
-
-/* Buy Button in Offer Details */
-.od-btn-visit {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    background: var(--color-plum);
-    color: #ffffff;
-    font-weight: 700;
-    font-size: 14px;
-    padding: 12px 24px;
-    border-radius: 12px;
-    text-decoration: none;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    width: 100%;
-    box-shadow: 0 4px 12px rgba(94, 22, 53, 0.15);
-}
-
-.od-btn-visit:hover {
-    filter: brightness(1.1);
-    transform: translateY(-2px);
-    box-shadow: 0 8px 16px rgba(94, 22, 53, 0.25);
-    color: #ffffff;
-}
