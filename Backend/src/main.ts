@@ -12,6 +12,10 @@ async function bootstrap() {
       'https://admin.jewellersparadise.com',
       'https://admin-api.jewellersparadise.com',
       'https://jewellersparadise.com',
+      'http://localhost:3001',
+      'http://localhost:3000',
+      'http://127.0.0.1:3001',
+      'http://127.0.0.1:3000',
     ],
     credentials: true,
   });

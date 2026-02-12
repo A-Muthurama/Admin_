@@ -169,24 +169,30 @@ export function PlanManagement() {
 
   const handleAddPlan = () => {
     console.log('➕ Add Plan button clicked');
-    console.log('📊 Current plans count:', plans.length);
+
+    // Prevent multiple new plans from being added at once if one is already being edited
+    if (editingPlan && editingPlan.startsWith('new-')) {
+      toast.error('Please save or cancel the current new plan first.');
+      return;
+    }
 
     const timestamp = Date.now();
     const newId = `new-${timestamp}`;
     const newPlan = {
       id: newId,
       name: 'New Plan',
-      price: 99,
-      posts: 1,
+      price: 0,
+      posts: 10,
       months: 1
     };
 
     console.log('🆕 Creating new plan:', newPlan);
-    setPlans([...plans, newPlan]);
-    console.log('📋 Plans after adding:', [...plans, newPlan].length);
+    // Add to the START of the list so user sees it immediately at the top
+    setPlans([newPlan, ...plans]);
 
     handleEdit(newPlan); // Immediately enter edit mode
-    console.log('✏️ Entering edit mode for new plan');
+    toast.success('New plan card added! Please fill in the details.');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   if (loading) {
@@ -213,7 +219,7 @@ export function PlanManagement() {
 
       <div className="pm-grid">
         {plans.map((plan) => (
-          <div key={plan.id} className="pm-card">
+          <div key={plan.id} className={`pm-card ${editingPlan === plan.id ? 'is-editing' : ''}`}>
             <div className="text-center mb-4 flex-grow">
               {editingPlan === plan.id ? (
                 // Edit Name in Edit Mode
