@@ -274,6 +274,25 @@
     }
 }
 
+.auth-footer-help {
+    margin-top: 24px;
+    display: flex;
+    justify-content: center;
+}
+
+.auth-footer-help button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: none;
+    border: none;
+    color: #4C0F2D;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 14px;
+    transition: opacity 0.2s;
+}
+
 @media (max-height: 700px) {
     .auth-page-wrapper {
         justify-content: flex-start;

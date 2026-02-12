@@ -142,7 +142,7 @@ export function OfferDetailsPage({ offerId, onBack, onStatusChange }: OfferDetai
 
     return (
         <div className="od-container">
-            <div className="od-nav-bar" style={{ marginBottom: '24px', display: 'flex' }}>
+            <div className="od-nav-bar" style={{ marginBottom: '16px', display: 'flex' }}>
                 <button
                     onClick={() => {
                         console.log("Back button clicked");
@@ -239,23 +239,31 @@ export function OfferDetailsPage({ offerId, onBack, onStatusChange }: OfferDetai
                                     </p>
                                 </div>
                                 <div className="od-stat-grid">
-                                    <div className="od-stat-card">
-                                        <div className="od-stat-icon-wrapper"><ShoppingBag size={18} /></div>
-                                        <div className="od-stat-label">Category</div>
-                                        <div className="od-stat-value">{details.category || 'General'}</div>
+                                    <div className="od-stat-card" style={{ background: 'linear-gradient(145deg, #ffffff 0%, #fffbfc 100%)', borderColor: 'rgba(76, 15, 45, 0.15)' }}>
+                                        <div className="od-stat-icon-wrapper" style={{ background: 'var(--color-plum)', color: 'white', border: 'none', boxShadow: '0 4px 10px rgba(76, 15, 45, 0.2)' }}>
+                                            <ShoppingBag size={18} />
+                                        </div>
+                                        <div className="od-stat-label" style={{ marginTop: '12px', color: 'var(--color-plum)', opacity: 1, fontSize: '11px', fontWeight: '800' }}>Category</div>
+                                        <div className="od-stat-value" style={{ fontSize: '16px', marginTop: '4px', color: '#1f2937' }}>{details.category || 'General'}</div>
                                     </div>
-                                    <div className="od-stat-card">
-                                        <div className="od-stat-icon-wrapper"><Calendar size={18} /></div>
-                                        <div className="od-stat-label">Validity</div>
-                                        <div className="od-stat-value">
+
+                                    <div className="od-stat-card" style={{ background: 'linear-gradient(145deg, #ffffff 0%, #fffbfc 100%)', borderColor: 'rgba(76, 15, 45, 0.15)' }}>
+                                        <div className="od-stat-icon-wrapper" style={{ background: 'var(--color-plum)', color: 'white', border: 'none', boxShadow: '0 4px 10px rgba(76, 15, 45, 0.2)' }}>
+                                            <Calendar size={18} />
+                                        </div>
+                                        <div className="od-stat-label" style={{ marginTop: '12px', color: 'var(--color-plum)', opacity: 1, fontSize: '11px', fontWeight: '800' }}>Validity</div>
+                                        <div className="od-stat-value" style={{ fontSize: '14px', marginTop: '4px', color: '#1f2937', lineHeight: '1.4' }}>
                                             {formatDate(details.start_date || details.startDate) || 'Start Date N/A'}
                                             {(details.end_date || details.endDate) ? ` to ${formatDate(details.end_date || details.endDate)}` : ' (Ongoing)'}
                                         </div>
                                     </div>
-                                    <div className="od-stat-card">
-                                        <div className="od-stat-icon-wrapper"><MapPin size={18} /></div>
-                                        <div className="od-stat-label">Location</div>
-                                        <div className="od-stat-value text-sm">
+
+                                    <div className="od-stat-card" style={{ background: 'linear-gradient(145deg, #ffffff 0%, #fffbfc 100%)', borderColor: 'rgba(76, 15, 45, 0.15)' }}>
+                                        <div className="od-stat-icon-wrapper" style={{ background: 'var(--color-plum)', color: 'white', border: 'none', boxShadow: '0 4px 10px rgba(76, 15, 45, 0.2)' }}>
+                                            <MapPin size={18} />
+                                        </div>
+                                        <div className="od-stat-label" style={{ marginTop: '12px', color: 'var(--color-plum)', opacity: 1, fontSize: '11px', fontWeight: '800' }}>Location</div>
+                                        <div className="od-stat-value text-sm" style={{ fontSize: '14px', marginTop: '4px', color: '#1f2937', lineHeight: '1.4', marginBottom: '8px' }}>
                                             {details.shop_address || details.vendor.address || 'Address not available'}
                                         </div>
                                         {details.map_link && (
