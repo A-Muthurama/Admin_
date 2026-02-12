@@ -271,20 +271,40 @@ export function OfferDetailsPage({ offerId, onBack, onStatusChange }: OfferDetai
                                         )}
                                     </div>
                                     {details.buy_link && (
-                                        <div className="od-stat-card">
-                                            <div className="od-stat-icon-wrapper">
-                                                <ShoppingBag size={18} />
+                                        <div className="od-stat-card" style={{ background: 'linear-gradient(145deg, #ffffff 0%, #fffbfc 100%)', borderColor: 'rgba(76, 15, 45, 0.15)' }}>
+                                            <div className="flex justify-between items-start">
+                                                <div className="od-stat-icon-wrapper" style={{ background: 'var(--color-plum)', color: 'white', border: 'none', boxShadow: '0 4px 10px rgba(76, 15, 45, 0.2)' }}>
+                                                    <ShoppingBag size={18} />
+                                                </div>
+                                                <span style={{ fontSize: '10px', background: 'var(--color-plum-soft)', color: 'var(--color-plum)', padding: '4px 10px', borderRadius: '20px', fontWeight: '800', letterSpacing: '0.05em' }}>ONLINE</span>
                                             </div>
-                                            <div className="od-stat-label">Buy Link</div>
-                                            <div className="od-stat-value">Available Online</div>
+
+                                            <div className="od-stat-label" style={{ marginTop: '12px', color: 'var(--color-plum)', opacity: 1, fontSize: '12px' }}>Shop Online</div>
+
                                             <a
                                                 href={details.buy_link}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
-                                                className="od-stat-action-link"
-                                                style={{ marginTop: '8px', display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--color-plum)', fontWeight: 700, fontSize: '14px', textDecoration: 'none' }}
+                                                className="od-btn"
+                                                style={{
+                                                    marginTop: '12px',
+                                                    height: '42px',
+                                                    background: 'var(--color-plum)',
+                                                    color: 'white',
+                                                    fontSize: '13px',
+                                                    fontWeight: '700',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    gap: '8px',
+                                                    textDecoration: 'none',
+                                                    borderRadius: '12px',
+                                                    boxShadow: '0 4px 12px rgba(76, 15, 45, 0.25)',
+                                                    flex: 'none',
+                                                    width: '100%'
+                                                }}
                                             >
-                                                <ExternalLink size={14} /> Visit Store
+                                                Visit Store <ExternalLink size={14} />
                                             </a>
                                         </div>
                                     )}
