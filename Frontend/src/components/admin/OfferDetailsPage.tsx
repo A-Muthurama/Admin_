@@ -136,7 +136,7 @@ export function OfferDetailsPage({ offerId, onBack, onStatusChange }: OfferDetai
     const isApproved = details?.status === 'APPROVED';
     const isRejected = details?.status === 'REJECTED';
     const activeMedia = details?.images[activeMediaIndex];
-    const isVideo = activeMedia ? /\.(mp4|webm|ogg|mov)$/i.test(activeMedia.url) : false;
+    const isVideo = activeMedia ? (activeMedia.id.startsWith('video-') || /\.(mp4|webm|ogg|mov|m3u8)$/i.test(activeMedia.url)) : false;
 
     const offerDate = details ? formatDate(details.createdAt || (details as any).created_at) : null;
 
@@ -270,24 +270,6 @@ export function OfferDetailsPage({ offerId, onBack, onStatusChange }: OfferDetai
                                             </a>
                                         )}
                                     </div>
-                                    {details.buy_link && (
-                                        <div className="od-stat-card">
-                                            <div className="od-stat-icon-wrapper">
-                                                <ShoppingBag size={18} />
-                                            </div>
-                                            <div className="od-stat-label">Buy Link</div>
-                                            <div className="od-stat-value">Available Online</div>
-                                            <a
-                                                href={details.buy_link}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="od-stat-action-link"
-                                                style={{ marginTop: '8px', display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--color-plum)', fontWeight: 700, fontSize: '14px', textDecoration: 'none' }}
-                                            >
-                                                <ExternalLink size={14} /> Visit Store
-                                            </a>
-                                        </div>
-                                    )}
                                 </div>
                             </div>
 
@@ -402,7 +384,7 @@ export function OfferDetailsPage({ offerId, onBack, onStatusChange }: OfferDetai
                                 <div className="od-thumbnails">
                                     {details.images.map((img, idx) => (
                                         <div key={img.id} className={`od-thumb-item ${idx === activeMediaIndex ? 'active' : ''}`} onClick={() => setActiveMediaIndex(idx)}>
-                                            {/\.(mp4|webm|ogg|mov)$/i.test(img.url) ? (
+                                            {(img.id.startsWith('video-') || /\.(mp4|webm|ogg|mov|m3u8)$/i.test(img.url)) ? (
                                                 <div className="w-full h-full bg-black flex items-center justify-center relative">
                                                     <PlayCircle size={16} className="text-white opacity-50" />
                                                 </div>
@@ -427,6 +409,20 @@ export function OfferDetailsPage({ offerId, onBack, onStatusChange }: OfferDetai
                         </div>
                     )}
                 </>
+            )}
+
+            {details?.buy_link && (
+                <div className="od-sticky-footer">
+                    <a
+                        href={details.buy_link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="od-sticky-btn"
+                    >
+                        <ExternalLink size={18} />
+                        Visit Store Online
+                    </a>
+                </div>
             )}
 
             <ConfirmationModal

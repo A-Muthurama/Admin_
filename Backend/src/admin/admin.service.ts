@@ -380,7 +380,7 @@ export class AdminService {
       ...offer,
       id: offer.id.toString(),
       createdAt: offer.created_at?.toISOString() || '',
-      vendorId: offer.vendor_id?.toString() || '', // ✅ CRITICAL: Map vendor_id to vendorId
+      vendorId: offer.vendor_id?.toString() || '', 
       price: offer.discount_value_numeric ? parseFloat(offer.discount_value_numeric.toString()) : 0,
       storeLat: 0,
       storeLng: 0,

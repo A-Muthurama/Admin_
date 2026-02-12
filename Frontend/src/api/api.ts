@@ -106,6 +106,7 @@ export interface PendingAdminOffer {
   status: BackendOfferStatus;
   isActive: boolean;
   poster_url?: string;
+  video_url?: string;
 
   // Database Fields (from screenshot)
   category?: string;
