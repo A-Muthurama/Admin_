@@ -1,6 +1,6 @@
 
 import { useEffect, useState } from "react";
-import { ArrowLeft, CheckCircle, XCircle, ShoppingBag, Store, X, MapPin, Calendar, Tag, PlayCircle, User, Phone, Trash2, ExternalLink, Mail } from "lucide-react";
+import { ArrowLeft, CheckCircle, XCircle, ShoppingBag, Store, X, MapPin, Calendar, Tag, User, Phone, Trash2, ExternalLink, Mail } from "lucide-react";
 import { AdminOfferDetails, approveOffer, getOfferDetails, rejectOffer, deleteOffer } from "../../api/api";
 import "../../styles/offer-details.css";
 import { toast } from "sonner";
@@ -59,7 +59,6 @@ export function OfferDetailsPage({ offerId, onBack, onStatusChange }: OfferDetai
     const [isRejecting, setIsRejecting] = useState(false);
     const [rejectionReason, setRejectionReason] = useState("");
     const [actionLoading, setActionLoading] = useState(false);
-    const [activeMediaIndex, setActiveMediaIndex] = useState(0);
     const [previewImage, setPreviewImage] = useState<string | null>(null);
     const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
 
@@ -73,7 +72,7 @@ export function OfferDetailsPage({ offerId, onBack, onStatusChange }: OfferDetai
                 // FIX: If video_url exists but is NOT in the images array, inject it manually
                 if (offerData.video_url && !offerData.images.some(img => img.url === offerData.video_url)) {
                     console.log("Injecting missing video into images array:", offerData.video_url);
-                    offerData.images.unshift({
+                    offerData.images.push({
                         id: `video-${Date.now()}`,
                         url: offerData.video_url,
                         publicId: 'video-placeholder',
@@ -150,8 +149,6 @@ export function OfferDetailsPage({ offerId, onBack, onStatusChange }: OfferDetai
     const isPending = details?.status === 'PENDING';
     const isApproved = details?.status === 'APPROVED';
     const isRejected = details?.status === 'REJECTED';
-    const activeMedia = details?.images[activeMediaIndex];
-    const isVideo = activeMedia ? (activeMedia.id.startsWith('video-') || /\.(mp4|webm|ogg|mov|m3u8)$/i.test(activeMedia.url)) : false;
 
     const offerDate = details ? formatDate(details.createdAt || (details as any).created_at) : null;
 
@@ -428,33 +425,36 @@ export function OfferDetailsPage({ offerId, onBack, onStatusChange }: OfferDetai
                             )}
                         </div>
 
-                        <div className="od-gallery-section">
-                            <div className="od-main-media">
-                                {details.images.length === 0 ? (
-                                    <div className="flex flex-col items-center justify-center text-gray-400 h-64 bg-slate-50 rounded-2xl w-full">
-                                        <ShoppingBag size={48} className="mb-2 opacity-20" />
-                                        <p>No images</p>
-                                    </div>
-                                ) : isVideo ? (
-                                    <video src={activeMedia?.url} controls autoPlay className="w-full h-full object-contain" />
-                                ) : (
-                                    <img src={activeMedia?.url} alt="Offer" className="cursor-zoom-in" onClick={() => setPreviewImage(activeMedia?.url || null)} />
-                                )}
-                            </div>
-                            {details.images.length > 1 && (
-                                <div className="od-thumbnails">
-                                    {details.images.map((img, idx) => (
-                                        <div key={img.id} className={`od-thumb-item ${idx === activeMediaIndex ? 'active' : ''}`} onClick={() => setActiveMediaIndex(idx)}>
-                                            {(img.id.startsWith('video-') || /\.(mp4|webm|ogg|mov|m3u8)$/i.test(img.url)) ? (
-                                                <div className="w-full h-full bg-black flex items-center justify-center relative">
-                                                    <PlayCircle size={16} className="text-white opacity-50" />
-                                                </div>
+                        <div className="od-gallery-section" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                            {details.images.length === 0 ? (
+                                <div className="flex flex-col items-center justify-center text-gray-400 h-64 bg-slate-50 rounded-2xl w-full">
+                                    <ShoppingBag size={48} className="mb-2 opacity-20" />
+                                    <p>No images</p>
+                                </div>
+                            ) : (
+                                details.images.map((media) => {
+                                    const isMediaVideo = media.id.startsWith('video-') || /\.(mp4|webm|ogg|mov|m3u8)$/i.test(media.url);
+
+                                    return (
+                                        <div key={media.id} className="od-main-media" style={{ marginBottom: '0' }}>
+                                            {isMediaVideo ? (
+                                                <video
+                                                    src={media.url}
+                                                    controls
+                                                    className="w-full h-full object-contain"
+                                                    style={{ backgroundColor: '#000', borderRadius: '20px' }}
+                                                />
                                             ) : (
-                                                <img src={img.url} alt="Thumb" className="od-thumb-img" />
+                                                <img
+                                                    src={media.url}
+                                                    alt="Offer Media"
+                                                    className="cursor-zoom-in w-full h-full object-contain"
+                                                    onClick={() => setPreviewImage(media.url)}
+                                                />
                                             )}
                                         </div>
-                                    ))}
-                                </div>
+                                    );
+                                })
                             )}
                         </div>
                     </div>
