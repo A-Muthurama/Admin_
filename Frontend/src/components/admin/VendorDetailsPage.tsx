@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import { ArrowLeft, CheckCircle, XCircle, Mail, ExternalLink, Users, Maximize2, X, MapPin, Phone, Trash2, Shield } from "lucide-react";
-import { VendorKycResponse, approveVendor, getVendorKyc, rejectVendor, deleteVendor, suspendVendor } from "../../api/api";
+import { ArrowLeft, CheckCircle, XCircle, Mail, ExternalLink, Users, Maximize2, X, MapPin, Phone, Shield } from "lucide-react";
+import { VendorKycResponse, approveVendor, getVendorKyc, rejectVendor, suspendVendor } from "../../api/api";
 import "../../styles/vendor-details.css"; // Import the new CSS
 import { toast } from "sonner";
 import { ConfirmationModal } from "../common/ConfirmationModal";
+
 
 interface VendorDetailsPageProps {
     vendorId: string;
@@ -19,7 +20,21 @@ export function VendorDetailsPage({ vendorId, onBack, onStatusChange }: VendorDe
     const [rejectionReason, setRejectionReason] = useState("");
     const [actionLoading, setActionLoading] = useState(false);
     const [previewImage, setPreviewImage] = useState<{ url: string, type: string } | null>(null);
-    const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+    const [confirmModal, setConfirmModal] = useState<{
+        isOpen: boolean;
+        title: string;
+        message: string;
+        confirmText: string;
+        type: 'danger' | 'warning' | 'info';
+        onConfirm: () => void;
+    }>({
+        isOpen: false,
+        title: '',
+        message: '',
+        confirmText: '',
+        type: 'info',
+        onConfirm: () => { }
+    });
 
     const fetchDetails = async () => {
         setIsLoading(true);
@@ -37,20 +52,34 @@ export function VendorDetailsPage({ vendorId, onBack, onStatusChange }: VendorDe
         fetchDetails();
     }, [vendorId]);
 
-    const handleApprove = async () => {
+    const executeApprove = async () => {
+        setConfirmModal(prev => ({ ...prev, isOpen: false }));
         setActionLoading(true);
         try {
             await approveVendor(vendorId);
             onStatusChange();
             await fetchDetails();
-            toast.success("Vendor approved successfully.");
+            toast.success(kycDetails?.status === 'SUSPENDED' ? "Vendor reactivated successfully." : "Vendor approved successfully.");
         } catch (err: any) {
             console.error("Failed to approve vendor", err);
             const msg = err.response?.data?.message || err.message || "Unknown error";
-            toast.error(`Approval Failed: ${msg}`);
+            toast.error(`Action Failed: ${msg}`);
         } finally {
             setActionLoading(false);
         }
+    };
+
+    const handleApprove = () => {
+        setConfirmModal({
+            isOpen: true,
+            title: kycDetails?.status === 'SUSPENDED' ? 'Reactivate Vendor?' : 'Approve Vendor?',
+            message: kycDetails?.status === 'SUSPENDED'
+                ? `Are you sure you want to reactivate ${kycDetails.shopName}? They will regain full access to the platform.`
+                : `Are you sure you want to approve ${kycDetails?.shopName}? This will grant them access to start posting offers.`,
+            confirmText: kycDetails?.status === 'SUSPENDED' ? 'Yes, Reactivate' : 'Yes, Approve',
+            type: 'info',
+            onConfirm: executeApprove
+        });
     };
 
     const handleReject = async () => {
@@ -71,7 +100,8 @@ export function VendorDetailsPage({ vendorId, onBack, onStatusChange }: VendorDe
         }
     };
 
-    const handleSuspend = async () => {
+    const executeSuspend = async () => {
+        setConfirmModal(prev => ({ ...prev, isOpen: false }));
         setActionLoading(true);
         try {
             await suspendVendor(vendorId);
@@ -85,23 +115,18 @@ export function VendorDetailsPage({ vendorId, onBack, onStatusChange }: VendorDe
         }
     };
 
-    const handleRemove = async () => {
-        setIsConfirmModalOpen(true);
+    const handleSuspend = () => {
+        setConfirmModal({
+            isOpen: true,
+            title: 'Suspend Vendor?',
+            message: `Are you sure you want to suspend ${kycDetails?.shopName}? They will be temporarily restricted from accessing the platform and their offers will be hidden.`,
+            confirmText: 'Yes, Suspend Vendor',
+            type: 'danger',
+            onConfirm: executeSuspend
+        });
     };
 
-    const executeRemove = async () => {
-        setIsConfirmModalOpen(false);
-        setActionLoading(true);
-        try {
-            await deleteVendor(vendorId);
-            onBack(); // Go back to list
-            toast.success("Vendor deleted successfully.");
-        } catch {
-            toast.error("Failed to delete vendor.");
-        } finally {
-            setActionLoading(false);
-        }
-    };
+
 
     if (isLoading) return <div className="py-20 text-center text-gray-500">Loading vendor details...</div>;
     if (error || !kycDetails) return <div className="py-20 text-center text-red-500">{error || "Vendor not found"}</div>;
@@ -112,9 +137,12 @@ export function VendorDetailsPage({ vendorId, onBack, onStatusChange }: VendorDe
 
     return (
         <div className="vd-container">
-            <button onClick={onBack} className="vd-back-btn">
-                <ArrowLeft size={16} /> Back to Vendors
-            </button>
+            <div className="vd-back-nav">
+                <button onClick={onBack} className="vd-back-btn-new">
+                    <ArrowLeft size={18} />
+                    <span>Back to Vendors</span>
+                </button>
+            </div>
 
             {/* Header */}
             <div className="vd-header-card">
@@ -239,19 +267,26 @@ export function VendorDetailsPage({ vendorId, onBack, onStatusChange }: VendorDe
             )}
 
             {(isApproved || isSuspended) && (
-                <div className="vd-action-panel" style={{ marginTop: '20px', borderColor: isSuspended ? '#bbf7d0' : '#fecaca', background: isSuspended ? '#f0fdf4' : '#fef2f2' }}>
+                <div className="vd-action-panel" style={{
+                    marginTop: '20px',
+                    borderColor: isSuspended ? '#4f1b3bff' : '#d1d5db',
+                    background: isSuspended ? '#4f1b3bff' : '#f9fafb'
+                }}>
                     <div className="vd-action-header">
-                        <div className="vd-action-icon-circle" style={{ background: isSuspended ? '#dcfce7' : '#fee2e2', color: isSuspended ? '#16a34a' : '#ef4444' }}>
-                            {isSuspended ? <CheckCircle size={24} /> : <Trash2 size={24} />}
+                        <div className="vd-action-icon-circle" style={{
+                            background: isSuspended ? '#dcfce7' : '#f3f4f6',
+                            color: isSuspended ? '#16a34a' : '#374151'
+                        }}>
+                            {isSuspended ? <CheckCircle size={24} /> : <Shield size={24} />}
                         </div>
                         <div>
-                            <h3 className="vd-action-title" style={{ color: isSuspended ? '#16a34a' : '#ef4444' }}>
-                                {isSuspended ? 'Reactivate Vendor' : 'Manage Vendor'}
+                            <h3 className="vd-action-title" style={{ color: isSuspended ? '#16a34a' : '#374151' }}>
+                                {isSuspended ? 'Reactivate Vendor' : 'Vendor Status Control'}
                             </h3>
-                            <p className="vd-action-desc" style={{ color: isSuspended ? '#15803d' : '#b91c1c' }}>
+                            <p className="vd-action-desc" style={{ color: isSuspended ? '#15803d' : '#4b5563' }}>
                                 {isSuspended
                                     ? 'This vendor is currently suspended. You can reactivate them to restore their access.'
-                                    : 'Removing this vendor will permanently delete their account and all associated offers.'}
+                                    : 'You can temporarily suspend this vendor to restrict their access to the platform.'}
                             </p>
                         </div>
                     </div>
@@ -261,41 +296,17 @@ export function VendorDetailsPage({ vendorId, onBack, onStatusChange }: VendorDe
                                 onClick={handleApprove}
                                 disabled={actionLoading}
                                 className="vd-btn vd-btn-approve"
-                                style={{ width: '240px' }}
                             >
                                 <CheckCircle size={18} /> Reactivate Vendor
                             </button>
                         ) : (
-                            <>
-                                <button
-                                    onClick={handleSuspend}
-                                    disabled={actionLoading}
-                                    className="vd-btn"
-                                    style={{
-                                        backgroundColor: '#f3f4f6',
-                                        color: '#374151',
-                                        border: '1px solid #d1d5db',
-                                        justifyContent: 'center',
-                                        fontWeight: 600
-                                    }}
-                                >
-                                    <XCircle size={18} /> Suspend Vendor
-                                </button>
-                                <button
-                                    onClick={handleRemove}
-                                    disabled={actionLoading}
-                                    className="vd-btn"
-                                    style={{
-                                        backgroundColor: '#fee2e2',
-                                        color: '#ef4444',
-                                        border: '1px solid #fecaca',
-                                        justifyContent: 'center',
-                                        fontWeight: 600
-                                    }}
-                                >
-                                    <Trash2 size={18} /> Permanently Remove
-                                </button>
-                            </>
+                            <button
+                                onClick={handleSuspend}
+                                disabled={actionLoading}
+                                className="vd-btn vd-btn-secondary"
+                            >
+                                <XCircle size={18} /> Suspend Vendor
+                            </button>
                         )}
                     </div>
                 </div>
@@ -312,14 +323,13 @@ export function VendorDetailsPage({ vendorId, onBack, onStatusChange }: VendorDe
             )}
 
             <ConfirmationModal
-                isOpen={isConfirmModalOpen}
-                onClose={() => setIsConfirmModalOpen(false)}
-                onConfirm={executeRemove}
-                title="Remove Vendor?"
-                message="Are you sure you want to remove this vendor? This action cannot be undone and will delete ALL associated data including offers."
-                confirmText="Yes, Remove Vendor"
-                cancelText="Cancel"
-                type="danger"
+                isOpen={confirmModal.isOpen}
+                onClose={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
+                onConfirm={confirmModal.onConfirm}
+                title={confirmModal.title}
+                message={confirmModal.message}
+                confirmText={confirmModal.confirmText}
+                type={confirmModal.type}
                 isLoading={actionLoading}
             />
         </div>

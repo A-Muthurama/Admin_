@@ -4,33 +4,49 @@
 .vd-container {
     max-width: 1200px;
     margin: 0 auto;
-    /* Adjusted padding-top to account for fixed header (80px) + spacing */
-    padding-top: 100px;
+    /* Removed large padding-top as parent layout already provides it */
+    padding-top: 0;
     padding-bottom: 80px;
     animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* Back Button */
-.vd-back-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    color: var(--text-muted);
-    font-size: 13px;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    background: none;
-    border: none;
-    cursor: pointer;
+.vd-back-nav {
     margin-bottom: 24px;
-    transition: all 0.3s ease;
-    padding: 12px 0;
+    display: flex;
 }
 
-.vd-back-btn:hover {
-    color: var(--color-plum);
-    transform: translateX(-4px);
+.vd-back-btn-new {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--color-plum) !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 12px 24px;
+    border-radius: 70px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 4px 15px rgba(76, 15, 45, 0.2);
+}
+
+.vd-back-btn-new:hover {
+    background-color: var(--color-plum-light);
+    color: white;
+    transform: translateX(-4px) scale(1.02);
+    box-shadow: 0 8px 25px rgba(162, 77, 119, 0.3);
+}
+
+.vd-back-btn-new span {
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: #ffffff !important;
+}
+
+.vd-back-btn-new svg {
+    color: #ffffff !important;
+    stroke: #ffffff !important;
 }
 
 /* Header Card */
@@ -67,12 +83,13 @@
 }
 
 .vd-shop-title {
-    font-size: 40px;
-    font-weight: 800;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 48px;
+    font-weight: 700;
     color: var(--text-primary);
     margin: 0 0 16px 0;
-    letter-spacing: -0.04em;
-    line-height: 1.1;
+    letter-spacing: -0.01em;
+    line-height: 1;
 }
 
 .vd-meta-info {
@@ -168,10 +185,11 @@
 }
 
 .vd-section-title {
-    font-size: 24px;
-    font-weight: 800;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 28px;
+    font-weight: 700;
     color: var(--text-primary);
-    letter-spacing: -0.02em;
+    letter-spacing: -0.01em;
     margin: 0;
 }
 
@@ -331,8 +349,9 @@
 }
 
 .vd-action-title {
-    font-size: 20px;
-    font-weight: 800;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 24px;
+    font-weight: 700;
     color: var(--text-primary);
     margin: 0 0 6px 0;
 }
@@ -372,7 +391,8 @@
     transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
     min-width: 160px;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.08em;
+    white-space: nowrap;
 }
 
 .vd-btn-approve {
@@ -382,9 +402,28 @@
 }
 
 .vd-btn-approve:hover {
-    transform: translateY(-4px);
+    transform: translateY(-4px) scale(1.02);
     box-shadow: 0 12px 30px rgba(107, 33, 168, 0.4);
     filter: brightness(1.1);
+}
+
+.vd-btn-secondary {
+    background-color: #f8fafc;
+    color: #475569;
+    border: 1px solid #e2e8f0 !important;
+}
+
+.vd-btn-secondary:hover {
+    background-color: var(--color-plum) !important;
+    color: #ffffff !important;
+    border-color: var(--color-plum) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(94, 22, 53, 0.2);
+}
+
+.vd-btn-secondary:hover svg {
+    color: #ffffff !important;
+    stroke: #ffffff !important;
 }
 
 .vd-btn-reject {
