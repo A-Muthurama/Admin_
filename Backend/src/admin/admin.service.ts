@@ -143,6 +143,21 @@ export class AdminService {
         rejection_reason: reason,
       },
     });
+    this.logger.log(`Vendor ${id} status successfully set to REJECTED.`);
+
+    // Notify vendor
+    if (vendor.email) {
+      try {
+        await this.brevo.sendVendorRejectedEmail({
+          toEmail: vendor.email,
+          shopName: vendor.shop_name,
+          ownerName: vendor.owner_name || 'Vendor',
+          reason: reason,
+        });
+      } catch (err: any) {
+        this.logger.error(`Failed to send rejection email to ${vendor.email}: ${err.message}`);
+      }
+    }
 
     return { message: 'Vendor rejected successfully' };
   }
@@ -165,6 +180,19 @@ export class AdminService {
         status: 'SUSPENDED',
       },
     });
+
+    // Notify vendor
+    if (vendor.email) {
+      try {
+        await this.brevo.sendVendorSuspendedEmail({
+          toEmail: vendor.email,
+          shopName: vendor.shop_name,
+          ownerName: vendor.owner_name || 'Vendor',
+        });
+      } catch (err: any) {
+        this.logger.error(`Failed to send suspension email to ${vendor.email}: ${err.message}`);
+      }
+    }
 
     return { message: 'Vendor suspended successfully' };
   }
@@ -380,7 +408,7 @@ export class AdminService {
       ...offer,
       id: offer.id.toString(),
       createdAt: offer.created_at?.toISOString() || '',
-      vendorId: offer.vendor_id?.toString() || '', 
+      vendorId: offer.vendor_id?.toString() || '',
       price: offer.discount_value_numeric ? parseFloat(offer.discount_value_numeric.toString()) : 0,
       storeLat: 0,
       storeLng: 0,

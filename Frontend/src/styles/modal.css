@@ -50,8 +50,8 @@
 }
 
 .pj-modal-icon-circle.info {
-    background: #e0e7ff;
-    color: #4f46e5;
+    background: #fcebf2;
+    color: #6B0F3A;
 }
 
 .pj-modal-close {
@@ -130,7 +130,11 @@
 }
 
 .pj-modal-btn-confirm.info {
-    background: #6366f1;
+    background: #6B0F3A;
+}
+
+.pj-modal-btn-confirm.info:hover {
+    background: #8A1450;
 }
 
 .animate-fade-in-up {
