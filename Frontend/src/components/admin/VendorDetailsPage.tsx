@@ -1,36 +1,45 @@
 import React, { useEffect, useState, useRef } from "react";
 import { ArrowLeft, CheckCircle, XCircle, Mail, ExternalLink, Users, Maximize2, X, MapPin, Phone, Shield, FileText } from "lucide-react";
 import { VendorKycResponse, approveVendor, getVendorKyc, rejectVendor, suspendVendor } from "../../api/api";
-import API from "../../api/api";
 import "../../styles/vendor-details.css";
 import { toast } from "sonner";
 import { ConfirmationModal } from "../common/ConfirmationModal";
 
-/** Fetches a PDF via authenticated Axios and returns a local blob URL */
+/** Fetches a PDF via authenticated native fetch and returns a local blob URL */
 function usePdfBlobUrl(url: string | null) {
     const [blobUrl, setBlobUrl] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(false);
     const prevUrl = useRef<string | null>(null);
 
     useEffect(() => {
         if (!url) { setBlobUrl(null); return; }
         if (prevUrl.current === url && blobUrl) return;
         setLoading(true);
-        API.get(url, { responseType: 'blob', baseURL: '' })
-            .then((res: { data: BlobPart }) => {
-                const blob = new Blob([res.data], { type: 'application/pdf' });
+        setError(false);
+
+        const token = sessionStorage.getItem('adminToken');
+        fetch(url, {
+            headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+        })
+            .then(res => {
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                return res.blob();
+            })
+            .then(blob => {
                 const objUrl = URL.createObjectURL(blob);
                 setBlobUrl(objUrl);
                 prevUrl.current = url;
             })
-            .catch(() => setBlobUrl(url)) // fallback: try direct URL
+            .catch(() => setError(true))
             .finally(() => setLoading(false));
+
         return () => {
-            if (blobUrl && blobUrl.startsWith('blob:')) URL.revokeObjectURL(blobUrl);
+            // cleanup blob URL when changing documents
         };
     }, [url]);
 
-    return { blobUrl, loading };
+    return { blobUrl, loading, error };
 }
 
 /** Renders a PDF inside an iframe using an authenticated blob URL */
