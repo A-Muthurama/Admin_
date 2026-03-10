@@ -379,19 +379,12 @@ export function VendorDetailsPage({ vendorId, onBack, onStatusChange }: VendorDe
                     {previewImage.url?.toLowerCase().match(/\.pdf($|\?|#)/i) ? (
                         previewImage.url?.includes('cloudinary.com') ? (
                             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }} onClick={(e: React.MouseEvent) => e.stopPropagation()}>
-                                <img 
-                                    src={previewImage.url.replace(/\.pdf($|\?|#)/i, '.jpg$1')} 
-                                    alt="PDF Preview" 
-                                    className="vd-lightbox-img" 
+                                <img
+                                    src={previewImage.url.replace(/\.pdf($|\?|#)/i, '.jpg$1')}
+                                    alt="PDF Preview"
+                                    className="vd-lightbox-img"
                                     style={{ maxHeight: '75vh' }}
                                 />
-                                <button
-                                    className="vd-pdf-fallback-link"
-                                    onClick={() => downloadPdf(previewImage.url)}
-                                    style={{ border: 'none', cursor: 'pointer' }}
-                                >
-                                    ⬇ Download PDF
-                                </button>
                             </div>
                         ) : (
                             <div className="vd-lightbox-pdf-container" onClick={(e: React.MouseEvent) => e.stopPropagation()}>
