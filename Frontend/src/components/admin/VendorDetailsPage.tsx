@@ -1,9 +1,50 @@
-import { useEffect, useState } from "react";
-import { ArrowLeft, CheckCircle, XCircle, Mail, ExternalLink, Users, Maximize2, X, MapPin, Phone, Shield } from "lucide-react";
+import React, { useEffect, useState, useRef } from "react";
+import { ArrowLeft, CheckCircle, XCircle, Mail, ExternalLink, Users, Maximize2, X, MapPin, Phone, Shield, FileText } from "lucide-react";
 import { VendorKycResponse, approveVendor, getVendorKyc, rejectVendor, suspendVendor } from "../../api/api";
-import "../../styles/vendor-details.css"; // Import the new CSS
+import API from "../../api/api";
+import "../../styles/vendor-details.css";
 import { toast } from "sonner";
 import { ConfirmationModal } from "../common/ConfirmationModal";
+
+/** Fetches a PDF via authenticated Axios and returns a local blob URL */
+function usePdfBlobUrl(url: string | null) {
+    const [blobUrl, setBlobUrl] = useState<string | null>(null);
+    const [loading, setLoading] = useState(false);
+    const prevUrl = useRef<string | null>(null);
+
+    useEffect(() => {
+        if (!url) { setBlobUrl(null); return; }
+        if (prevUrl.current === url && blobUrl) return;
+        setLoading(true);
+        API.get(url, { responseType: 'blob', baseURL: '' })
+            .then((res: { data: BlobPart }) => {
+                const blob = new Blob([res.data], { type: 'application/pdf' });
+                const objUrl = URL.createObjectURL(blob);
+                setBlobUrl(objUrl);
+                prevUrl.current = url;
+            })
+            .catch(() => setBlobUrl(url)) // fallback: try direct URL
+            .finally(() => setLoading(false));
+        return () => {
+            if (blobUrl && blobUrl.startsWith('blob:')) URL.revokeObjectURL(blobUrl);
+        };
+    }, [url]);
+
+    return { blobUrl, loading };
+}
+
+/** Renders a PDF inside an iframe using an authenticated blob URL */
+function PdfViewer({ url, className, style }: { url: string; className?: string; style?: React.CSSProperties }) {
+    const { blobUrl, loading } = usePdfBlobUrl(url);
+    if (loading) return (
+        <div className="vd-pdf-loading">
+            <Shield size={32} className="vd-pdf-spin-icon" />
+            <span>Loading PDF...</span>
+        </div>
+    );
+    if (!blobUrl) return null;
+    return <iframe src={blobUrl} className={className} style={style} title="PDF Document" />;
+}
 
 
 interface VendorDetailsPageProps {
@@ -193,10 +234,11 @@ export function VendorDetailsPage({ vendorId, onBack, onStatusChange }: VendorDe
                 {kycDetails.kycDocs.map((doc, idx) => (
                     <div key={idx} className="vd-doc-card" onClick={() => setPreviewImage({ url: doc.url, type: doc.type })}>
                         <div className="vd-doc-preview">
-                            {doc.url?.toLowerCase().match(/\.(pdf|PDF)($|\?)/) ? (
+                            {doc.url?.toLowerCase().match(/\.pdf($|\?|#)/i) ? (
                                 <div className="vd-doc-pdf-placeholder">
-                                    <Shield size={48} className="vd-pdf-icon" />
+                                    <FileText size={48} className="vd-pdf-icon" />
                                     <span className="vd-pdf-text">PDF Document</span>
+                                    <span className="vd-pdf-subtext">Click to view</span>
                                 </div>
                             ) : (
                                 <img src={doc.url} alt={doc.type} className="vd-doc-img" />
@@ -327,15 +369,16 @@ export function VendorDetailsPage({ vendorId, onBack, onStatusChange }: VendorDe
                     <button className="vd-lightbox-close" onClick={() => setPreviewImage(null)}>
                         <X size={32} />
                     </button>
-                    {previewImage.url?.toLowerCase().match(/\.(pdf|PDF)($|\?)/) ? (
-                        <div className="vd-lightbox-pdf-container">
-                            <iframe 
-                                src={previewImage.url} 
-                                className="vd-lightbox-iframe" 
-                                title="PDF Preview"
-                            />
-                            <a href={previewImage.url} target="_blank" rel="noopener noreferrer" className="vd-pdf-fallback-link">
-                                Can't see the PDF? Click here to open in new tab
+                    {previewImage.url?.toLowerCase().match(/\.pdf($|\?|#)/i) ? (
+                        <div className="vd-lightbox-pdf-container" onClick={(e: React.MouseEvent) => e.stopPropagation()}>
+                            <PdfViewer url={previewImage.url} className="vd-lightbox-iframe" />
+                            <a
+                                href={previewImage.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="vd-pdf-fallback-link"
+                            >
+                                Open PDF in new tab
                             </a>
                         </div>
                     ) : (

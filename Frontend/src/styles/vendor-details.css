@@ -677,4 +677,36 @@
     color: var(--color-plum);
     transform: translateY(-2px);
     box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-}
+}
+
+.vd-pdf-subtext {
+    font-size: 11px;
+    font-weight: 500;
+    opacity: 0.5;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.vd-pdf-loading {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    color: white;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.vd-pdf-spin-icon {
+    animation: spin 1.5s linear infinite;
+    opacity: 0.8;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
