@@ -193,8 +193,11 @@ export function VendorDetailsPage({ vendorId, onBack, onStatusChange }: VendorDe
                 {kycDetails.kycDocs.map((doc, idx) => (
                     <div key={idx} className="vd-doc-card" onClick={() => setPreviewImage({ url: doc.url, type: doc.type })}>
                         <div className="vd-doc-preview">
-                            {doc.url?.toLowerCase().includes('.pdf') ? (
-                                <iframe src={`${doc.url}#toolbar=0`} title={doc.type} className="vd-doc-img" style={{ pointerEvents: 'none', backgroundColor: 'white' }} />
+                            {doc.url?.toLowerCase().match(/\.(pdf|PDF)($|\?)/) ? (
+                                <div className="vd-doc-pdf-placeholder">
+                                    <Shield size={48} className="vd-pdf-icon" />
+                                    <span className="vd-pdf-text">PDF Document</span>
+                                </div>
                             ) : (
                                 <img src={doc.url} alt={doc.type} className="vd-doc-img" />
                             )}
@@ -324,14 +327,17 @@ export function VendorDetailsPage({ vendorId, onBack, onStatusChange }: VendorDe
                     <button className="vd-lightbox-close" onClick={() => setPreviewImage(null)}>
                         <X size={32} />
                     </button>
-                    {previewImage.url?.toLowerCase().includes('.pdf') ? (
-                        <iframe 
-                            src={previewImage.url} 
-                            className="vd-lightbox-img" 
-                            style={{ width: '80vw', height: '85vh', backgroundColor: 'white', border: 'none' }} 
-                            onClick={e => e.stopPropagation()} 
-                            title="PDF Preview"
-                        />
+                    {previewImage.url?.toLowerCase().match(/\.(pdf|PDF)($|\?)/) ? (
+                        <div className="vd-lightbox-pdf-container">
+                            <iframe 
+                                src={previewImage.url} 
+                                className="vd-lightbox-iframe" 
+                                title="PDF Preview"
+                            />
+                            <a href={previewImage.url} target="_blank" rel="noopener noreferrer" className="vd-pdf-fallback-link">
+                                Can't see the PDF? Click here to open in new tab
+                            </a>
+                        </div>
                     ) : (
                         <img src={previewImage.url} alt="Full view" className="vd-lightbox-img" onClick={e => e.stopPropagation()} />
                     )}
