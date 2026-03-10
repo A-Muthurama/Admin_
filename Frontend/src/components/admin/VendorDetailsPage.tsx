@@ -1,58 +1,26 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import { ArrowLeft, CheckCircle, XCircle, Mail, ExternalLink, Users, Maximize2, X, MapPin, Phone, Shield, FileText } from "lucide-react";
 import { VendorKycResponse, approveVendor, getVendorKyc, rejectVendor, suspendVendor } from "../../api/api";
 import "../../styles/vendor-details.css";
 import { toast } from "sonner";
 import { ConfirmationModal } from "../common/ConfirmationModal";
 
-/** Fetches a PDF via authenticated native fetch and returns a local blob URL */
-function usePdfBlobUrl(url: string | null) {
-    const [blobUrl, setBlobUrl] = useState<string | null>(null);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(false);
-    const prevUrl = useRef<string | null>(null);
-
-    useEffect(() => {
-        if (!url) { setBlobUrl(null); return; }
-        if (prevUrl.current === url && blobUrl) return;
-        setLoading(true);
-        setError(false);
-
+/** Opens a PDF in a new tab using an authenticated fetch + blob URL */
+async function openPdfInNewTab(url: string) {
+    try {
         const token = sessionStorage.getItem('adminToken');
-        fetch(url, {
+        const res = await fetch(url, {
             headers: token ? { 'Authorization': `Bearer ${token}` } : {}
-        })
-            .then(res => {
-                if (!res.ok) throw new Error(`HTTP ${res.status}`);
-                return res.blob();
-            })
-            .then(blob => {
-                const objUrl = URL.createObjectURL(blob);
-                setBlobUrl(objUrl);
-                prevUrl.current = url;
-            })
-            .catch(() => setError(true))
-            .finally(() => setLoading(false));
-
-        return () => {
-            // cleanup blob URL when changing documents
-        };
-    }, [url]);
-
-    return { blobUrl, loading, error };
-}
-
-/** Renders a PDF inside an iframe using an authenticated blob URL */
-function PdfViewer({ url, className, style }: { url: string; className?: string; style?: React.CSSProperties }) {
-    const { blobUrl, loading } = usePdfBlobUrl(url);
-    if (loading) return (
-        <div className="vd-pdf-loading">
-            <Shield size={32} className="vd-pdf-spin-icon" />
-            <span>Loading PDF...</span>
-        </div>
-    );
-    if (!blobUrl) return null;
-    return <iframe src={blobUrl} className={className} style={style} title="PDF Document" />;
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const blob = await res.blob();
+        const blobUrl = URL.createObjectURL(new Blob([blob], { type: 'application/pdf' }));
+        const win = window.open(blobUrl, '_blank');
+        // cleanup after tab opens
+        if (win) setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
+    } catch {
+        toast.error('Could not open PDF. You may not have permission to view this file.');
+    }
 }
 
 
@@ -380,15 +348,18 @@ export function VendorDetailsPage({ vendorId, onBack, onStatusChange }: VendorDe
                     </button>
                     {previewImage.url?.toLowerCase().match(/\.pdf($|\?|#)/i) ? (
                         <div className="vd-lightbox-pdf-container" onClick={(e: React.MouseEvent) => e.stopPropagation()}>
-                            <PdfViewer url={previewImage.url} className="vd-lightbox-iframe" />
-                            <a
-                                href={previewImage.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="vd-pdf-fallback-link"
-                            >
-                                Open PDF in new tab
-                            </a>
+                            <div className="vd-lightbox-pdf-box">
+                                <FileText size={72} style={{ opacity: 0.7, color: 'white' }} />
+                                <span style={{ color: 'white', fontSize: '20px', fontWeight: 700 }}>PDF Document</span>
+                                <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '14px', margin: '0 0 24px' }}>Click the button below to open and view this PDF</p>
+                                <button
+                                    className="vd-pdf-fallback-link"
+                                    onClick={() => openPdfInNewTab(previewImage.url)}
+                                    style={{ border: 'none', cursor: 'pointer' }}
+                                >
+                                    Open PDF in New Tab
+                                </button>
+                            </div>
                         </div>
                     ) : (
                         <img src={previewImage.url} alt="Full view" className="vd-lightbox-img" onClick={e => e.stopPropagation()} />
