@@ -10,20 +10,48 @@ function openPdfFallback(url: string) {
     window.open(url, '_blank', 'noopener,noreferrer');
 }
 
-/** Downloads the PDF as a file via Cloudinary raw resource type */
-function downloadPdf(url: string) {
-    let downloadUrl = url;
-    // Cloudinary: change image/upload to raw/upload/fl_attachment to force browser download
-    if (url.includes('cloudinary.com') && url.includes('/image/upload/')) {
-        downloadUrl = url.replace('/image/upload/', '/raw/upload/fl_attachment/');
+/** 
+ * Builds a Cloudinary download URL by injecting fl_attachment transformation.
+ * Handles both /raw/upload/ and /image/upload/ path styles.
+ */
+function buildCloudinaryDownloadUrl(url: string): string {
+    if (!url.includes('cloudinary.com')) return url;
+
+    // Already has fl_attachment — return as-is
+    if (url.includes('fl_attachment')) return url;
+
+    // Handle /raw/upload/vXXX/... → inject fl_attachment after /raw/upload/
+    if (url.includes('/raw/upload/')) {
+        return url.replace('/raw/upload/', '/raw/upload/fl_attachment/');
     }
-    const a = document.createElement('a');
-    a.href = downloadUrl;
-    a.download = 'KYC_Document.pdf';
-    a.target = '_blank';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+
+    // Handle /image/upload/vXXX/... → switch to raw and inject fl_attachment
+    if (url.includes('/image/upload/')) {
+        return url.replace('/image/upload/', '/raw/upload/fl_attachment/');
+    }
+
+    return url;
+}
+
+/** Downloads the PDF as a file using fetch + blob (avoids browser navigation/blocking) */
+async function downloadPdf(url: string) {
+    const downloadUrl = buildCloudinaryDownloadUrl(url);
+    try {
+        const response = await fetch(downloadUrl);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const blob = await response.blob();
+        const blobUrl = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = blobUrl;
+        a.download = 'KYC_Document.pdf';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(blobUrl);
+    } catch {
+        // If fetch fails (e.g. CORS), fall back to direct link
+        window.open(downloadUrl, '_blank', 'noopener,noreferrer');
+    }
 }
 
 interface VendorDetailsPageProps {
