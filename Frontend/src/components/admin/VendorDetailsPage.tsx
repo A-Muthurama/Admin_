@@ -7,8 +7,14 @@ import { ConfirmationModal } from "../common/ConfirmationModal";
 
 /** Triggers a direct download of the PDF file */
 function downloadPdf(url: string) {
+    // If it's a Cloudinary URL, we can force download by adding fl_attachment
+    let downloadUrl = url;
+    if (url.includes('cloudinary.com') && url.includes('/upload/')) {
+        downloadUrl = url.replace('/upload/', '/upload/fl_attachment/');
+    }
+
     const a = document.createElement('a');
-    a.href = url;
+    a.href = downloadUrl;
     a.download = 'KYC_Document.pdf';
     a.target = '_blank';
     document.body.appendChild(a);
