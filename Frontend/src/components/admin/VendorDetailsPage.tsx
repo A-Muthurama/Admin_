@@ -10,24 +10,20 @@ function openPdfFallback(url: string) {
     window.open(url, '_blank', 'noopener,noreferrer');
 }
 
-/** Downloads the PDF as a file via blob fetch */
-async function downloadPdf(url: string) {
-    try {
-        const res = await fetch(url);
-        if (!res.ok) throw new Error();
-        const blob = await res.blob();
-        const blobUrl = URL.createObjectURL(new Blob([blob], { type: 'application/pdf' }));
-        const a = document.createElement('a');
-        a.href = blobUrl;
-        a.download = 'KYC_Document.pdf';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        setTimeout(() => URL.revokeObjectURL(blobUrl), 5000);
-    } catch {
-        // fallback: open directly
-        window.open(url, '_blank', 'noopener,noreferrer');
+/** Downloads the PDF as a file via Cloudinary raw resource type */
+function downloadPdf(url: string) {
+    let downloadUrl = url;
+    // Cloudinary: change image/upload to raw/upload/fl_attachment to force browser download
+    if (url.includes('cloudinary.com') && url.includes('/image/upload/')) {
+        downloadUrl = url.replace('/image/upload/', '/raw/upload/fl_attachment/');
     }
+    const a = document.createElement('a');
+    a.href = downloadUrl;
+    a.download = 'KYC_Document.pdf';
+    a.target = '_blank';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
 }
 
 interface VendorDetailsPageProps {
