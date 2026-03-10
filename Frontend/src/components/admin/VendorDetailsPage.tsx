@@ -12,6 +12,15 @@ interface VendorDetailsPageProps {
     onStatusChange: () => void;
 }
 
+interface ConfirmModalState {
+    isOpen: boolean;
+    title: string;
+    message: string;
+    confirmText: string;
+    type: 'danger' | 'warning' | 'info';
+    onConfirm: () => void;
+}
+
 export function VendorDetailsPage({ vendorId, onBack, onStatusChange }: VendorDetailsPageProps) {
     const [kycDetails, setKycDetails] = useState<VendorKycResponse | null>(null);
     const [isLoading, setIsLoading] = useState(true);
@@ -20,14 +29,7 @@ export function VendorDetailsPage({ vendorId, onBack, onStatusChange }: VendorDe
     const [rejectionReason, setRejectionReason] = useState("");
     const [actionLoading, setActionLoading] = useState(false);
     const [previewImage, setPreviewImage] = useState<{ url: string, type: string } | null>(null);
-    const [confirmModal, setConfirmModal] = useState<{
-        isOpen: boolean;
-        title: string;
-        message: string;
-        confirmText: string;
-        type: 'danger' | 'warning' | 'info';
-        onConfirm: () => void;
-    }>({
+    const [confirmModal, setConfirmModal] = useState<ConfirmModalState>({
         isOpen: false,
         title: '',
         message: '',
@@ -53,7 +55,7 @@ export function VendorDetailsPage({ vendorId, onBack, onStatusChange }: VendorDe
     }, [vendorId]);
 
     const executeApprove = async () => {
-        setConfirmModal(prev => ({ ...prev, isOpen: false }));
+        setConfirmModal((prev: ConfirmModalState) => ({ ...prev, isOpen: false }));
         setActionLoading(true);
         try {
             await approveVendor(vendorId);
@@ -101,7 +103,7 @@ export function VendorDetailsPage({ vendorId, onBack, onStatusChange }: VendorDe
     };
 
     const executeSuspend = async () => {
-        setConfirmModal(prev => ({ ...prev, isOpen: false }));
+        setConfirmModal((prev: ConfirmModalState) => ({ ...prev, isOpen: false }));
         setActionLoading(true);
         try {
             await suspendVendor(vendorId);
@@ -191,7 +193,11 @@ export function VendorDetailsPage({ vendorId, onBack, onStatusChange }: VendorDe
                 {kycDetails.kycDocs.map((doc, idx) => (
                     <div key={idx} className="vd-doc-card" onClick={() => setPreviewImage({ url: doc.url, type: doc.type })}>
                         <div className="vd-doc-preview">
-                            <img src={doc.url} alt={doc.type} className="vd-doc-img" />
+                            {doc.url?.toLowerCase().includes('.pdf') ? (
+                                <iframe src={`${doc.url}#toolbar=0`} title={doc.type} className="vd-doc-img" style={{ pointerEvents: 'none', backgroundColor: 'white' }} />
+                            ) : (
+                                <img src={doc.url} alt={doc.type} className="vd-doc-img" />
+                            )}
                             <div className="vd-doc-overlay">
                                 <Maximize2 className="vd-doc-zoom-icon" size={24} />
                             </div>
@@ -318,13 +324,23 @@ export function VendorDetailsPage({ vendorId, onBack, onStatusChange }: VendorDe
                     <button className="vd-lightbox-close" onClick={() => setPreviewImage(null)}>
                         <X size={32} />
                     </button>
-                    <img src={previewImage.url} alt="Full view" className="vd-lightbox-img" onClick={e => e.stopPropagation()} />
+                    {previewImage.url?.toLowerCase().includes('.pdf') ? (
+                        <iframe 
+                            src={previewImage.url} 
+                            className="vd-lightbox-img" 
+                            style={{ width: '80vw', height: '85vh', backgroundColor: 'white', border: 'none' }} 
+                            onClick={e => e.stopPropagation()} 
+                            title="PDF Preview"
+                        />
+                    ) : (
+                        <img src={previewImage.url} alt="Full view" className="vd-lightbox-img" onClick={e => e.stopPropagation()} />
+                    )}
                 </div>
             )}
 
             <ConfirmationModal
                 isOpen={confirmModal.isOpen}
-                onClose={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
+                onClose={() => setConfirmModal((prev: ConfirmModalState) => ({ ...prev, isOpen: false }))}
                 onConfirm={confirmModal.onConfirm}
                 title={confirmModal.title}
                 message={confirmModal.message}
