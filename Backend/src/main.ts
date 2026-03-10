@@ -8,16 +8,10 @@ async function bootstrap() {
 
 
   app.enableCors({
-    origin: [
-      'https://admin.jewellersparadise.com',
-      'https://admin-api.jewellersparadise.com',
-      'https://jewellersparadise.com',
-      'http://localhost:3001',
-      'http://localhost:3000',
-      'http://127.0.0.1:3001',
-      'http://127.0.0.1:3000',
-    ],
+    origin: true,
     credentials: true,
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    allowedHeaders: 'Content-Type,Accept,Authorization',
   });
 
   app.useGlobalPipes(
