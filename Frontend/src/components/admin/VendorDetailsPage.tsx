@@ -5,25 +5,16 @@ import "../../styles/vendor-details.css";
 import { toast } from "sonner";
 import { ConfirmationModal } from "../common/ConfirmationModal";
 
-/** Opens a PDF in a new tab using an authenticated fetch + blob URL */
-async function openPdfInNewTab(url: string) {
-    try {
-        const token = sessionStorage.getItem('adminToken');
-        const res = await fetch(url, {
-            headers: token ? { 'Authorization': `Bearer ${token}` } : {}
-        });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const blob = await res.blob();
-        const blobUrl = URL.createObjectURL(new Blob([blob], { type: 'application/pdf' }));
-        const win = window.open(blobUrl, '_blank');
-        // cleanup after tab opens
-        if (win) setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
-    } catch (err: any) {
-        console.error("PDF Fetch Error:", err);
-        toast.error(`Error opening PDF: ${err.message || 'Unknown error. Check console.'}`);
-    }
+/** Triggers a direct download of the PDF file */
+function downloadPdf(url: string) {
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'KYC_Document.pdf';
+    a.target = '_blank';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
 }
-
 
 interface VendorDetailsPageProps {
     vendorId: string;
@@ -355,10 +346,10 @@ export function VendorDetailsPage({ vendorId, onBack, onStatusChange }: VendorDe
                                 <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '14px', margin: '0 0 24px' }}>Click the button below to open and view this PDF</p>
                                 <button
                                     className="vd-pdf-fallback-link"
-                                    onClick={() => openPdfInNewTab(previewImage.url)}
+                                    onClick={() => downloadPdf(previewImage.url)}
                                     style={{ border: 'none', cursor: 'pointer' }}
                                 >
-                                    Open PDF in New Tab
+                                    Download & View PDF
                                 </button>
                             </div>
                         </div>
