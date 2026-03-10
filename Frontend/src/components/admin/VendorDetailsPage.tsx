@@ -18,8 +18,9 @@ async function openPdfInNewTab(url: string) {
         const win = window.open(blobUrl, '_blank');
         // cleanup after tab opens
         if (win) setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
-    } catch {
-        toast.error('Could not open PDF. You may not have permission to view this file.');
+    } catch (err: any) {
+        console.error("PDF Fetch Error:", err);
+        toast.error(`Error opening PDF: ${err.message || 'Unknown error. Check console.'}`);
     }
 }
 
