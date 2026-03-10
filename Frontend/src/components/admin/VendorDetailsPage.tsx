@@ -5,9 +5,29 @@ import "../../styles/vendor-details.css";
 import { toast } from "sonner";
 import { ConfirmationModal } from "../common/ConfirmationModal";
 
-/** Opens a PDF in a new tab as a fallback constraint */
+/** Opens a PDF in a new tab as a fallback */
 function openPdfFallback(url: string) {
     window.open(url, '_blank', 'noopener,noreferrer');
+}
+
+/** Downloads the PDF as a file via blob fetch */
+async function downloadPdf(url: string) {
+    try {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error();
+        const blob = await res.blob();
+        const blobUrl = URL.createObjectURL(new Blob([blob], { type: 'application/pdf' }));
+        const a = document.createElement('a');
+        a.href = blobUrl;
+        a.download = 'KYC_Document.pdf';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(blobUrl), 5000);
+    } catch {
+        // fallback: open directly
+        window.open(url, '_blank', 'noopener,noreferrer');
+    }
 }
 
 interface VendorDetailsPageProps {
@@ -334,12 +354,21 @@ export function VendorDetailsPage({ vendorId, onBack, onStatusChange }: VendorDe
                     </button>
                     {previewImage.url?.toLowerCase().match(/\.pdf($|\?|#)/i) ? (
                         previewImage.url?.includes('cloudinary.com') ? (
-                            <img 
-                                src={previewImage.url.replace(/\.pdf($|\?|#)/i, '.jpg$1')} 
-                                alt="PDF Preview" 
-                                className="vd-lightbox-img" 
-                                onClick={e => e.stopPropagation()} 
-                            />
+                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }} onClick={(e: React.MouseEvent) => e.stopPropagation()}>
+                                <img 
+                                    src={previewImage.url.replace(/\.pdf($|\?|#)/i, '.jpg$1')} 
+                                    alt="PDF Preview" 
+                                    className="vd-lightbox-img" 
+                                    style={{ maxHeight: '75vh' }}
+                                />
+                                <button
+                                    className="vd-pdf-fallback-link"
+                                    onClick={() => downloadPdf(previewImage.url)}
+                                    style={{ border: 'none', cursor: 'pointer' }}
+                                >
+                                    ⬇ Download PDF
+                                </button>
+                            </div>
                         ) : (
                             <div className="vd-lightbox-pdf-container" onClick={(e: React.MouseEvent) => e.stopPropagation()}>
                                 <div className="vd-lightbox-pdf-box">
