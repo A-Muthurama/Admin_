@@ -5,21 +5,9 @@ import "../../styles/vendor-details.css";
 import { toast } from "sonner";
 import { ConfirmationModal } from "../common/ConfirmationModal";
 
-/** Triggers a direct download of the PDF file */
-function downloadPdf(url: string) {
-    // If it's a Cloudinary URL, we can force download by adding fl_attachment
-    let downloadUrl = url;
-    if (url.includes('cloudinary.com') && url.includes('/upload/')) {
-        downloadUrl = url.replace('/upload/', '/upload/fl_attachment/');
-    }
-
-    const a = document.createElement('a');
-    a.href = downloadUrl;
-    a.download = 'KYC_Document.pdf';
-    a.target = '_blank';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+/** Opens a PDF in a new tab as a fallback constraint */
+function openPdfFallback(url: string) {
+    window.open(url, '_blank', 'noopener,noreferrer');
 }
 
 interface VendorDetailsPageProps {
@@ -345,20 +333,29 @@ export function VendorDetailsPage({ vendorId, onBack, onStatusChange }: VendorDe
                         <X size={32} />
                     </button>
                     {previewImage.url?.toLowerCase().match(/\.pdf($|\?|#)/i) ? (
-                        <div className="vd-lightbox-pdf-container" onClick={(e: React.MouseEvent) => e.stopPropagation()}>
-                            <div className="vd-lightbox-pdf-box">
-                                <FileText size={72} style={{ opacity: 0.7, color: 'white' }} />
-                                <span style={{ color: 'white', fontSize: '20px', fontWeight: 700 }}>PDF Document</span>
-                                <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '14px', margin: '0 0 24px' }}>Click the button below to open and view this PDF</p>
-                                <button
-                                    className="vd-pdf-fallback-link"
-                                    onClick={() => downloadPdf(previewImage.url)}
-                                    style={{ border: 'none', cursor: 'pointer' }}
-                                >
-                                    Download & View PDF
-                                </button>
+                        previewImage.url?.includes('cloudinary.com') ? (
+                            <img 
+                                src={previewImage.url.replace(/\.pdf($|\?|#)/i, '.jpg$1')} 
+                                alt="PDF Preview" 
+                                className="vd-lightbox-img" 
+                                onClick={e => e.stopPropagation()} 
+                            />
+                        ) : (
+                            <div className="vd-lightbox-pdf-container" onClick={(e: React.MouseEvent) => e.stopPropagation()}>
+                                <div className="vd-lightbox-pdf-box">
+                                    <FileText size={72} style={{ opacity: 0.7, color: 'white' }} />
+                                    <span style={{ color: 'white', fontSize: '20px', fontWeight: 700 }}>PDF Document</span>
+                                    <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '14px', margin: '0 0 24px' }}>Click the button below to open and view this PDF</p>
+                                    <button
+                                        className="vd-pdf-fallback-link"
+                                        onClick={() => openPdfFallback(previewImage.url)}
+                                        style={{ border: 'none', cursor: 'pointer' }}
+                                    >
+                                        Open PDF in New Tab
+                                    </button>
+                                </div>
                             </div>
-                        </div>
+                        )
                     ) : (
                         <img src={previewImage.url} alt="Full view" className="vd-lightbox-img" onClick={e => e.stopPropagation()} />
                     )}
