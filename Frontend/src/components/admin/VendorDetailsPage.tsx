@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { ArrowLeft, CheckCircle, XCircle, Mail, ExternalLink, Users, Maximize2, X, MapPin, Phone, Shield, FileText } from "lucide-react";
+import { ArrowLeft, CheckCircle, XCircle, Mail, ExternalLink, Users, Maximize2, X, MapPin, Phone, Shield, FileText, Download } from "lucide-react";
 import { VendorKycResponse, approveVendor, getVendorKyc, rejectVendor, suspendVendor } from "../../api/api";
 import "../../styles/vendor-details.css";
 import { toast } from "sonner";
@@ -20,21 +20,13 @@ function buildCloudinaryDownloadUrl(url: string): string {
     // Already has fl_attachment — return as-is
     if (url.includes('fl_attachment')) return url;
 
-    // Handle /raw/upload/vXXX/... → inject fl_attachment after /raw/upload/
-    if (url.includes('/raw/upload/')) {
-        return url.replace('/raw/upload/', '/raw/upload/fl_attachment/');
-    }
-
-    // Handle /image/upload/vXXX/... → switch to raw and inject fl_attachment
-    if (url.includes('/image/upload/')) {
-        return url.replace('/image/upload/', '/raw/upload/fl_attachment/');
-    }
-
-    return url;
+    // Inject fl_attachment after the resource type part (e.g., /image/upload/ or /raw/upload/)
+    // This works for both 'image' and 'raw' resource types.
+    return url.replace('/upload/', '/upload/fl_attachment/');
 }
 
 /** Downloads the PDF as a file using fetch + blob (avoids browser navigation/blocking) */
-async function downloadPdf(url: string) {
+async function downloadPdf(url: string, filename?: string) {
     const downloadUrl = buildCloudinaryDownloadUrl(url);
     try {
         const response = await fetch(downloadUrl);
@@ -43,7 +35,7 @@ async function downloadPdf(url: string) {
         const blobUrl = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = blobUrl;
-        a.download = 'KYC_Document.pdf';
+        a.download = filename ? `${filename.replace(/\s+/g, '_')}.pdf` : 'KYC_Document.pdf';
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
@@ -256,7 +248,19 @@ export function VendorDetailsPage({ vendorId, onBack, onStatusChange }: VendorDe
                         </div>
                         <div className="vd-doc-info">
                             <span className="vd-doc-name">{doc.type.replace(/_/g, ' ')}</span>
-                            <ExternalLink size={14} className="vd-doc-action-icon" />
+                            <div className="flex items-center gap-3">
+                                {doc.url?.toLowerCase().match(/\.pdf($|\?|#)/i) && (
+                                    <button 
+                                        onClick={(e) => { e.stopPropagation(); downloadPdf(doc.url, doc.type); }}
+                                        className="vd-doc-download-icon-btn"
+                                        title="Download PDF"
+                                        style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'flex' }}
+                                    >
+                                        <Download size={16} className="vd-doc-action-icon" />
+                                    </button>
+                                )}
+                                <ExternalLink size={14} className="vd-doc-action-icon" />
+                            </div>
                         </div>
                     </div>
                 ))}
@@ -377,31 +381,57 @@ export function VendorDetailsPage({ vendorId, onBack, onStatusChange }: VendorDe
                         <X size={32} />
                     </button>
                     {previewImage.url?.toLowerCase().match(/\.pdf($|\?|#)/i) ? (
-                        previewImage.url?.includes('cloudinary.com') ? (
-                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }} onClick={(e: React.MouseEvent) => e.stopPropagation()}>
-                                <img
-                                    src={previewImage.url.replace(/\.pdf($|\?|#)/i, '.jpg$1')}
-                                    alt="PDF Preview"
-                                    className="vd-lightbox-img"
-                                    style={{ maxHeight: '75vh' }}
-                                />
-                            </div>
-                        ) : (
-                            <div className="vd-lightbox-pdf-container" onClick={(e: React.MouseEvent) => e.stopPropagation()}>
-                                <div className="vd-lightbox-pdf-box">
-                                    <FileText size={72} style={{ opacity: 0.7, color: 'white' }} />
-                                    <span style={{ color: 'white', fontSize: '20px', fontWeight: 700 }}>PDF Document</span>
-                                    <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '14px', margin: '0 0 24px' }}>Click the button below to open and view this PDF</p>
+                        <div className="vd-lightbox-pdf-container" onClick={(e: React.MouseEvent) => e.stopPropagation()}>
+                            <div className="vd-lightbox-pdf-box">
+                                <FileText size={72} style={{ opacity: 0.7, color: 'white' }} />
+                                <span style={{ color: 'white', fontSize: '20px', fontWeight: 700 }}>PDF Document</span>
+                                <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '14px', margin: '0 0 24px' }}>
+                                    View or download this document
+                                </p>
+
+                                {/* Show image preview only if it's a Cloudinary IMAGE resource (not RAW) */}
+                                {previewImage.url.includes('cloudinary.com') && previewImage.url.includes('/image/upload/') && (
+                                    <div style={{ marginBottom: '24px' }}>
+                                        <img
+                                            src={previewImage.url.replace(/\.pdf($|\?|#)/i, '.jpg$1')}
+                                            alt="PDF Preview"
+                                            className="vd-lightbox-img"
+                                            style={{ maxHeight: '40vh', border: 'none' }}
+                                        />
+                                    </div>
+                                )}
+
+                                <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', justifyContent: 'center' }}>
                                     <button
                                         className="vd-pdf-fallback-link"
                                         onClick={() => openPdfFallback(previewImage.url)}
                                         style={{ border: 'none', cursor: 'pointer' }}
                                     >
-                                        Open PDF in New Tab
+                                        View PDF
+                                    </button>
+                                    <button
+                                        onClick={() => downloadPdf(previewImage.url, previewImage.type)}
+                                        style={{
+                                            border: 'none',
+                                            cursor: 'pointer',
+                                            padding: '12px 24px',
+                                            background: 'var(--bg-plum-gradient)',
+                                            color: 'white',
+                                            borderRadius: '50px',
+                                            fontWeight: 600,
+                                            fontSize: '14px',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '8px',
+                                            transition: 'all 0.3s'
+                                        }}
+                                        className="vd-pdf-download-btn"
+                                    >
+                                        <Download size={18} /> Download
                                     </button>
                                 </div>
                             </div>
-                        )
+                        </div>
                     ) : (
                         <img src={previewImage.url} alt="Full view" className="vd-lightbox-img" onClick={e => e.stopPropagation()} />
                     )}
