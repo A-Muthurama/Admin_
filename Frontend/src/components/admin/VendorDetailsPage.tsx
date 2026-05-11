@@ -215,10 +215,10 @@ export function VendorDetailsPage({ vendorId, onBack, onStatusChange }: VendorDe
                                 )}
                                 {kycDetails.city && (
                                     <span className="vd-meta-item">
-                                        <MapPin size={16} className="vd-meta-icon" /> {kycDetails.city}, {kycDetails.state}
+                                        <MapPin size={16} className="vd-meta-icon" /> {kycDetails.city}{kycDetails.state ? `, ${kycDetails.state}` : ''}
                                     </span>
                                 )}
-                                {kycDetails.country && kycDetails.country !== 'India' && (
+                                {kycDetails.country && (
                                     <span className="vd-meta-item">
                                         🌍 {kycDetails.country}
                                     </span>
