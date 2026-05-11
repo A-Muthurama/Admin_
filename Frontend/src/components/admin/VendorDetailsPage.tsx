@@ -206,7 +206,7 @@ export function VendorDetailsPage({ vendorId, onBack, onStatusChange }: VendorDe
                         <span className="vd-meta-divider"></span>
                         <span className="vd-meta-item"><Mail size={16} className="vd-meta-icon" /> {kycDetails.user.email}</span>
                         <span className="vd-meta-divider"></span>
-                        <span className="vd-meta-item">🌍 {kycDetails.country || 'N/A'}</span>
+                        <span className="vd-meta-item">🌍 {kycDetails.country || 'India'}</span>
                         {(kycDetails.phone || kycDetails.city) && (
                             <>
                                 <span className="vd-meta-divider"></span>
