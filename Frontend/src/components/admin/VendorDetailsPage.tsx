@@ -205,6 +205,8 @@ export function VendorDetailsPage({ vendorId, onBack, onStatusChange }: VendorDe
                         <span className="vd-meta-item"><Users size={16} className="vd-meta-icon" /> {kycDetails.ownerName}</span>
                         <span className="vd-meta-divider"></span>
                         <span className="vd-meta-item"><Mail size={16} className="vd-meta-icon" /> {kycDetails.user.email}</span>
+                        <span className="vd-meta-divider"></span>
+                        <span className="vd-meta-item">🌍 {kycDetails.country || 'India'}</span>
                         {(kycDetails.phone || kycDetails.city) && (
                             <>
                                 <span className="vd-meta-divider"></span>
@@ -216,11 +218,6 @@ export function VendorDetailsPage({ vendorId, onBack, onStatusChange }: VendorDe
                                 {kycDetails.city && (
                                     <span className="vd-meta-item">
                                         <MapPin size={16} className="vd-meta-icon" /> {kycDetails.city}{kycDetails.state ? `, ${kycDetails.state}` : ''}
-                                    </span>
-                                )}
-                                {kycDetails.country && (
-                                    <span className="vd-meta-item">
-                                        🌍 {kycDetails.country}
                                     </span>
                                 )}
                             </>
