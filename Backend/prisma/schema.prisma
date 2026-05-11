@@ -69,6 +69,7 @@ model vendors {
   phone                  String?         @db.VarChar(20)
   state                  String?         @db.VarChar(100)
   city                   String?         @db.VarChar(100)
+  country                String?         @db.VarChar(100)
   pincode                String?         @db.VarChar(10)
   address                String?
   status                 String?         @default("pending") @db.VarChar(20)
