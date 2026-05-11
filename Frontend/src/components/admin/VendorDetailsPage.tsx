@@ -10,6 +10,17 @@ function openPdfFallback(url: string) {
     window.open(url, '_blank', 'noopener,noreferrer');
 }
 
+/** Human-readable labels for KYC document types */
+const docLabelMap: Record<string, string> = {
+    AADHAAR: "Aadhaar Card",
+    PAN: "PAN Card",
+    GST: "GST Certificate",
+    TRADE_LICENSE: "Trade License",
+    ISR_FORM_W9: "ISR Form W-9 (US)",
+    NATIONAL_ID: "National ID / Passport",
+    TAX_ID: "Tax Identification Document",
+};
+
 /** 
  * Builds a Cloudinary download URL by injecting fl_attachment transformation.
  * Handles both /raw/upload/ and /image/upload/ path styles.
@@ -207,6 +218,11 @@ export function VendorDetailsPage({ vendorId, onBack, onStatusChange }: VendorDe
                                         <MapPin size={16} className="vd-meta-icon" /> {kycDetails.city}, {kycDetails.state}
                                     </span>
                                 )}
+                                {kycDetails.country && kycDetails.country !== 'India' && (
+                                    <span className="vd-meta-item">
+                                        🌍 {kycDetails.country}
+                                    </span>
+                                )}
                             </>
                         )}
                     </div>
@@ -247,7 +263,9 @@ export function VendorDetailsPage({ vendorId, onBack, onStatusChange }: VendorDe
                             </div>
                         </div>
                         <div className="vd-doc-info">
-                            <span className="vd-doc-name">{doc.type.replace(/_/g, ' ')}</span>
+                        <span className="vd-doc-name">
+                                {docLabelMap[doc.type] || doc.type.replace(/_/g, ' ')}
+                            </span>
                             <div className="flex items-center gap-3">
                                 {doc.url?.toLowerCase().match(/\.pdf($|\?|#)/i) && (
                                     <button 

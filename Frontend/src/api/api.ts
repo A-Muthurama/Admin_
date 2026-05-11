@@ -53,9 +53,10 @@ export interface AdminVendorProfile {
   userId: string;
   shopName: string;
   ownerName: string;
-  phone: string;  // Added phone
-  city: string;   // Added city
-  state: string;  // Added state
+  phone: string;
+  city: string;
+  state: string;
+  country?: string;    // country of registration
   kycDocs: string[];
   status: BackendVendorStatus;
   createdAt: string;
@@ -71,11 +72,12 @@ export interface VendorKycResponse {
   shopName: string;
   ownerName: string;
   status: string;
-  phone: string; // Added phone
-  city: string;  // Added city
-  state: string; // Added state
-  address: string; // Added address
-  pincode: string; // Added pincode
+  phone: string;
+  city: string;
+  state: string;
+  address: string;
+  pincode: string;
+  country?: string;    // country of registration
   kycDocs: VendorKycDoc[];
   user: {
     email: string;

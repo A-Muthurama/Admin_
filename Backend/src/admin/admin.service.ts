@@ -34,6 +34,7 @@ export class AdminService {
       phone: v.phone || '',
       city: v.city || '',
       state: v.state || '',
+      country: (v as any).country || 'India',
       user: {
         id: v.id.toString(),
         email: v.email || '',
@@ -66,6 +67,7 @@ export class AdminService {
       phone: v.phone || '',
       city: v.city || '',
       state: v.state || '',
+      country: (v as any).country || 'India',
       user: {
         id: v.id.toString(),
         email: v.email || '',
@@ -449,6 +451,7 @@ export class AdminService {
       state: vendor.state || '',
       address: vendor.address || '',
       pincode: vendor.pincode || '',
+      country: (vendor as any).country || 'India',
       kycDocs: vendor.kyc_documents.map(d => ({
         type: d.doc_type,
         url: d.file_url
