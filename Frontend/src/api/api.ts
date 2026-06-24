@@ -360,6 +360,53 @@ export const deleteOffer = (offerId: string) =>
   API.delete<MessageResponse>(`/admin/offers/${offerId}`);
 
 /* ======================================================
+   PRODUCT MANAGEMENT APIs
+   ====================================================== */
+
+export interface Product {
+  id: number;
+  title: string;
+  description: string;
+  image1_url: string;
+  image2_url: string;
+  affiliate_url: string;
+  created_at: string;
+  updated_at: string;
+}
+
+/**
+ * Get all products
+ */
+export const getProducts = () =>
+  API.get<Product[]>("/products");
+
+/**
+ * Create a new product
+ */
+export const createProduct = (formData: FormData) =>
+  API.post<Product>("/admin/products", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+
+/**
+ * Update an existing product
+ */
+export const updateProduct = (id: number, formData: FormData) =>
+  API.patch<Product>(`/admin/products/${id}`, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+
+/**
+ * Delete a product
+ */
+export const deleteProduct = (id: number) =>
+  API.delete<{ message: string }>(`/admin/products/${id}`);
+
+/* ======================================================
    EXPORT AXIOS INSTANCE (optional)
    ====================================================== */
 

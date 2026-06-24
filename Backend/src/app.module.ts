@@ -12,6 +12,7 @@ import { SyncModule } from './sync/sync.module';
 import { InternalModule } from './internal/internal.module';
 import { PlansModule } from './plans/plans.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { ProductModule } from './product/product.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { NotificationsModule } from './notifications/notifications.module';
     InternalModule,
     PlansModule,
     NotificationsModule,
+    ProductModule,
     // other modules
   ],
   controllers: [AppController],

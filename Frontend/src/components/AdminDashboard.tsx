@@ -5,6 +5,7 @@ import { VendorManagement } from "./admin/VendorManagement";
 import { OfferManagement } from "./admin/OfferManagement";
 import { LocationManagement } from "./admin/LocationManagement";
 import { PlanManagement } from "./admin/PlanManagement";
+import { ProductManagement } from "./admin/ProductManagement";
 import { VendorDetailsPage } from "./admin/VendorDetailsPage";
 import { OfferDetailsPage } from "./admin/OfferDetailsPage";
 import { Footer } from "./Footer";
@@ -17,7 +18,7 @@ interface AdminDashboardProps {
   onLogout: () => void;
 }
 
-type AdminTab = "vendors" | "offers" | "locations" | "plans";
+type AdminTab = "vendors" | "offers" | "locations" | "plans" | "products";
 
 export function AdminDashboard({ onLogout }: AdminDashboardProps) {
   const [activeTab, setActiveTab] = useState<AdminTab>("vendors");
@@ -51,6 +52,10 @@ export function AdminDashboard({ onLogout }: AdminDashboardProps) {
         setViewingOfferId(null);
       } else if (fullPath === '/plans' || fullPath === '/plan') {
         setActiveTab('plans');
+        setViewingVendorId(null);
+        setViewingOfferId(null);
+      } else if (fullPath === '/products' || fullPath === '/product') {
+        setActiveTab('products');
         setViewingVendorId(null);
         setViewingOfferId(null);
       } else {
@@ -113,6 +118,7 @@ export function AdminDashboard({ onLogout }: AdminDashboardProps) {
     { id: "offers" as AdminTab, label: "Offers", path: '/offers' },
     { id: "plans" as AdminTab, label: "Plan", path: '/plans' },
     { id: "locations" as AdminTab, label: "Location", path: '/locations' },
+    { id: "products" as AdminTab, label: "Product", path: '/products' },
   ];
 
   const handleTabChange = (item: { id: AdminTab, path: string }) => {
@@ -221,6 +227,7 @@ export function AdminDashboard({ onLogout }: AdminDashboardProps) {
               {activeTab === "offers" && <OfferManagement onViewOffer={handleViewOffer} />}
               {activeTab === "locations" && <LocationManagement />}
               {activeTab === "plans" && <PlanManagement />}
+              {activeTab === "products" && <ProductManagement />}
             </div>
           )}
         </div>

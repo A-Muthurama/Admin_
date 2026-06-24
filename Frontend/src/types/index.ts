@@ -60,3 +60,14 @@ export interface Admin {
   username: string;
   email: string;
 }
+
+export interface Product {
+  id: number;
+  title: string;
+  description: string;
+  image1_url: string;
+  image2_url: string;
+  affiliate_url: string;
+  created_at: string;
+  updated_at: string;
+}
