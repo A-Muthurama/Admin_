@@ -1,0 +1,9 @@
+[build]
+rootDirectory = "Backend"
+buildCommand = "npm run build"
+
+[deploy]
+startCommand = "npm run start"
+healthcheckPath = "/"
+restartPolicyType = "on_failure"
+restartPolicyMaxRetries = 5
