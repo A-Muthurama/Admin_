@@ -1,7 +1,7 @@
 # Backend
-Backend/jewellery-backend/node_modules/
-Backend/jewellery-backend/dist/
-Backend/jewellery-backend/.env
+Backend/node_modules/
+Backend/dist/
+Backend/.env
 
 # Frontend
 Frontend/node_modules/
