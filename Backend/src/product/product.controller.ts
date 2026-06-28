@@ -47,7 +47,7 @@ export class ProductController {
   updateProduct(
     @Param('id', ParseIntPipe) id: number,
     @UploadedFiles() files: Array<Express.Multer.File>,
-    @Body() body: { title?: string; description?: string; affiliateUrl?: string; targetImageIndex?: string },
+    @Body() body: { title?: string; description?: string; affiliateUrl?: string; targetImageIndex?: string; removeImage1?: string; removeImage2?: string },
   ) {
     return this.productService.updateProduct(
       id,
@@ -56,6 +56,8 @@ export class ProductController {
       body.affiliateUrl,
       files,
       body.targetImageIndex,
+      body.removeImage1 === 'true',
+      body.removeImage2 === 'true',
     );
   }
 

@@ -10,7 +10,7 @@ export class CloudinaryService {
         'Cloudinary is not configured. Set CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET (and ensure .env is loaded).',
       );
     }
-
+ 
     return new Promise((resolve, reject) => {
       cloudinary.uploader
         .upload_stream({ folder }, (error, result) => {

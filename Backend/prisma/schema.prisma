@@ -140,7 +140,7 @@ model Product {
   id            Int      @id @default(autoincrement())
   title         String   @db.VarChar(255)
   description   String?
-  image1_url    String
+  image1_url    String?
   image2_url    String?
   affiliate_url String
   created_at    DateTime @default(now()) @db.Timestamp(6)

@@ -9,12 +9,11 @@ import {
   getProducts, createProduct, updateProduct, deleteProduct, Product,
 } from "../../api/api";
 
-/* ─── Image Drop Zone ─── */
 function ImageDropZone({
-  id, preview, onFile, label, required,
+  id, preview, onFile, onRemove, label, required,
 }: {
   id: string; preview: string | null;
-  onFile: (f: File) => void; label: string; required?: boolean;
+  onFile: (f: File) => void; onRemove?: () => void; label: string; required?: boolean;
 }) {
   return (
     <div className="img-zone-wrap">
@@ -47,6 +46,20 @@ function ImageDropZone({
           </div>
         )}
       </label>
+      {preview && onRemove && (
+        <button
+          type="button"
+          className="img-zone-remove"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onRemove();
+          }}
+          title="Remove image"
+        >
+          <X size={14} />
+        </button>
+      )}
     </div>
   );
 }
@@ -92,6 +105,8 @@ function EditModal({
   const [img2File, setImg2File] = useState<File | null>(null);
   const [img1Preview, setImg1Preview] = useState<string | null>(product.image1_url);
   const [img2Preview, setImg2Preview] = useState<string | null>(product.image2_url || null);
+  const [removeImage1, setRemoveImage1] = useState(false);
+  const [removeImage2, setRemoveImage2] = useState(false);
   const [saving, setSaving] = useState(false);
 
   const handleSave = async () => {
@@ -103,6 +118,8 @@ function EditModal({
       fd.append("title", title);
       fd.append("description", description);
       fd.append("affiliateUrl", affiliateUrl);
+      fd.append("removeImage1", removeImage1 ? "true" : "false");
+      fd.append("removeImage2", removeImage2 ? "true" : "false");
 
       // Determine which image slot is being modified
       let targetImageIndex = "";
@@ -163,10 +180,12 @@ function EditModal({
           <div className="form-field">
             <label className="field-label">Images <span className="hint-text">(upload to replace current)</span></label>
             <div className="edit-img-grid">
-              <ImageDropZone id="edit-img1" preview={img1Preview} label="Primary Image" required
-                onFile={(f) => { setImg1File(f); setImg1Preview(URL.createObjectURL(f)); }} />
+              <ImageDropZone id="edit-img1" preview={img1Preview} label="Primary Image"
+                onFile={(f) => { setImg1File(f); setImg1Preview(URL.createObjectURL(f)); setRemoveImage1(false); }}
+                onRemove={() => { setImg1File(null); setImg1Preview(null); setRemoveImage1(true); }} />
               <ImageDropZone id="edit-img2" preview={img2Preview} label="Secondary Image"
-                onFile={(f) => { setImg2File(f); setImg2Preview(URL.createObjectURL(f)); }} />
+                onFile={(f) => { setImg2File(f); setImg2Preview(URL.createObjectURL(f)); setRemoveImage2(false); }}
+                onRemove={() => { setImg2File(null); setImg2Preview(null); setRemoveImage2(true); }} />
             </div>
           </div>
         </div>
@@ -226,14 +245,13 @@ export function ProductManagement() {
     e.preventDefault();
     if (!title.trim()) return toast.error("Product title is required");
     if (!affiliateUrl.trim()) return toast.error("Affiliate URL is required");
-    if (!image1) return toast.error("At least one product image is required");
 
     setIsSubmitting(true);
     const fd = new FormData();
     fd.append("title", title);
     fd.append("description", description);
     fd.append("affiliateUrl", affiliateUrl);
-    fd.append("images", image1);
+    if (image1) fd.append("images", image1);
     if (image2) fd.append("images", image2);
 
     try {
@@ -309,8 +327,10 @@ export function ProductManagement() {
 
         /* ══ Image Upload Zones ══ */
         .img-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
-        .img-zone-wrap{}
+        .img-zone-wrap{position:relative;}
         .img-zone{display:flex;align-items:center;justify-content:center;height:clamp(150px,18vw,200px);border-radius:14px;border:2px dashed #d9c8d0;background:#fdf7f9;cursor:pointer;overflow:hidden;position:relative;transition:border-color .2s,background .2s;}
+        .img-zone-remove{position:absolute;top:8px;right:8px;width:24px;height:24px;border-radius:50%;background:rgba(255,255,255,0.9);border:1px solid #eedde5;display:flex;align-items:center;justify-content:center;color:#4c0f2e;cursor:pointer;z-index:10;transition:all .15s;box-shadow:0 2px 6px rgba(0,0,0,0.15);}
+        .img-zone-remove:hover{background:#dc2626;color:#fff;border-color:#dc2626;transform:scale(1.15);}
         .img-zone:hover{border-color:#4c0f2e;background:#fdf0f5;}
         .img-zone.has-img{border:2px solid #e0d0d8;background:transparent;}
         .img-zone-preview{width:100%;height:100%;object-fit:cover;display:block;}
@@ -491,16 +511,18 @@ export function ProductManagement() {
               <div className="form-field">
                 <label className="field-label">
                   Product Images&nbsp;
-                  <span className="hint-text">— 1 required, 2nd optional</span>
+                  <span className="hint-text">— both optional</span>
                 </label>
                 <div className="img-grid">
                   <ImageDropZone
-                    id="pub-img1" preview={image1Preview} label="Primary Image" required
+                    id="pub-img1" preview={image1Preview} label="Primary Image"
                     onFile={(f) => { setImage1(f); setImage1Preview(URL.createObjectURL(f)); }}
+                    onRemove={() => { setImage1(null); setImage1Preview(null); }}
                   />
                   <ImageDropZone
                     id="pub-img2" preview={image2Preview} label="Secondary Image"
                     onFile={(f) => { setImage2(f); setImage2Preview(URL.createObjectURL(f)); }}
+                    onRemove={() => { setImage2(null); setImage2Preview(null); }}
                   />
                 </div>
               </div>
@@ -541,7 +563,9 @@ export function ProductManagement() {
                     <div key={product.id} className="product-row">
                       {/* Thumbnails */}
                       <div className="row-imgs">
-                        <img src={product.image1_url} alt={product.title} className="row-img" />
+                        {product.image1_url
+                          ? <img src={product.image1_url} alt={product.title} className="row-img" />
+                          : <div className="row-img-ph"><ImagePlus size={18} /></div>}
                         {product.image2_url
                           ? <img src={product.image2_url} alt={product.title} className="row-img" />
                           : <div className="row-img-ph"><ImagePlus size={18} /></div>}
